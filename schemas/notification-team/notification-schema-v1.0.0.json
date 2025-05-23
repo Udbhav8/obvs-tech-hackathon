@@ -1,0 +1,478 @@
+{
+  "notifications": {
+    "title": "Core Notification Components",
+    "description": "JSON Schema for notification system components",
+    "definitions": {
+      "NotificationType": {
+        "type": "object",
+        "properties": {
+          "notification_type_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the notification type"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the notification type (e.g., 'CRC Renewal', 'Driver Abstract Renewal')"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the notification type"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["Credential", "Booking", "System", "Custom"],
+            "description": "Category of the notification"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["Info", "Warning", "Critical"],
+            "description": "Severity level of the notification"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Path to the icon file representing this notification type"
+          },
+          "color_code": {
+            "type": "string",
+            "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+            "description": "Hex color code for visual representation"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether this notification type is currently active"
+          },
+          "affects_booking": {
+            "type": "boolean",
+            "description": "Whether this notification affects booking capabilities"
+          },
+          "affected_services": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of service codes affected by this notification"
+          },
+          "auto_status_change": {
+            "type": "boolean",
+            "description": "Whether this notification automatically changes user status"
+          },
+          "new_status": {
+            "type": ["string", "null"],
+            "description": "New status to set when auto_status_change is true"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this notification type was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this notification type was last updated"
+          }
+        },
+        "required": [
+          "notification_type_id",
+          "name",
+          "category",
+          "severity",
+          "is_active",
+          "affects_booking",
+          "auto_status_change",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "NotificationTemplate": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the template"
+          },
+          "notification_type_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationType"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the notification template"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject line for email notifications"
+          },
+          "body_text": {
+            "type": "string",
+            "description": "Plain text version of the notification content"
+          },
+          "body_html": {
+            "type": "string",
+            "description": "HTML formatted version of the notification content"
+          },
+          "delivery_method": {
+            "type": "string",
+            "enum": ["Email", "SMS", "InApp", "Multiple"],
+            "description": "Method(s) used to deliver this notification"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "Whether this is the default template for its notification type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this template was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this template was last updated"
+          }
+        },
+        "required": [
+          "template_id",
+          "notification_type_id",
+          "name",
+          "subject",
+          "body_text",
+          "delivery_method",
+          "is_default",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "NotificationRule": {
+        "type": "object",
+        "properties": {
+          "rule_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the rule"
+          },
+          "notification_type_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationType"
+          },
+          "template_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationTemplate"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the notification rule"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the rule"
+          },
+          "trigger_type": {
+            "type": "string",
+            "enum": ["TimeBeforeExpiry", "TimeAfterExpiry", "Status", "Custom"],
+            "description": "Type of trigger that activates this rule"
+          },
+          "trigger_value": {
+            "type": "integer",
+            "description": "Value associated with the trigger (e.g., number of days/weeks)"
+          },
+          "trigger_unit": {
+            "type": "string",
+            "enum": ["Days", "Weeks", "Months"],
+            "description": "Unit of time for the trigger value"
+          },
+          "recipient_type": {
+            "type": "string",
+            "enum": ["User", "Admin", "Coordinator", "Custom"],
+            "description": "Type of recipient for the notification"
+          },
+          "custom_recipients": {
+            "type": ["array", "null"],
+            "items": {
+              "type": ["integer", "string"]
+            },
+            "description": "Array of user IDs or roles for custom recipients"
+          },
+          "is_recurring": {
+            "type": "boolean",
+            "description": "Whether this notification recurs multiple times"
+          },
+          "recurrence_interval": {
+            "type": ["integer", "null"],
+            "description": "Interval between recurring notifications"
+          },
+          "recurrence_unit": {
+            "type": ["string", "null"],
+            "enum": ["Days", "Weeks", "Months", null],
+            "description": "Unit of time for recurrence interval"
+          },
+          "max_recurrences": {
+            "type": ["integer", "null"],
+            "description": "Maximum number of times this notification should recur"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether this rule is currently active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this rule was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this rule was last updated"
+          }
+        },
+        "required": [
+          "rule_id",
+          "notification_type_id",
+          "template_id",
+          "name",
+          "trigger_type",
+          "trigger_value",
+          "trigger_unit",
+          "recipient_type",
+          "is_recurring",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "NotificationInstance": {
+        "type": "object",
+        "properties": {
+          "notification_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the notification instance"
+          },
+          "rule_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationRule"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to User, nullable for system notifications"
+          },
+          "related_entity_type": {
+            "type": "string",
+            "description": "Type of entity this notification relates to (e.g., 'Credential', 'Booking')"
+          },
+          "related_entity_id": {
+            "type": "integer",
+            "description": "ID of the related entity"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Pending", "Sent", "Failed", "Acknowledged"],
+            "description": "Current status of the notification"
+          },
+          "scheduled_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when this notification is scheduled to be sent"
+          },
+          "sent_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when this notification was actually sent"
+          },
+          "acknowledged_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when this notification was acknowledged"
+          },
+          "acknowledged_by": {
+            "type": ["integer", "null"],
+            "description": "User ID of who acknowledged the notification"
+          },
+          "delivery_method": {
+            "type": "string",
+            "enum": ["Email", "SMS", "InApp", "Multiple"],
+            "description": "Method used to deliver this notification"
+          },
+          "delivery_details": {
+            "type": "object",
+            "description": "Details about the delivery (e.g., email address, phone number)"
+          },
+          "error_message": {
+            "type": ["string", "null"],
+            "description": "Error message if delivery failed"
+          },
+          "retry_count": {
+            "type": "integer",
+            "default": 0,
+            "description": "Number of delivery retry attempts"
+          },
+          "next_retry_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time for the next retry attempt"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this notification instance was created"
+          }
+        },
+        "required": [
+          "notification_id",
+          "rule_id",
+          "related_entity_type",
+          "related_entity_id",
+          "status",
+          "scheduled_time",
+          "delivery_method",
+          "delivery_details",
+          "retry_count",
+          "created_at"
+        ]
+      },
+      "UserNotificationPreference": {
+        "type": "object",
+        "properties": {
+          "preference_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the preference"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to User"
+          },
+          "notification_type_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to NotificationType, null for global preferences"
+          },
+          "delivery_method": {
+            "type": "string",
+            "enum": ["Email", "SMS", "InApp", "Multiple", "None"],
+            "description": "Preferred delivery method for notifications"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether notifications of this type are enabled for this user"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this preference was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this preference was last updated"
+          }
+        },
+        "required": ["preference_id", "user_id", "delivery_method", "is_enabled", "created_at", "updated_at"]
+      },
+      "UserCredential": {
+        "type": "object",
+        "properties": {
+          "credential_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the credential"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to User"
+          },
+          "credential_type": {
+            "type": "string",
+            "enum": ["CRC", "DriversAbstract", "Training", "Other"],
+            "description": "Type of credential"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the credential was issued"
+          },
+          "expiry_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the credential expires"
+          },
+          "document_path": {
+            "type": "string",
+            "description": "Path to the stored credential document"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Valid", "Pending", "Expired", "Revoked"],
+            "description": "Current status of the credential"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the credential"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this credential was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this credential was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "User ID of who created this credential record"
+          },
+          "updated_by": {
+            "type": "integer",
+            "description": "User ID of who last updated this credential record"
+          }
+        },
+        "required": [
+          "credential_id",
+          "user_id",
+          "credential_type",
+          "issue_date",
+          "expiry_date",
+          "status",
+          "created_at",
+          "updated_at",
+          "created_by"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "notification_types": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationType"
+        }
+      },
+      "notification_templates": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationTemplate"
+        }
+      },
+      "notification_rules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationRule"
+        }
+      },
+      "notification_instances": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationInstance"
+        }
+      },
+      "user_notification_preferences": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UserNotificationPreference"
+        }
+      },
+      "user_credentials": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UserCredential"
+        }
+      }
+    }
+  }
+}

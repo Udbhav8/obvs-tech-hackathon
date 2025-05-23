@@ -1,0 +1,458 @@
+{
+  "homepage": {
+    "title": "Homepage Components Schema",
+    "description": "JSON Schema for the homepage components including Journal, UpcomingJobs, and Navigation",
+    "definitions": {
+      "Journal": {
+        "type": "object",
+        "required": [
+          "journal_entry_id",
+          "title",
+          "content",
+          "author_id",
+          "creation_date",
+          "importance_level",
+          "is_pinned",
+          "visibility",
+          "comments_enabled"
+        ],
+        "properties": {
+          "journal_entry_id": {
+            "type": "integer",
+            "description": "Primary key for the journal entry"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the journal entry"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the journal entry"
+          },
+          "author_id": {
+            "type": "integer",
+            "description": "Foreign key to the User who created the entry"
+          },
+          "creation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the entry was created"
+          },
+          "last_edited_date": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Timestamp when the entry was last edited"
+          },
+          "last_edited_by": {
+            "type": ["integer", "null"],
+            "description": "Foreign key to the User who last edited the entry"
+          },
+          "importance_level": {
+            "type": "string",
+            "enum": ["Normal", "Important", "Urgent"],
+            "description": "Importance level of the journal entry"
+          },
+          "expiry_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the entry expires"
+          },
+          "is_pinned": {
+            "type": "boolean",
+            "description": "Whether the entry is pinned to the top"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": ["AllStaff", "Admins", "AllUsers"],
+            "description": "Who can see this journal entry"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with the journal entry"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "filename", "file_path", "file_type", "upload_date"],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "description": "Unique identifier for the attachment"
+                },
+                "filename": {
+                  "type": "string",
+                  "description": "Original filename of the attachment"
+                },
+                "file_path": {
+                  "type": "string",
+                  "description": "Path to the stored file"
+                },
+                "file_type": {
+                  "type": "string",
+                  "description": "MIME type of the file"
+                },
+                "file_size": {
+                  "type": "integer",
+                  "description": "Size of the file in bytes"
+                },
+                "upload_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the file was uploaded"
+                }
+              }
+            },
+            "description": "Attachments for the journal entry"
+          },
+          "comments_enabled": {
+            "type": "boolean",
+            "description": "Whether comments are enabled for this entry"
+          }
+        }
+      },
+      "JournalComment": {
+        "type": "object",
+        "required": ["comment_id", "journal_entry_id", "author_id", "content", "creation_date", "is_deleted"],
+        "properties": {
+          "comment_id": {
+            "type": "integer",
+            "description": "Primary key for the comment"
+          },
+          "journal_entry_id": {
+            "type": "integer",
+            "description": "Foreign key to the Journal entry"
+          },
+          "author_id": {
+            "type": "integer",
+            "description": "Foreign key to the User who created the comment"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the comment"
+          },
+          "creation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the comment was created"
+          },
+          "last_edited_date": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Timestamp when the comment was last edited"
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "description": "Whether the comment has been deleted"
+          }
+        }
+      },
+      "UpcomingJob": {
+        "type": "object",
+        "required": [
+          "booking_id",
+          "booking_type",
+          "service_type",
+          "client_name",
+          "date",
+          "start_time",
+          "duration",
+          "status",
+          "location",
+          "is_assigned"
+        ],
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key to the Booking"
+          },
+          "booking_type": {
+            "type": "string",
+            "description": "Type of booking"
+          },
+          "service_type": {
+            "type": "string",
+            "description": "Type of service"
+          },
+          "client_name": {
+            "type": "string",
+            "description": "Name of the client"
+          },
+          "volunteer_name": {
+            "type": ["string", "null"],
+            "description": "Name of the volunteer, if assigned"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the job"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "time",
+            "description": "Start time of the job"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Duration of the job in minutes"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the job"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location of the job"
+          },
+          "is_assigned": {
+            "type": "boolean",
+            "description": "Whether the job is assigned to a volunteer"
+          },
+          "days_until": {
+            "type": "integer",
+            "description": "Number of days until the job"
+          },
+          "priority_level": {
+            "type": "string",
+            "description": "Priority level calculated based on assignment status and proximity"
+          }
+        }
+      },
+      "NavigationMenuItem": {
+        "type": "object",
+        "required": ["menu_item_id", "name", "display_name", "url", "order", "is_visible"],
+        "properties": {
+          "menu_item_id": {
+            "type": "integer",
+            "description": "Primary key for the menu item"
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal name of the menu item"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name of the menu item"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for the menu item"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon for the menu item"
+          },
+          "parent_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key to parent menu item for nested menus"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Display order of the menu item"
+          },
+          "is_visible": {
+            "type": "boolean",
+            "description": "Whether the menu item is visible"
+          },
+          "required_permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Permissions required to see this menu item"
+          },
+          "badge_counter_source": {
+            "type": ["string", "null"],
+            "description": "Reference to counter function for badge display"
+          }
+        }
+      },
+      "UserDashboardPreference": {
+        "type": "object",
+        "required": ["preference_id", "user_id", "widget_type", "is_visible", "order", "size"],
+        "properties": {
+          "preference_id": {
+            "type": "integer",
+            "description": "Primary key for the preference"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key to the User"
+          },
+          "widget_type": {
+            "type": "string",
+            "enum": ["Journal", "UpcomingJobs", "QuickLinks", "Stats", "Calendar"],
+            "description": "Type of widget"
+          },
+          "is_visible": {
+            "type": "boolean",
+            "description": "Whether the widget is visible"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Display order of the widget"
+          },
+          "size": {
+            "type": "string",
+            "enum": ["Small", "Medium", "Large"],
+            "description": "Size of the widget"
+          },
+          "custom_settings": {
+            "type": "object",
+            "description": "Widget-specific settings"
+          }
+        }
+      },
+      "QuickLink": {
+        "type": "object",
+        "required": ["link_id", "name", "url", "category", "is_system", "order"],
+        "properties": {
+          "link_id": {
+            "type": "integer",
+            "description": "Primary key for the quick link"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the quick link"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for the quick link"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon for the quick link"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the quick link"
+          },
+          "is_system": {
+            "type": "boolean",
+            "description": "Whether this is a system-defined link"
+          },
+          "created_by": {
+            "type": ["integer", "null"],
+            "description": "Foreign key to the User who created the link"
+          },
+          "visible_to_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Roles that can see this quick link"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Display order of the quick link"
+          }
+        }
+      },
+      "DashboardStat": {
+        "type": "object",
+        "required": [
+          "stat_id",
+          "name",
+          "description",
+          "calculation_method",
+          "display_format",
+          "refresh_interval",
+          "is_enabled"
+        ],
+        "properties": {
+          "stat_id": {
+            "type": "integer",
+            "description": "Primary key for the stat"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the stat"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the stat"
+          },
+          "calculation_method": {
+            "type": "string",
+            "description": "Reference to calculation function"
+          },
+          "display_format": {
+            "type": "string",
+            "description": "Format for displaying the stat"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon for the stat"
+          },
+          "color": {
+            "type": ["string", "null"],
+            "description": "Color for the stat"
+          },
+          "visible_to_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Roles that can see this stat"
+          },
+          "refresh_interval": {
+            "type": "integer",
+            "description": "Refresh interval in minutes"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether the stat is enabled"
+          }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "journals": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Journal"
+        }
+      },
+      "journal_comments": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/JournalComment"
+        }
+      },
+      "upcoming_jobs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UpcomingJob"
+        }
+      },
+      "navigation_menu": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NavigationMenuItem"
+        }
+      },
+      "user_dashboard_preferences": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UserDashboardPreference"
+        }
+      },
+      "quick_links": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/QuickLink"
+        }
+      },
+      "dashboard_stats": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/DashboardStat"
+        }
+      }
+    }
+  }
+}

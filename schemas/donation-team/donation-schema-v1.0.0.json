@@ -1,0 +1,294 @@
+{
+  "donations": {
+    "title": "Donation Management System",
+    "description": "JSON Schema for donation management system entities",
+    "definitions": {
+      "Donation": {
+        "type": "object",
+        "properties": {
+          "donation_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the donation"
+          },
+          "donation_type": {
+            "type": "string",
+            "enum": ["Personal", "Corporate", "Grant", "Bequeathed", "Other"],
+            "description": "Type of donation"
+          },
+          "donor_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Donor"
+          },
+          "donation_amount": {
+            "type": "number",
+            "description": "Amount of the donation with precision to cents"
+          },
+          "eligible_amount": {
+            "type": "number",
+            "description": "Eligible amount for tax purposes, defaults to donation_amount"
+          },
+          "value_advantage": {
+            "type": "number",
+            "description": "Value advantage amount, defaults to 0.00"
+          },
+          "payment_type": {
+            "type": "string",
+            "enum": ["Cheque", "Cash", "Third Party", "Direct Debit", "Other"],
+            "description": "Method of payment"
+          },
+          "receipt_type": {
+            "type": "string",
+            "enum": ["Required", "Sent via CanadaHelps", "Not Needed"],
+            "description": "Type of receipt required"
+          },
+          "receipt_sent_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when receipt was sent, nullable"
+          },
+          "received_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when donation was received, defaults to current date"
+          },
+          "processed_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when donation was processed, defaults to current date"
+          },
+          "deposit_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when donation was deposited, defaults to current date"
+          },
+          "notes": {
+            "type": ["string", "null"],
+            "description": "Additional notes about the donation, optional"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donation record was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donation record was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Foreign key reference to User who created the record"
+          },
+          "updated_by": {
+            "type": "integer",
+            "description": "Foreign key reference to User who last updated the record"
+          }
+        },
+        "required": [
+          "donation_id",
+          "donation_type",
+          "donor_id",
+          "donation_amount",
+          "eligible_amount",
+          "value_advantage",
+          "payment_type",
+          "receipt_type",
+          "received_date",
+          "processed_date",
+          "deposit_date",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "updated_by"
+        ]
+      },
+      "Donor": {
+        "type": "object",
+        "properties": {
+          "donor_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the donor"
+          },
+          "donor_type": {
+            "type": "string",
+            "enum": ["Individual", "Organization"],
+            "description": "Type of donor"
+          },
+          "first_name": {
+            "type": ["string", "null"],
+            "description": "First name of the donor, for individuals"
+          },
+          "last_name": {
+            "type": ["string", "null"],
+            "description": "Last name of the donor, for individuals"
+          },
+          "organization_name": {
+            "type": ["string", "null"],
+            "description": "Name of the organization, for organizations"
+          },
+          "email": {
+            "type": ["string", "null"],
+            "format": "email",
+            "description": "Email address of the donor"
+          },
+          "phone": {
+            "type": ["string", "null"],
+            "description": "Phone number of the donor"
+          },
+          "address_street": {
+            "type": ["string", "null"],
+            "description": "Street address of the donor"
+          },
+          "address_city": {
+            "type": ["string", "null"],
+            "description": "City of the donor's address"
+          },
+          "address_province": {
+            "type": ["string", "null"],
+            "description": "Province/state of the donor's address"
+          },
+          "address_postal_code": {
+            "type": ["string", "null"],
+            "description": "Postal/zip code of the donor's address"
+          },
+          "tax_receipt_address": {
+            "type": "boolean",
+            "description": "Indicates if address can be used for tax receipts"
+          },
+          "is_anonymous": {
+            "type": "boolean",
+            "description": "Indicates if the donor wishes to remain anonymous"
+          },
+          "donation_history_summary": {
+            "type": "object",
+            "description": "Virtual field - calculated summary of donation history",
+            "properties": {
+              "total_donations": {
+                "type": "number",
+                "description": "Total amount donated"
+              },
+              "donation_count": {
+                "type": "integer",
+                "description": "Number of donations made"
+              },
+              "first_donation_date": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Date of first donation"
+              },
+              "last_donation_date": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Date of most recent donation"
+              },
+              "average_donation": {
+                "type": "number",
+                "description": "Average donation amount"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donor record was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donor record was last updated"
+          }
+        },
+        "required": ["donor_id", "donor_type", "tax_receipt_address", "is_anonymous", "created_at", "updated_at"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "donor_type": { "enum": ["Individual"] } }
+            },
+            "then": {
+              "required": ["first_name", "last_name"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "donor_type": { "enum": ["Organization"] } }
+            },
+            "then": {
+              "required": ["organization_name"]
+            }
+          }
+        ]
+      },
+      "Receipt": {
+        "type": "object",
+        "properties": {
+          "receipt_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the receipt"
+          },
+          "donation_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Donation"
+          },
+          "receipt_number": {
+            "type": "string",
+            "description": "Unique receipt number"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the receipt was issued"
+          },
+          "sent_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the receipt was sent, nullable"
+          },
+          "sent_method": {
+            "type": "string",
+            "enum": ["Email", "Mail", "In Person"],
+            "description": "Method used to send the receipt"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Pending", "Sent", "Void"],
+            "description": "Current status of the receipt"
+          },
+          "pdf_file_path": {
+            "type": "string",
+            "description": "Path to the stored receipt PDF file"
+          }
+        },
+        "required": [
+          "receipt_id",
+          "donation_id",
+          "receipt_number",
+          "issue_date",
+          "sent_method",
+          "status",
+          "pdf_file_path"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "donations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Donation"
+        }
+      },
+      "donors": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Donor"
+        }
+      },
+      "receipts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Receipt"
+        }
+      }
+    }
+  }
+}

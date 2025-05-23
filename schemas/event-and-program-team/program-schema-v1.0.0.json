@@ -1,0 +1,744 @@
+{
+  "programs": {
+    "title": "Program Management System",
+    "description": "JSON Schema for program management system entities",
+    "definitions": {
+      "Program": {
+        "type": "object",
+        "properties": {
+          "program_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the program"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the program"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique identifier code for the program"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the program"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Planned"],
+            "description": "Current status of the program"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the program started"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the program ended, null for ongoing programs"
+          },
+          "coordinator_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program coordinator"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Contact email for the program"
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "Contact phone number for the program"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the program"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the program was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the program was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who created the program"
+          },
+          "has_events": {
+            "type": "boolean",
+            "description": "Whether this program has associated events"
+          },
+          "has_bookings": {
+            "type": "boolean",
+            "description": "Whether this program has associated bookings"
+          },
+          "has_map_function": {
+            "type": "boolean",
+            "description": "Whether this program uses the map function"
+          },
+          "program_type": {
+            "type": "string",
+            "enum": ["Service", "Support", "Community"],
+            "description": "Type of program"
+          }
+        },
+        "required": [
+          "program_id",
+          "name",
+          "code",
+          "description",
+          "status",
+          "start_date",
+          "coordinator_id",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "has_events",
+          "has_bookings",
+          "has_map_function",
+          "program_type"
+        ]
+      },
+      "ProgramParticipant": {
+        "type": "object",
+        "properties": {
+          "participant_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the participant"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the user"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["Client", "Volunteer", "Staff", "Other"],
+            "description": "Role of the participant in the program"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the participant started in the program"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the participant ended in the program, null for active participants"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Waitlisted", "Completed"],
+            "description": "Current status of the participant"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the participant"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the participant record was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the participant record was last updated"
+          }
+        },
+        "required": [
+          "participant_id",
+          "program_id",
+          "user_id",
+          "role",
+          "start_date",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ProgramBooking": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the booking"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "booking_type": {
+            "type": "string",
+            "description": "Type of booking"
+          },
+          "duration_hours": {
+            "type": "number",
+            "description": "Duration of the booking in hours"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the volunteer"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the booking (calculated field)"
+          }
+        },
+        "required": [
+          "booking_id",
+          "program_id",
+          "booking_type",
+          "duration_hours",
+          "client_id",
+          "volunteer_id",
+          "fiscal_year"
+        ]
+      },
+      "ProgramEvent": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Type of event"
+          },
+          "attendance_count": {
+            "type": "integer",
+            "description": "Number of attendees at the event"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Number of volunteers at the event"
+          },
+          "duration_hours": {
+            "type": "number",
+            "description": "Duration of the event in hours"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the event (calculated field)"
+          }
+        },
+        "required": [
+          "event_id",
+          "program_id",
+          "event_type",
+          "attendance_count",
+          "volunteer_count",
+          "duration_hours",
+          "fiscal_year"
+        ]
+      },
+      "ProgramResource": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the resource"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the resource"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Document", "Image", "Link", "Other"],
+            "description": "Type of resource"
+          },
+          "file_path": {
+            "type": ["string", "null"],
+            "description": "Path to the resource file, null if not applicable"
+          },
+          "url": {
+            "type": ["string", "null"],
+            "description": "URL of the resource, null if not applicable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the resource"
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the resource is publicly accessible"
+          },
+          "upload_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the resource was uploaded"
+          },
+          "uploaded_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who uploaded the resource"
+          }
+        },
+        "required": [
+          "resource_id",
+          "program_id",
+          "name",
+          "type",
+          "description",
+          "is_public",
+          "upload_date",
+          "uploaded_by"
+        ]
+      },
+      "ProgramMetric": {
+        "type": "object",
+        "properties": {
+          "metric_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the metric"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "metric_name": {
+            "type": "string",
+            "description": "Name of the metric"
+          },
+          "metric_value": {
+            "type": "number",
+            "description": "Value of the metric"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metric"
+          },
+          "quarter": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "description": "Quarter (1-4) for the metric"
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month (1-12) for the metric"
+          },
+          "calculation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the metric was calculated"
+          }
+        },
+        "required": ["metric_id", "program_id", "metric_name", "metric_value", "fiscal_year", "calculation_date"]
+      },
+      "AmbassadorActivity": {
+        "type": "object",
+        "properties": {
+          "activity_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the activity"
+          },
+          "ambassador_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the ambassador user"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the ambassador at the event"
+          },
+          "hours": {
+            "type": "number",
+            "description": "Hours contributed by the ambassador"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the activity"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the activity (calculated field)"
+          }
+        },
+        "required": ["activity_id", "ambassador_id", "event_id", "role", "hours", "fiscal_year"]
+      },
+      "CompanionPet": {
+        "type": "object",
+        "properties": {
+          "pet_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the pet"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the pet"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of pet"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the pet"
+          },
+          "image_path": {
+            "type": ["string", "null"],
+            "description": "Path to the pet's image, null if not available"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Available", "Assigned", "Retired"],
+            "description": "Current status of the pet"
+          },
+          "acquisition_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the pet was acquired"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the pet"
+          }
+        },
+        "required": ["pet_id", "name", "type", "description", "status", "acquisition_date"]
+      },
+      "CompanionPetAssignment": {
+        "type": "object",
+        "properties": {
+          "assignment_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the assignment"
+          },
+          "pet_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the pet"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the assignment started"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the assignment ended, null for current assignments"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the assignment"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the assignment (calculated field)"
+          }
+        },
+        "required": ["assignment_id", "pet_id", "client_id", "start_date", "fiscal_year"]
+      },
+      "CulturalEvent": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "culture": {
+            "type": "string",
+            "description": "Culture represented by the event"
+          },
+          "cultural_significance": {
+            "type": "string",
+            "description": "Cultural significance of the event"
+          },
+          "language": {
+            "type": "string",
+            "description": "Primary language of the event"
+          },
+          "special_requirements": {
+            "type": "string",
+            "description": "Special requirements for the event"
+          }
+        },
+        "required": ["event_id", "culture", "cultural_significance", "language"]
+      },
+      "SnowAngelsLocation": {
+        "type": "object",
+        "properties": {
+          "location_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the location"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of the location"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the location"
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the location"
+          },
+          "service_area": {
+            "type": "string",
+            "description": "Service area of the location"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["Low", "Medium", "High"],
+            "description": "Priority level of the location"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the location"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether the location is currently active"
+          }
+        },
+        "required": [
+          "location_id",
+          "client_id",
+          "address",
+          "latitude",
+          "longitude",
+          "service_area",
+          "priority",
+          "is_active"
+        ]
+      },
+      "BetterAtHomeClient": {
+        "type": "object",
+        "properties": {
+          "bah_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the Better at Home client"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client user"
+          },
+          "bah_number": {
+            "type": "integer",
+            "description": "Better at Home client number"
+          },
+          "intake_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of client intake"
+          },
+          "first_service_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date of first service, null if not yet served"
+          },
+          "end_service_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date of service termination, null if still active"
+          },
+          "living_situation": {
+            "type": "string",
+            "description": "Living situation of the client"
+          },
+          "language": {
+            "type": "string",
+            "description": "Primary language of the client"
+          },
+          "sociocultural_info": {
+            "type": "string",
+            "description": "Sociocultural information about the client"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Waitlisted"],
+            "description": "Current status of the client"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the client"
+          }
+        },
+        "required": ["bah_id", "client_id", "bah_number", "intake_date", "living_situation", "language", "status"]
+      },
+      "ProgramSummaryMetrics": {
+        "type": "object",
+        "properties": {
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          },
+          "booking_count": {
+            "type": "integer",
+            "description": "Count of bookings (calculated)"
+          },
+          "total_hours": {
+            "type": "number",
+            "description": "Total hours (calculated)"
+          },
+          "client_count": {
+            "type": "integer",
+            "description": "Count of clients, excluding Better at Home (calculated)"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Count of volunteers (calculated)"
+          }
+        },
+        "required": ["program_id", "fiscal_year", "booking_count", "total_hours", "client_count", "volunteer_count"]
+      },
+      "FiscalYearProgramMetrics": {
+        "type": "object",
+        "properties": {
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          },
+          "total_program_bookings": {
+            "type": "integer",
+            "description": "Total program bookings (calculated)"
+          },
+          "total_program_hours": {
+            "type": "number",
+            "description": "Total program hours (calculated)"
+          },
+          "total_program_clients": {
+            "type": "integer",
+            "description": "Total program clients, excluding Better at Home (calculated)"
+          },
+          "total_program_volunteers": {
+            "type": "integer",
+            "description": "Total program volunteers (calculated)"
+          }
+        },
+        "required": [
+          "fiscal_year",
+          "total_program_bookings",
+          "total_program_hours",
+          "total_program_clients",
+          "total_program_volunteers"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "programs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Program"
+        }
+      },
+      "program_participants": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramParticipant"
+        }
+      },
+      "program_bookings": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramBooking"
+        }
+      },
+      "program_events": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramEvent"
+        }
+      },
+      "program_resources": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramResource"
+        }
+      },
+      "program_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramMetric"
+        }
+      },
+      "ambassador_activities": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/AmbassadorActivity"
+        }
+      },
+      "companion_pets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CompanionPet"
+        }
+      },
+      "companion_pet_assignments": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CompanionPetAssignment"
+        }
+      },
+      "cultural_events": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CulturalEvent"
+        }
+      },
+      "snow_angels_locations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SnowAngelsLocation"
+        }
+      },
+      "better_at_home_clients": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/BetterAtHomeClient"
+        }
+      },
+      "program_summary_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramSummaryMetrics"
+        }
+      },
+      "fiscal_year_program_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/FiscalYearProgramMetrics"
+        }
+      }
+    }
+  }
+}

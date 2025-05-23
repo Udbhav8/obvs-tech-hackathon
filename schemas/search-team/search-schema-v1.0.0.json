@@ -1,0 +1,545 @@
+{
+  "searches": {
+    "title": "Search System Components",
+    "description": "JSON Schema for search functionality components",
+    "definitions": {
+      "SearchConfiguration": {
+        "type": "object",
+        "properties": {
+          "search_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the search configuration"
+          },
+          "search_type": {
+            "type": "string",
+            "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"],
+            "description": "Type of search"
+          },
+          "tab_id": {
+            "type": "integer",
+            "description": "Foreign key reference to SearchTab"
+          },
+          "default_sort_field": {
+            "type": "string",
+            "description": "Default field to sort results by"
+          },
+          "default_sort_direction": {
+            "type": "string",
+            "enum": ["Ascending", "Descending"],
+            "description": "Default sort direction"
+          },
+          "results_per_page": {
+            "type": "integer",
+            "description": "Number of results to display per page, defaults based on search type"
+          },
+          "search_fields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of field configurations for search form"
+          },
+          "result_fields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of field configurations for results display"
+          },
+          "permissions_required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of permission strings required to access this search"
+          }
+        },
+        "required": [
+          "search_id",
+          "search_type",
+          "tab_id",
+          "default_sort_direction",
+          "results_per_page",
+          "search_fields",
+          "result_fields",
+          "permissions_required"
+        ]
+      },
+      "SearchTab": {
+        "type": "object",
+        "properties": {
+          "tab_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the search tab"
+          },
+          "search_type": {
+            "type": "string",
+            "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"],
+            "description": "Type of search this tab belongs to"
+          },
+          "tab_name": {
+            "type": "string",
+            "description": "Display name of the tab"
+          },
+          "tab_order": {
+            "type": "integer",
+            "description": "Order in which to display this tab"
+          },
+          "filter_criteria": {
+            "type": "object",
+            "description": "JSON object of default filters for this tab"
+          },
+          "visible_to_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of role strings that can see this tab"
+          }
+        },
+        "required": ["tab_id", "search_type", "tab_name", "tab_order", "filter_criteria", "visible_to_roles"]
+      },
+      "SearchField": {
+        "type": "object",
+        "properties": {
+          "field_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the search field"
+          },
+          "field_name": {
+            "type": "string",
+            "description": "Database column name"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "UI display name"
+          },
+          "field_type": {
+            "type": "string",
+            "enum": ["Text", "Number", "Date", "DateRange", "Dropdown", "MultiSelect", "Checkbox", "Radio"],
+            "description": "Type of field"
+          },
+          "search_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"]
+            },
+            "description": "Array of search types where this field is used"
+          },
+          "search_tabs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Array of tab IDs where this field appears"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "Whether this field is included in the default search form"
+          },
+          "default_value": {
+            "type": ["string", "object", "null"],
+            "description": "Default value for the field, nullable"
+          },
+          "options": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of options for dropdowns/multiselect"
+          },
+          "placeholder": {
+            "type": "string",
+            "description": "Placeholder text for the field"
+          },
+          "validation": {
+            "type": ["object", "null"],
+            "description": "JSON object with validation rules"
+          },
+          "width": {
+            "type": "string",
+            "description": "CSS width value"
+          },
+          "search_behavior": {
+            "type": "string",
+            "enum": ["Exact", "Contains", "StartsWith", "FuzzyMatch"],
+            "description": "How the search should match this field"
+          }
+        },
+        "required": [
+          "field_id",
+          "field_name",
+          "display_name",
+          "field_type",
+          "search_type",
+          "search_tabs",
+          "is_default",
+          "search_behavior"
+        ]
+      },
+      "ResultField": {
+        "type": "object",
+        "properties": {
+          "field_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the result field"
+          },
+          "field_name": {
+            "type": "string",
+            "description": "Database column name"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "UI display name"
+          },
+          "search_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"]
+            },
+            "description": "Array of search types where this field is used"
+          },
+          "search_tabs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Array of tab IDs where this field appears"
+          },
+          "is_sortable": {
+            "type": "boolean",
+            "description": "Whether this field can be sorted"
+          },
+          "is_filterable": {
+            "type": "boolean",
+            "description": "Whether this field can be filtered"
+          },
+          "formatter": {
+            "type": ["string", "null"],
+            "description": "Function name to format display"
+          },
+          "width": {
+            "type": "string",
+            "description": "CSS width value"
+          },
+          "is_editable": {
+            "type": "boolean",
+            "description": "Whether this field can be edited inline"
+          },
+          "edit_permissions": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of permission strings required to edit this field"
+          }
+        },
+        "required": [
+          "field_id",
+          "field_name",
+          "display_name",
+          "search_type",
+          "search_tabs",
+          "is_sortable",
+          "is_filterable",
+          "is_editable"
+        ]
+      },
+      "SavedSearch": {
+        "type": "object",
+        "properties": {
+          "saved_search_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the saved search"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to User"
+          },
+          "search_type": {
+            "type": "string",
+            "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"],
+            "description": "Type of search"
+          },
+          "tab_id": {
+            "type": "integer",
+            "description": "Foreign key reference to SearchTab"
+          },
+          "search_name": {
+            "type": "string",
+            "description": "Name of the saved search"
+          },
+          "search_criteria": {
+            "type": "object",
+            "description": "JSON object of search parameters"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "Whether this is the default search for this user and type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the search was saved"
+          },
+          "last_used": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the search was last used"
+          }
+        },
+        "required": [
+          "saved_search_id",
+          "user_id",
+          "search_type",
+          "tab_id",
+          "search_name",
+          "search_criteria",
+          "is_default",
+          "created_at"
+        ]
+      },
+      "UserSearchTabs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "tab_id": {
+              "type": "integer",
+              "description": "Tab identifier"
+            },
+            "tab_name": {
+              "type": "string",
+              "enum": [
+                "All Users",
+                "Clients",
+                "Volunteers",
+                "Donors",
+                "Funders",
+                "Better at Home (BaH)",
+                "Event Attendees"
+              ],
+              "description": "Name of the user search tab"
+            },
+            "tab_order": {
+              "type": "integer",
+              "description": "Display order of the tab"
+            },
+            "filter_criteria": {
+              "type": "object",
+              "description": "Default filters for this tab"
+            }
+          },
+          "required": ["tab_id", "tab_name", "tab_order", "filter_criteria"]
+        },
+        "description": "Predefined tabs for user search"
+      },
+      "UserSearchFields": {
+        "type": "object",
+        "properties": {
+          "common": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["first_name", "last_name", "phone", "email", "status", "active_date", "custom"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Text", "Dropdown", "DateRange", "Text"]
+                },
+                "search_behavior": {
+                  "type": "string",
+                  "enum": ["FuzzyMatch", "Exact", "Contains"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type", "search_behavior"]
+            },
+            "description": "Common search fields for all user types"
+          },
+          "client_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["services"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["MultiSelect"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Client-specific search fields"
+          },
+          "volunteer_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["current_services", "service_interests"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["MultiSelect"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Volunteer-specific search fields"
+          },
+          "donor_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["helping_hearts_donor"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Checkbox"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Donor-specific search fields"
+          },
+          "funder_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["name"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Text"]
+                },
+                "search_behavior": {
+                  "type": "string",
+                  "enum": ["FuzzyMatch"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type", "search_behavior"]
+            },
+            "description": "Funder-specific search fields"
+          },
+          "bah_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["sociocultural_info", "intake_date", "language"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Text", "DateRange", "Dropdown"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Better at Home-specific search fields"
+          }
+        },
+        "required": ["common"],
+        "description": "Search fields for different user types"
+      }
+    },
+    "type": "object",
+    "properties": {
+      "search_configurations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SearchConfiguration"
+        }
+      },
+      "search_tabs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SearchTab"
+        }
+      },
+      "search_fields": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SearchField"
+        }
+      },
+      "result_fields": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ResultField"
+        }
+      },
+      "saved_searches": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SavedSearch"
+        }
+      },
+      "user_search_configuration": {
+        "type": "object",
+        "properties": {
+          "tabs": {
+            "$ref": "#/definitions/UserSearchTabs"
+          },
+          "fields": {
+            "$ref": "#/definitions/UserSearchFields"
+          }
+        },
+        "required": ["tabs", "fields"]
+      }
+    }
+  }
+}

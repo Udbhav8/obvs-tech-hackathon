@@ -1,0 +1,742 @@
+{
+	"users": {
+		"general_information": {
+			"user_id": "UUID",
+			"roles": [
+				"Client",
+				"Donor",
+				"Volunteer",
+				"Staff": [ // Need Staff Roles
+					"Volunteer Coordinator",
+					"Admin"
+				],
+				"Board",
+				"BAH", // Group into Client
+				"Event Attendee",
+				"Other" // Spouse, Roommates, etc.
+			],
+			"enews_subscription": "boolean",
+			"letter_mail_subscription": "boolean",
+			"referred_by": [
+				"211",
+				"Advertising",
+				"Family/Friend",
+				"Support Service",
+				"Web Search",
+				"Other",
+				"Unknown"
+			],
+			"created_at": "timestamp",
+			"updated_at": "timestamp"
+		},
+		"personal_information": {
+			"first_name": "string",
+			"preferred_name": "string",
+			"last_name": "string",
+			"email": "string",
+			"cell_phone": "string",
+			"home_phone": "string",
+			"date_of_birth": "date",
+			"home_address": {
+				"street_address": "string",
+				"city": "string",
+				"province": "string",
+				"country": "string",
+				"postal_code": "string"
+			},
+			"gender": [
+				"Male",
+				"Female",
+				"Non-binary",
+				"Other"
+			],
+
+			"interests": ["string"],
+			"skills": ["string"],
+			"languages": {
+				"primary_language": [
+					"English",
+					"French",
+					"Arabic",
+					"Bengali",
+					"Bulgarian",
+					"Cantonese",
+					"Croatian",
+					"Czech",
+					"Dutch",
+					"German",
+					"Greek",
+					"Hebrew",
+					"Hindi",
+					"Iranian",
+					"Italian",
+					"Japanese",
+					"Korean",
+					"Mandarin",
+					"PND", // What is PND?
+					"Punjabi",
+					"Russian",
+					"Samoan",
+					"Spanish",
+					"Swedish",
+					"Tagalog",
+					"Ukranian",
+					"Unknown",
+					"Urdu"
+				], // Multiple Choice and Add More Button
+				"other_languages": [
+					"English",
+					"French",
+					"Arabic",
+					"Bengali",
+					"Bulgarian",
+					"Cantonese",
+					"Croatian",
+					"Czech",
+					"Dutch",
+					"German",
+					"Greek",
+					"Hebrew",
+					"Hindi",
+					"Iranian",
+					"Italian",
+					"Japanese",
+					"Korean",
+					"Mandarin",
+					"PND", // What is PND?
+					"Punjabi",
+					"Russian",
+					"Samoan",
+					"Spanish",
+					"Swedish",
+					"Tagalog",
+					"Ukranian",
+					"Unknown",
+					"Urdu"
+				], // Checkbox and Add More Button
+				"notes": "string"
+			},
+			"ethnicity": [
+				"Aboriginal/First Nations/Metis",
+				"Arab",
+				"Black",
+				"Chinese",
+				"Filipino",
+				"Japanese",
+				"Korean",
+				"Latin American",
+				"Other",
+				"PND",
+				"South Asia",
+				"Southeast Asia",
+				"Unknown",
+				"West Asia",
+				"White"
+			],
+			"spouse_partner": {
+				"id": "UUID",
+				"name": "string"
+			},
+			"emergency_contacts": [
+				{
+					"emergency_contact_id": "UUID",
+					"name": "string",
+					"relationship": "string",
+					"home_phone": "string",
+					"cell_phone": "string",
+					"work_phone": "string",
+					"email": "string",
+					"notes": "string"
+				}
+			],
+		},
+		"health_information": {
+			"allergies": ["string"],
+			"dnr": "boolean",
+			"dnr_notes": "string",
+			"smoker": "boolean",
+			"healthConditions": {
+				"health_condition_id": "UUID",
+				"health_condition_type": [
+					"Asthma",
+					"Arthritis",
+					"Back Problems",
+					"Brain Injury",
+					"Broken Hip",
+					"Cancer",
+					"Chronic Pain",
+					"COPD",
+					"Dementia or Memory Loss",
+					"Diabetes",
+					"Dizziness/Vertigo",
+					"Heart Condition",
+					"Mental Health",
+					"Multiple Sclerosis",
+					"Osteoporosis",
+					"Parkinsons",
+					"Seizures",
+					"Stroke",
+					"Syncope (Fainting Disorder)",
+					"Other",
+					"Add More button (adds additional Other checkboxes with fillable boxes)"
+				],
+				"notes": "string"
+			},
+			"accessibility_needs": {
+				"accessibility_need_id": "UUID",
+				"accessibility_need_type": [
+					"Blind",
+					"Vision Loss",
+					"Deaf",
+					"Hearing Loss",
+					"Immunocompromised - Requests that you wear a mask",
+					"Intellectual or Developmental Disability",
+					"Scent Sensitive",
+					"Sound Sensitive",
+					"Other",
+					"Add More button (adds additional Other checkboxes with fillable boxes)"
+				],
+				"notes": "string"
+			}
+		},
+		"client_information": {
+			"current_status": [
+				"Active",
+				"Away",
+				"Inactive",
+				"New",
+				"Pending"
+			],
+			"client_start_date": "date",
+			"internal_flags": ["string"],
+			"booking_flags": ["string"],
+			"volunteer_exceptions": ["string"],
+			"family_involvement": "string",
+			"mobility_aids": [
+				"Cane",
+				"Walking Poles",
+				"Walker",
+				"Wheelchair"
+			],
+			"vehicle_requirements": [
+				"Coupe",
+				"Sedan",
+				"Crossover",
+				"SUV",
+				"Minivan",
+				"Van",
+				"Truck"
+			],
+			"client_living_arrangements": {
+				"living_arrangement_id": "UUID",
+				"arrangement_type": [
+					"Lives Alone in Apartment/Condo",
+					"Lives Alone in House",
+					"Lives Communally in Low-Income Housing Facility",
+					"Lives Communally in Seniors’ Retirement Facility",
+					"Lives with a Roommate/Partner in House",
+					"Lives with a Roommate/Partner in Apartment/Condo"
+				],
+				"lives_with_contact_id": "UUID",
+				"notes": "string"
+			},
+			"client_services": [
+				{
+					"service_type": [
+						"Destination Walk",
+						"Document Assistance",
+						"Gardening",
+						"Medical Drive",
+						"Minor Home Repair",
+						"Miscellaneous Drive",
+						"Miscellaneous Service",
+						"Packing and Sorting",
+						"Reassurance Phone Call",
+						"Recreation Drive",
+						"Shopping Drive",
+						"Social Phone Call",
+						"Technology Support",
+						"Visiting",
+						"Visiting with Drive",
+						"Walking",
+						"Walking with Drive",
+						"Wheelchair Push"
+					],
+					"service_id": "UUID", // Add to Each Service Type
+					"is_active": "boolean", // Add to Each Service Type
+					"start_date": ["date"], // Add to Each Service Type
+					"end_date": ["date"], // Add to Each Service Type
+					"notes": "string" // Add to Each Service Type
+				}
+			],
+			"client_programs": {
+				"program_type": [
+					"Ambassador",
+					"Better at Home": {
+						"referral_date": "date",
+						"intake_date": "date",
+						"referred_by": [
+							"Ad",
+							"BaH Host Organization",
+							"Community Health Worker / Nurse (HA)",
+							"Doctor",
+							"Family/Friend",
+							"Group",
+							"Other",
+							"Unknown"
+						],
+						"receiving_other_publically_funded_home_support": "boolean"
+					},
+					"Companion Pets",
+					"Cultural Companions",
+					"Holiday Gift Exchange",
+					"Income Tax",
+					"Silent Disco",
+					"Snow Angels",
+					"Welcome Team"
+				],
+				"program_id": "UUID", // Add to Each Program Type
+				"is_active": "boolean", // Add to Each Program Type
+				"start_date": ["date"], // Add to Each Program Type
+				"end_date": ["date"], // Add to Each Program Type
+				"notes": "string" // Add to Each Program Type
+			},
+			"client_support_services": {
+				"support_service_type": [
+					"Better at Home Housekeeping",
+					"Island Health Support",
+					"Private Caregiving",
+					"Private Housekeeping",
+					"Return to Health"
+				],
+				"support_service_id": "UUID", // Add to Each Support Service Type
+				"is_active": "boolean", // Add to Each Support Service Type
+				"start_date": ["date"], // Add to Each Support Service Type
+				"end_date": ["date"], // Add to Each Support Service Type
+				"notes": "string" // Add to Each Support Service Type
+			},
+			"client_structured_programs": {
+				"structured_program_type": [
+					"Adult Day Program",
+					"Recreation Centre",
+					"Seniors’ Centre"
+				],
+				"structured_program_id": "UUID", // Add to Each Structured Program Type
+				"is_active": "boolean", // Add to Each Structured Program Type
+				"start_date": ["date"], // Add to Each Structured Program Type
+				"end_date": ["date"], // Add to Each Structured Program Type
+				"notes": "string" // Add to Each Structured Program Type
+			},
+			"client_bookings": [
+				{
+					"status": [
+						"Assigned",
+						"Cancelled",
+						"Completed",
+						"Deleted",
+						"Not Assigned"
+					],
+					"booking_number": "string",
+					"volunteer_id": "UUID",
+					"booking_type_category": [
+						"Client Service",
+						"Client Program",
+						"Client Support Service",
+						"Client Structured Program"
+					],
+					"booking_type": [
+						"${service_type}",
+						"${program_type}",
+						"${support_service_type}",
+						"${structured_program_type}"
+					],
+					"frequency": [
+						"One-Time",
+						"Ongoing",
+						"Recurring"
+					],
+					"booking_date": "date",
+					"booking_start_time": "string",
+					"booking_duration_hrs": "string",
+					"booking_pickup_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_destination_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_history": ["string"] // Events/Actions Taken While Booking and By who
+				}
+			],
+			"client_files": {
+				"file_id": "UUID",
+				"file_name": "string",
+				"file_type": "string",
+				"file_path": "string",
+				"uploaded_by": "UUID",
+				"upload_date": "timestamp",
+				"description": "string"
+			},
+			"client_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"volunteer_information": {
+			"current_status": [
+				"Active",
+				"Away",
+				"Inactive",
+				"New", // Lasts for 3 months and then auto-update to "Active" unless other option has been selected
+				"Pending" // Can't be booked for services, except using the manual override... Should update to Active before booking?
+			],
+			"volunteer_intake_date": "date",
+			"volunteer_orientation_date": "date",
+			"volunteer_start_date": "date",
+			"volunteer_end_date": "date",
+			"volunteer_experience": "string",
+			"work_experience": "string",
+			"education": "string",
+			"internal_flags": ["string"],
+			"booking_flags": ["string"],
+			"client_exceptions": ["string"],
+			"volunteer_services": {
+				"service_type": [
+					"Destination Walk",
+					"Document Assistance",
+					"Gardening",
+					"Medical Drive",
+					"Minor Home Repair",
+					"Miscellaneous Drive",
+					"Miscellaneous Service",
+					"Packing and Sorting",
+					"Reassurance Phone Call",
+					"Recreation Drive",
+					"Shopping Drive",
+					"Social Phone Call",
+					"Technology Support",
+					"Visiting",
+					"Visiting with Drive",
+					"Walking",
+					"Walking with Drive",
+					"Wheelchair Push"
+				],
+				"service_id": "UUID", // Add to Each Service Type
+				"is_active": "boolean", // Add to Each Service Type
+				"start_date": ["date"], // Add to Each Service Type
+				"end_date": ["date"], // Add to Each Service Type
+				"notes": "string" // Add to Each Service Type
+			},
+			"volunteer_programs": {
+				"program_type": [
+					"Ambassador",
+					"Better at Home",
+					"Companion Pets",
+					"Cultural Companions",
+					"Holiday Gift Exchange",
+					"Income Tax",
+					"Silent Disco",
+					"Snow Angels",
+					"Welcome Team"
+				],
+				"program_id": "UUID", // Add to Each Program Type
+				"is_active": "boolean", // Add to Each Program Type
+				"start_date": ["date"], // Add to Each Program Type
+				"end_date": ["date"], // Add to Each Program Type
+				"notes": "string" // Add to Each Program Type
+			},
+			"volunteer_support_services": {
+				"support_service_type": [ // Support Services don't match Client Support Service Types
+					"Accounting",
+					"Board",
+					"MarComm",
+					"Fundraising",
+					"Events",
+					"Miscellaneous Support",
+					"Helpline"
+				],
+				"support_service_id": "UUID", // Add to Each Support Service Type
+				"is_active": "boolean", // Add to Each Support Service Type
+				"start_date": ["date"], // Add to Each Support Service Type
+				"end_date": ["date"], // Add to Each Support Service Type
+				"notes": "string" // Add to Each Support Service Type
+			},
+			"volunteer_availability": {
+				"Monday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Tuesday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Wednesday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Thursday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Friday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Saturday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Sunday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				}
+			},
+			"volunteer_unavailable_dates": {
+				"first_date_unavailable": ["date"],
+				"last_date_unavailable": ["date"]
+			},
+			"volunteer_driving_information": {
+				"accessible_parking_permit": {
+					"parking_permit": "boolean",
+					"parking_permit_number": "string",
+					"parking_permit_expiry_date": "date"
+				},
+				"drivers_license_number": "string",
+				"drivers_abstract": {
+					"completion_date": ["date"],
+					"expiration_date": "date",
+					"notes": "string"	
+				},
+				"vehicle_information": {
+					"vehicle_make": ["string"],
+					"vehicle_model": ["string"],
+					"vehicle_year": "string",
+					"vehicle_type": [
+						"Coupe",
+						"Crossover",
+						"Minivan",
+						"Truck",
+						"Sedan",
+						"SUV",
+						"Van"
+					],
+					"number_of_passengers": "string",
+					"accomodations": [
+						"Cane",
+						"Walking Poles",
+						"Walker",
+						"Wheelchair"
+					]
+				}
+			},
+			"security_clearance": {
+					"completion_date": ["date"],
+					"expiration_date": "date",
+					"notes": "string"			
+			},
+			"references": [
+				{
+					"first_name": "string",
+					"last_name": "string",
+					"relationship": "string",
+					"email": "string",
+					"cell_phone": "string",
+					"home_phone": "string",
+					"work_phone": "string",
+					"notes": "string",
+					"reference_check_completed_date": "date",
+					"reference_check_completed_by": "string"
+				}
+			],
+			"volunteer_bookings": [
+				{
+					"status": [
+						"Assigned",
+						"Cancelled",
+						"Completed",
+						"Deleted",
+						"Not Assigned"
+					],
+					"booking_number": "string",
+					"client_id": "UUID",
+					"booking_type_category": [
+						"Client Service",
+						"Client Program",
+						"Client Support Service",
+						"Client Structured Program"
+					],
+					"booking_type": [
+						"${service_type}",
+						"${program_type}",
+						"${support_service_type}",
+						"${structured_program_type}"
+					],
+					"frequency": [
+						"One-Time",
+						"Ongoing",
+						"Recurring"
+					],
+					"booking_date": "date",
+					"booking_start_time": "string",
+					"booking_duration_hrs": "string",
+					"booking_pickup_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_destination_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_history": ["string"] // Events/Actions Taken While Booking and By who
+				}
+			],
+			"volunteer_files": {
+				"file_id": "UUID",
+				"file_name": "string",
+				"file_type": "string",
+				"file_path": "string",
+				"uploaded_by": "UUID",
+				"upload_date": "timestamp",
+				"description": "string"
+			},
+			"volunteer_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"donor_information": {
+			"current_status": [
+				"Active",
+				"Inactive"
+			],
+			"active_engagement": "boolean",
+			"monthly_donor": "boolean",
+			"monthly_amount": "string",
+			"donations": [
+				{
+					"donation_date": "date",
+					"processed_date": "date",
+					"donation_type": ["string"],
+					"donation_amount": "string",
+					"donation_value_advantage": "string",
+					"donation_eligible_amount": "string",
+					"donation_receipt": "boolean"
+				}
+			],
+			"donor_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"funder_information": {
+			"organization_name": "string",
+			"grant_details": {
+				"name": "string",
+				"application_deadline": "date",
+				"grant_amount": "string"
+			},	
+			"contact": {
+				"first_name": "string",
+				"preferred_name": "string",
+				"last_name": "string",
+				"email": "string",
+				"cell_phone": "string",
+				"work_phone": "string"
+			},
+			"address": {
+				"street_address": "string",
+				"city": "string",
+				"province": "string",
+				"country": "string",
+				"postal_code": "string"
+			},
+			"current_status": [
+				"Active",
+				"Inactive"
+			],
+			"active_engagement": "boolean",
+			"donations": [
+				{
+					"donation_date": "date",
+					"processed_date": "date",
+					"donation_type": ["string"],
+					"donation_amount": "string",
+					"donation_value_advantage": "string",
+					"donation_eligible_amount": "string",
+					"donation_receipt": "boolean"
+				}
+			],
+			"funder_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"event_attendee_information": {
+			"contact_for_events": [
+				"Silent Disco",
+				"Symphony"
+			],
+			"event_attendee_bookings": [
+				{
+					"status": [
+						"Assigned",
+						"Cancelled",
+						"Completed",
+						"Deleted",
+						"Not Assigned"
+					],
+					"booking_number": "string",
+					"booking_type_category": [
+						"Client Service",
+						"Client Program",
+						"Client Support Service",
+						"Client Structured Program"
+					],
+					"booking_type": [
+						"${service_type}",
+						"${program_type}",
+						"${support_service_type}",
+						"${structured_program_type}"
+					],
+					"booking_event_name": "string",
+					"booking_date": "date",
+					"booking_start_time": "string",
+					"booking_duration_hrs": "string",
+					"booking_history": ["string"] // Events/Actions Taken While Booking and By who
+				}
+			],
+			"event_attendee_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		}
+	}
+}

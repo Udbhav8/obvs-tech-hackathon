@@ -1,0 +1,590 @@
+{
+  "bookings": {
+    "title": "Booking Management System",
+    "description": "JSON Schema for booking management system entities",
+    "definitions": {
+      "Booking": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the booking"
+          },
+          "booking_type": {
+            "type": "string",
+            "enum": ["Service", "Program", "Support Service", "Event"],
+            "description": "Type of booking"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Assigned", "Not Assigned", "Cancelled", "Deleted"],
+            "description": "Current status of the booking"
+          },
+          "frequency_type": {
+            "type": "string",
+            "enum": ["One-Time", "Continuous", "Ongoing"],
+            "description": "Frequency type of the booking"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the booking"
+          },
+          "start_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "Start time of the booking"
+          },
+          "appointment_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "Appointment time for the booking"
+          },
+          "appointment_length": {
+            "type": "integer",
+            "description": "Length of the appointment in minutes"
+          },
+          "full_duration": {
+            "type": "integer",
+            "description": "Full duration of the booking in minutes"
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 2000,
+            "description": "Notes about the booking with minimum 400 character capacity"
+          },
+          "num_volunteers_needed": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "default": 1,
+            "description": "Number of volunteers needed for this booking"
+          },
+          "client_confirmation": {
+            "type": "boolean",
+            "description": "Whether the client has confirmed the booking"
+          },
+          "cancellation_reason": {
+            "type": ["string", "null"],
+            "enum": [
+              "Client - Provider",
+              "Client - Health",
+              "Client - Other",
+              "Volunteer - Health",
+              "Volunteer - Other",
+              "No Volunteers Available",
+              null
+            ],
+            "description": "Reason for cancellation, nullable"
+          },
+          "cancellation_notes": {
+            "type": ["string", "null"],
+            "description": "Additional notes about cancellation, nullable"
+          },
+          "is_parent_booking": {
+            "type": "boolean",
+            "description": "Whether this is a parent booking for recurring bookings"
+          },
+          "parent_booking_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to parent booking, nullable"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "End date for recurring bookings, nullable"
+          },
+          "recurrence_frequency": {
+            "type": ["string", "null"],
+            "enum": ["Daily", "Weekly", "Bi-weekly", "Monthly", "Annually", null],
+            "description": "Frequency of recurrence, nullable"
+          },
+          "recurrence_days": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "description": "Array of weekday values (0=Sunday, 6=Saturday), nullable"
+          }
+        },
+        "required": [
+          "booking_id",
+          "booking_type",
+          "status",
+          "frequency_type",
+          "date",
+          "start_time",
+          "appointment_time",
+          "appointment_length",
+          "full_duration",
+          "num_volunteers_needed",
+          "client_confirmation",
+          "is_parent_booking"
+        ]
+      },
+      "ServiceProgramBooking": {
+        "allOf": [
+          { "$ref": "#/definitions/Booking" },
+          {
+            "type": "object",
+            "properties": {
+              "service_type": {
+                "type": "string",
+                "enum": [
+                  "Drives Medical",
+                  "Drives Miscellaneous",
+                  "Drives Shopping",
+                  "Drives Recreation",
+                  "Destination Walks",
+                  "Document Assistance",
+                  "Gardening",
+                  "Minor Home Repair",
+                  "Packing and Sorting",
+                  "Reassurance Phone Calls",
+                  "Social Phone Call",
+                  "Technology Support",
+                  "Visiting",
+                  "Visiting with Drive",
+                  "Walking",
+                  "Walking with Drive",
+                  "Wheelchair Push",
+                  "Miscellaneous Service",
+                  "Ambassador",
+                  "Companion Pets",
+                  "Cultural Companions",
+                  "Holiday Gift Exchange",
+                  "Income Tax",
+                  "Silent Disco",
+                  "Snow Angels",
+                  "Welcome Team",
+                  "Accounting",
+                  "Board",
+                  "Fundraising",
+                  "Helpline",
+                  "MarComm",
+                  "Miscellaneous Support",
+                  "Training"
+                ],
+                "description": "Type of service or program"
+              },
+              "pickup_address_description": {
+                "type": "string",
+                "description": "Description of the pickup address"
+              },
+              "pickup_address_street": {
+                "type": "string",
+                "description": "Street of the pickup address"
+              },
+              "pickup_address_city": {
+                "type": "string",
+                "description": "City of the pickup address"
+              },
+              "destination_address_description": {
+                "type": ["string", "null"],
+                "description": "Description of the destination address, nullable"
+              },
+              "destination_address_street": {
+                "type": ["string", "null"],
+                "description": "Street of the destination address, nullable"
+              },
+              "destination_address_city": {
+                "type": ["string", "null"],
+                "description": "City of the destination address, nullable"
+              }
+            },
+            "required": ["service_type", "pickup_address_description", "pickup_address_street", "pickup_address_city"]
+          }
+        ]
+      },
+      "EventBooking": {
+        "allOf": [
+          { "$ref": "#/definitions/Booking" },
+          {
+            "type": "object",
+            "properties": {
+              "event_id": {
+                "type": "integer",
+                "description": "Foreign key reference to Event"
+              },
+              "setup_time_start": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "Start time for setup, nullable"
+              },
+              "setup_time_end": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "End time for setup, nullable"
+              },
+              "takedown_time_start": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "Start time for takedown, nullable"
+              },
+              "takedown_time_end": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "End time for takedown, nullable"
+              },
+              "location_description": {
+                "type": "string",
+                "description": "Description of the event location"
+              },
+              "location_street": {
+                "type": "string",
+                "description": "Street of the event location"
+              },
+              "location_city": {
+                "type": "string",
+                "description": "City of the event location"
+              }
+            },
+            "required": ["event_id", "location_description", "location_street", "location_city"]
+          }
+        ]
+      },
+      "Client": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the client"
+          },
+          "preferred_name": {
+            "type": "string",
+            "description": "Preferred name of the client"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the client"
+          },
+          "internal_flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of internal flag values"
+          },
+          "booking_flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of booking flag values"
+          },
+          "allergies": {
+            "type": "string",
+            "description": "Client's allergies"
+          },
+          "mobility_aids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of mobility aid types"
+          },
+          "disability": {
+            "type": "string",
+            "description": "Client's disability information"
+          },
+          "dnr": {
+            "type": "boolean",
+            "description": "Do Not Resuscitate status"
+          },
+          "dnr_notes": {
+            "type": "string",
+            "description": "Notes related to DNR status"
+          },
+          "home_phone": {
+            "type": ["string", "null"],
+            "description": "Home phone number"
+          },
+          "cell_phone": {
+            "type": ["string", "null"],
+            "description": "Cell phone number"
+          },
+          "home_address_street": {
+            "type": "string",
+            "description": "Street of the home address"
+          },
+          "home_address_city": {
+            "type": "string",
+            "description": "City of the home address"
+          },
+          "scent_sensitivity": {
+            "type": "boolean",
+            "description": "Whether the client has scent sensitivity"
+          },
+          "smoking": {
+            "type": "boolean",
+            "description": "Whether the client smokes"
+          },
+          "vehicle_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of vehicle requirements"
+          }
+        },
+        "required": [
+          "client_id",
+          "preferred_name",
+          "last_name",
+          "internal_flags",
+          "booking_flags",
+          "home_address_street",
+          "home_address_city",
+          "dnr",
+          "scent_sensitivity",
+          "smoking"
+        ]
+      },
+      "Volunteer": {
+        "type": "object",
+        "properties": {
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the volunteer"
+          },
+          "preferred_name": {
+            "type": "string",
+            "description": "Preferred name of the volunteer"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the volunteer"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of flag values"
+          },
+          "allergies": {
+            "type": "string",
+            "description": "Volunteer's allergies"
+          },
+          "home_phone": {
+            "type": ["string", "null"],
+            "description": "Home phone number"
+          },
+          "cell_phone": {
+            "type": ["string", "null"],
+            "description": "Cell phone number"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "car_type": {
+            "type": ["string", "null"],
+            "description": "Type of car the volunteer drives"
+          },
+          "scent_sensitivity": {
+            "type": "boolean",
+            "description": "Whether the volunteer has scent sensitivity"
+          },
+          "smoking": {
+            "type": "boolean",
+            "description": "Whether the volunteer smokes"
+          }
+        },
+        "required": ["volunteer_id", "preferred_name", "last_name", "flags", "email", "scent_sensitivity", "smoking"]
+      },
+      "BookingClientRelation": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Booking"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Client"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "Whether this client is the primary client for the booking"
+          }
+        },
+        "required": ["booking_id", "client_id", "is_primary"]
+      },
+      "BookingVolunteerRelation": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Booking"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Volunteer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Possible", "Left Voicemail", "Emailed", "Assigned", "Unavailable"],
+            "description": "Status of the volunteer for this booking"
+          }
+        },
+        "required": ["booking_id", "volunteer_id", "status"]
+      },
+      "EventAttendee": {
+        "type": "object",
+        "properties": {
+          "event_booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to EventBooking"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to User, nullable for external attendees"
+          },
+          "external_name": {
+            "type": ["string", "null"],
+            "description": "Name of external attendee, nullable for system users"
+          },
+          "user_type": {
+            "type": "string",
+            "enum": ["Client", "Volunteer", "Staff", "External"],
+            "description": "Type of user attending the event"
+          }
+        },
+        "required": ["event_booking_id", "user_type"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "user_type": { "enum": ["External"] } }
+            },
+            "then": {
+              "required": ["external_name"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "user_type": { "enum": ["Client", "Volunteer", "Staff"] } }
+            },
+            "then": {
+              "required": ["user_id"]
+            }
+          }
+        ]
+      },
+      "VolunteerAbsence": {
+        "type": "object",
+        "properties": {
+          "absence_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the absence"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Volunteer"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the absence"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "End date of the absence"
+          },
+          "is_one_day": {
+            "type": "boolean",
+            "description": "Whether the absence is for a single day"
+          },
+          "reason": {
+            "type": ["string", "null"],
+            "description": "Reason for the absence, optional"
+          }
+        },
+        "required": ["absence_id", "volunteer_id", "start_date", "end_date", "is_one_day"]
+      },
+      "JobHistory": {
+        "type": "object",
+        "properties": {
+          "history_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the history entry"
+          },
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Booking"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to database user"
+          },
+          "action": {
+            "type": "string",
+            "description": "Text description of the action taken"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the action occurred"
+          }
+        },
+        "required": ["history_id", "booking_id", "user_id", "action", "timestamp"]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "bookings": {
+        "type": "array",
+        "items": {
+          "oneOf": [{ "$ref": "#/definitions/ServiceProgramBooking" }, { "$ref": "#/definitions/EventBooking" }]
+        }
+      },
+      "clients": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Client"
+        }
+      },
+      "volunteers": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Volunteer"
+        }
+      },
+      "booking_client_relations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/BookingClientRelation"
+        }
+      },
+      "booking_volunteer_relations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/BookingVolunteerRelation"
+        }
+      },
+      "event_attendees": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventAttendee"
+        }
+      },
+      "volunteer_absences": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/VolunteerAbsence"
+        }
+      },
+      "job_history": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/JobHistory"
+        }
+      }
+    }
+  }
+}

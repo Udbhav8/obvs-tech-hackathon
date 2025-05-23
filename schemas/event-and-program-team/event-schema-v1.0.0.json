@@ -1,0 +1,679 @@
+{
+  "events": {
+    "title": "Event Management System",
+    "description": "JSON Schema for event management system entities",
+    "definitions": {
+      "Event": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the event"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the event"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": ["Program", "Other"],
+            "description": "Type of event"
+          },
+          "event_category": {
+            "type": "integer",
+            "description": "Foreign key reference to EventCategory"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the event"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the event"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "End date of the event, null for single-day events"
+          },
+          "start_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "Start time of the event"
+          },
+          "end_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "End time of the event"
+          },
+          "location_name": {
+            "type": "string",
+            "description": "Name of the event location"
+          },
+          "location_address": {
+            "type": "string",
+            "description": "Address of the event location"
+          },
+          "location_city": {
+            "type": "string",
+            "description": "City of the event location"
+          },
+          "max_attendees": {
+            "type": ["integer", "null"],
+            "description": "Maximum number of attendees, null if unlimited"
+          },
+          "max_volunteers": {
+            "type": ["integer", "null"],
+            "description": "Maximum number of volunteers, null if unlimited"
+          },
+          "is_recurring": {
+            "type": "boolean",
+            "description": "Whether this is a recurring event"
+          },
+          "recurrence_pattern": {
+            "type": ["object", "null"],
+            "description": "JSON object defining the recurrence pattern, null for non-recurring events"
+          },
+          "registration_required": {
+            "type": "boolean",
+            "description": "Whether registration is required for this event"
+          },
+          "registration_deadline": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Deadline for registration, null if no deadline"
+          },
+          "registration_url": {
+            "type": ["string", "null"],
+            "description": "URL for external registration, null if not applicable"
+          },
+          "contact_person": {
+            "type": "string",
+            "description": "Name of the contact person for the event"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the contact person"
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "Phone number of the contact person"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the event"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Planned", "Active", "Completed", "Cancelled"],
+            "description": "Current status of the event"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who created the event"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the event (calculated field based on start_date)"
+          }
+        },
+        "required": [
+          "event_id",
+          "name",
+          "event_type",
+          "event_category",
+          "description",
+          "start_date",
+          "start_time",
+          "end_time",
+          "location_name",
+          "location_address",
+          "location_city",
+          "is_recurring",
+          "registration_required",
+          "contact_person",
+          "contact_email",
+          "status",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "fiscal_year"
+        ]
+      },
+      "EventCategory": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the category"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "parent_category_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to parent category, null for top-level categories"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Program", "Other"],
+            "description": "Type of category"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the category"
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Order in which to display this category"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether this category is active"
+          }
+        },
+        "required": ["category_id", "name", "type", "display_order", "is_active"]
+      },
+      "EventAttendee": {
+        "type": "object",
+        "properties": {
+          "attendee_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the attendee record"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to the user, null for external attendees"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name of the attendee (for external attendees)"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the attendee (for external attendees)"
+          },
+          "email": {
+            "type": ["string", "null"],
+            "format": "email",
+            "description": "Email of the attendee, null if not provided"
+          },
+          "phone": {
+            "type": ["string", "null"],
+            "description": "Phone number of the attendee, null if not provided"
+          },
+          "registration_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the attendee registered"
+          },
+          "attendance_status": {
+            "type": "string",
+            "enum": ["Registered", "Attended", "No-Show", "Cancelled"],
+            "description": "Status of the attendee's attendance"
+          },
+          "check_in_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when the attendee checked in, null if not checked in"
+          },
+          "check_out_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when the attendee checked out, null if not checked out"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the attendee"
+          },
+          "special_needs": {
+            "type": "string",
+            "description": "Special needs or accommodations required by the attendee"
+          },
+          "is_external": {
+            "type": "boolean",
+            "description": "Whether this is an external attendee (not in the system)"
+          }
+        },
+        "required": ["attendee_id", "event_id", "registration_date", "attendance_status", "is_external"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "is_external": { "enum": [true] } }
+            },
+            "then": {
+              "required": ["first_name", "last_name"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "is_external": { "enum": [false] } }
+            },
+            "then": {
+              "required": ["user_id"]
+            }
+          }
+        ]
+      },
+      "EventVolunteer": {
+        "type": "object",
+        "properties": {
+          "volunteer_assignment_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the volunteer assignment"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the volunteer user"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the volunteer at the event"
+          },
+          "assignment_status": {
+            "type": "string",
+            "enum": ["Invited", "Confirmed", "Declined", "No-Show"],
+            "description": "Status of the volunteer assignment"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start time of the volunteer's shift"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End time of the volunteer's shift"
+          },
+          "hours_worked": {
+            "type": "number",
+            "description": "Hours worked by the volunteer (calculated or manually entered)"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the volunteer assignment"
+          }
+        },
+        "required": [
+          "volunteer_assignment_id",
+          "event_id",
+          "volunteer_id",
+          "role",
+          "assignment_status",
+          "start_time",
+          "end_time",
+          "hours_worked"
+        ]
+      },
+      "EventTask": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the task"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the task"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the task"
+          },
+          "assigned_to": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to the assigned user, null if unassigned"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Due date for the task"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Not Started", "In Progress", "Completed", "Cancelled"],
+            "description": "Current status of the task"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["Low", "Medium", "High"],
+            "description": "Priority level of the task"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the task"
+          }
+        },
+        "required": ["task_id", "event_id", "name", "due_date", "status", "priority"]
+      },
+      "EventResource": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the resource"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the resource"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Document", "Image", "Link", "Other"],
+            "description": "Type of resource"
+          },
+          "file_path": {
+            "type": ["string", "null"],
+            "description": "Path to the resource file, null if not applicable"
+          },
+          "url": {
+            "type": ["string", "null"],
+            "description": "URL of the resource, null if not applicable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the resource"
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the resource is publicly accessible"
+          },
+          "upload_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the resource was uploaded"
+          },
+          "uploaded_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who uploaded the resource"
+          }
+        },
+        "required": [
+          "resource_id",
+          "event_id",
+          "name",
+          "type",
+          "description",
+          "is_public",
+          "upload_date",
+          "uploaded_by"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "type": { "enum": ["Document", "Image"] } }
+            },
+            "then": {
+              "required": ["file_path"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "enum": ["Link"] } }
+            },
+            "then": {
+              "required": ["url"]
+            }
+          }
+        ]
+      },
+      "EventFeedback": {
+        "type": "object",
+        "properties": {
+          "feedback_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the feedback"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to the user, null for anonymous feedback"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Rating from 1 to 5"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Feedback comments"
+          },
+          "submission_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the feedback was submitted"
+          },
+          "is_anonymous": {
+            "type": "boolean",
+            "description": "Whether the feedback is anonymous"
+          }
+        },
+        "required": ["feedback_id", "event_id", "rating", "submission_date", "is_anonymous"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "is_anonymous": { "enum": [false] } }
+            },
+            "then": {
+              "required": ["user_id"]
+            }
+          }
+        ]
+      },
+      "EventMetrics": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "attendee_count": {
+            "type": "integer",
+            "description": "Count of attendees (calculated)"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Count of volunteers (calculated)"
+          },
+          "total_volunteer_hours": {
+            "type": "number",
+            "description": "Total volunteer hours (calculated)"
+          },
+          "attendance_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Attendance rate calculated as attended/registered"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the event"
+          }
+        },
+        "required": [
+          "event_id",
+          "attendee_count",
+          "volunteer_count",
+          "total_volunteer_hours",
+          "attendance_rate",
+          "fiscal_year"
+        ]
+      },
+      "CategoryMetrics": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event category"
+          },
+          "event_count": {
+            "type": "integer",
+            "description": "Count of events (calculated)"
+          },
+          "total_attendees": {
+            "type": "integer",
+            "description": "Total attendees (calculated)"
+          },
+          "total_volunteers": {
+            "type": "integer",
+            "description": "Total volunteers (calculated)"
+          },
+          "total_volunteer_hours": {
+            "type": "number",
+            "description": "Total volunteer hours (calculated)"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          }
+        },
+        "required": [
+          "category_id",
+          "event_count",
+          "total_attendees",
+          "total_volunteers",
+          "total_volunteer_hours",
+          "fiscal_year"
+        ]
+      },
+      "FiscalYearMetrics": {
+        "type": "object",
+        "properties": {
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          },
+          "total_events": {
+            "type": "integer",
+            "description": "Total events (calculated)"
+          },
+          "total_attendees": {
+            "type": "integer",
+            "description": "Total attendees (calculated)"
+          },
+          "total_volunteers": {
+            "type": "integer",
+            "description": "Total volunteers (calculated)"
+          },
+          "total_volunteer_hours": {
+            "type": "number",
+            "description": "Total volunteer hours (calculated)"
+          },
+          "program_event_count": {
+            "type": "integer",
+            "description": "Count of program events (calculated)"
+          },
+          "other_event_count": {
+            "type": "integer",
+            "description": "Count of other events (calculated)"
+          }
+        },
+        "required": [
+          "fiscal_year",
+          "total_events",
+          "total_attendees",
+          "total_volunteers",
+          "total_volunteer_hours",
+          "program_event_count",
+          "other_event_count"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "events": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Event"
+        }
+      },
+      "event_categories": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventCategory"
+        }
+      },
+      "event_attendees": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventAttendee"
+        }
+      },
+      "event_volunteers": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventVolunteer"
+        }
+      },
+      "event_tasks": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventTask"
+        }
+      },
+      "event_resources": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventResource"
+        }
+      },
+      "event_feedback": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventFeedback"
+        }
+      },
+      "event_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventMetrics"
+        }
+      },
+      "category_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CategoryMetrics"
+        }
+      },
+      "fiscal_year_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/FiscalYearMetrics"
+        }
+      }
+    }
+  }
+}

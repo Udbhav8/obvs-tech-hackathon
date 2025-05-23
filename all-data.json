@@ -1,0 +1,5629 @@
+{
+  "bookings": {
+    "title": "Booking Management System",
+    "description": "JSON Schema for booking management system entities",
+    "definitions": {
+      "Booking": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the booking"
+          },
+          "booking_type": {
+            "type": "string",
+            "enum": ["Service", "Program", "Support Service", "Event"],
+            "description": "Type of booking"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Assigned", "Not Assigned", "Cancelled", "Deleted"],
+            "description": "Current status of the booking"
+          },
+          "frequency_type": {
+            "type": "string",
+            "enum": ["One-Time", "Continuous", "Ongoing"],
+            "description": "Frequency type of the booking"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the booking"
+          },
+          "start_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "Start time of the booking"
+          },
+          "appointment_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "Appointment time for the booking"
+          },
+          "appointment_length": {
+            "type": "integer",
+            "description": "Length of the appointment in minutes"
+          },
+          "full_duration": {
+            "type": "integer",
+            "description": "Full duration of the booking in minutes"
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 2000,
+            "description": "Notes about the booking with minimum 400 character capacity"
+          },
+          "num_volunteers_needed": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "default": 1,
+            "description": "Number of volunteers needed for this booking"
+          },
+          "client_confirmation": {
+            "type": "boolean",
+            "description": "Whether the client has confirmed the booking"
+          },
+          "cancellation_reason": {
+            "type": ["string", "null"],
+            "enum": [
+              "Client - Provider",
+              "Client - Health",
+              "Client - Other",
+              "Volunteer - Health",
+              "Volunteer - Other",
+              "No Volunteers Available",
+              null
+            ],
+            "description": "Reason for cancellation, nullable"
+          },
+          "cancellation_notes": {
+            "type": ["string", "null"],
+            "description": "Additional notes about cancellation, nullable"
+          },
+          "is_parent_booking": {
+            "type": "boolean",
+            "description": "Whether this is a parent booking for recurring bookings"
+          },
+          "parent_booking_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to parent booking, nullable"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "End date for recurring bookings, nullable"
+          },
+          "recurrence_frequency": {
+            "type": ["string", "null"],
+            "enum": ["Daily", "Weekly", "Bi-weekly", "Monthly", "Annually", null],
+            "description": "Frequency of recurrence, nullable"
+          },
+          "recurrence_days": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "description": "Array of weekday values (0=Sunday, 6=Saturday), nullable"
+          }
+        },
+        "required": [
+          "booking_id",
+          "booking_type",
+          "status",
+          "frequency_type",
+          "date",
+          "start_time",
+          "appointment_time",
+          "appointment_length",
+          "full_duration",
+          "num_volunteers_needed",
+          "client_confirmation",
+          "is_parent_booking"
+        ]
+      },
+      "ServiceProgramBooking": {
+        "allOf": [
+          { "$ref": "#/definitions/Booking" },
+          {
+            "type": "object",
+            "properties": {
+              "service_type": {
+                "type": "string",
+                "enum": [
+                  "Drives Medical",
+                  "Drives Miscellaneous",
+                  "Drives Shopping",
+                  "Drives Recreation",
+                  "Destination Walks",
+                  "Document Assistance",
+                  "Gardening",
+                  "Minor Home Repair",
+                  "Packing and Sorting",
+                  "Reassurance Phone Calls",
+                  "Social Phone Call",
+                  "Technology Support",
+                  "Visiting",
+                  "Visiting with Drive",
+                  "Walking",
+                  "Walking with Drive",
+                  "Wheelchair Push",
+                  "Miscellaneous Service",
+                  "Ambassador",
+                  "Companion Pets",
+                  "Cultural Companions",
+                  "Holiday Gift Exchange",
+                  "Income Tax",
+                  "Silent Disco",
+                  "Snow Angels",
+                  "Welcome Team",
+                  "Accounting",
+                  "Board",
+                  "Fundraising",
+                  "Helpline",
+                  "MarComm",
+                  "Miscellaneous Support",
+                  "Training"
+                ],
+                "description": "Type of service or program"
+              },
+              "pickup_address_description": {
+                "type": "string",
+                "description": "Description of the pickup address"
+              },
+              "pickup_address_street": {
+                "type": "string",
+                "description": "Street of the pickup address"
+              },
+              "pickup_address_city": {
+                "type": "string",
+                "description": "City of the pickup address"
+              },
+              "destination_address_description": {
+                "type": ["string", "null"],
+                "description": "Description of the destination address, nullable"
+              },
+              "destination_address_street": {
+                "type": ["string", "null"],
+                "description": "Street of the destination address, nullable"
+              },
+              "destination_address_city": {
+                "type": ["string", "null"],
+                "description": "City of the destination address, nullable"
+              }
+            },
+            "required": ["service_type", "pickup_address_description", "pickup_address_street", "pickup_address_city"]
+          }
+        ]
+      },
+      "EventBooking": {
+        "allOf": [
+          { "$ref": "#/definitions/Booking" },
+          {
+            "type": "object",
+            "properties": {
+              "event_id": {
+                "type": "integer",
+                "description": "Foreign key reference to Event"
+              },
+              "setup_time_start": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "Start time for setup, nullable"
+              },
+              "setup_time_end": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "End time for setup, nullable"
+              },
+              "takedown_time_start": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "Start time for takedown, nullable"
+              },
+              "takedown_time_end": {
+                "type": ["string", "null"],
+                "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+                "description": "End time for takedown, nullable"
+              },
+              "location_description": {
+                "type": "string",
+                "description": "Description of the event location"
+              },
+              "location_street": {
+                "type": "string",
+                "description": "Street of the event location"
+              },
+              "location_city": {
+                "type": "string",
+                "description": "City of the event location"
+              }
+            },
+            "required": ["event_id", "location_description", "location_street", "location_city"]
+          }
+        ]
+      },
+      "Client": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the client"
+          },
+          "preferred_name": {
+            "type": "string",
+            "description": "Preferred name of the client"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the client"
+          },
+          "internal_flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of internal flag values"
+          },
+          "booking_flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of booking flag values"
+          },
+          "allergies": {
+            "type": "string",
+            "description": "Client's allergies"
+          },
+          "mobility_aids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of mobility aid types"
+          },
+          "disability": {
+            "type": "string",
+            "description": "Client's disability information"
+          },
+          "dnr": {
+            "type": "boolean",
+            "description": "Do Not Resuscitate status"
+          },
+          "dnr_notes": {
+            "type": "string",
+            "description": "Notes related to DNR status"
+          },
+          "home_phone": {
+            "type": ["string", "null"],
+            "description": "Home phone number"
+          },
+          "cell_phone": {
+            "type": ["string", "null"],
+            "description": "Cell phone number"
+          },
+          "home_address_street": {
+            "type": "string",
+            "description": "Street of the home address"
+          },
+          "home_address_city": {
+            "type": "string",
+            "description": "City of the home address"
+          },
+          "scent_sensitivity": {
+            "type": "boolean",
+            "description": "Whether the client has scent sensitivity"
+          },
+          "smoking": {
+            "type": "boolean",
+            "description": "Whether the client smokes"
+          },
+          "vehicle_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of vehicle requirements"
+          }
+        },
+        "required": [
+          "client_id",
+          "preferred_name",
+          "last_name",
+          "internal_flags",
+          "booking_flags",
+          "home_address_street",
+          "home_address_city",
+          "dnr",
+          "scent_sensitivity",
+          "smoking"
+        ]
+      },
+      "Volunteer": {
+        "type": "object",
+        "properties": {
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the volunteer"
+          },
+          "preferred_name": {
+            "type": "string",
+            "description": "Preferred name of the volunteer"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the volunteer"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of flag values"
+          },
+          "allergies": {
+            "type": "string",
+            "description": "Volunteer's allergies"
+          },
+          "home_phone": {
+            "type": ["string", "null"],
+            "description": "Home phone number"
+          },
+          "cell_phone": {
+            "type": ["string", "null"],
+            "description": "Cell phone number"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "car_type": {
+            "type": ["string", "null"],
+            "description": "Type of car the volunteer drives"
+          },
+          "scent_sensitivity": {
+            "type": "boolean",
+            "description": "Whether the volunteer has scent sensitivity"
+          },
+          "smoking": {
+            "type": "boolean",
+            "description": "Whether the volunteer smokes"
+          }
+        },
+        "required": ["volunteer_id", "preferred_name", "last_name", "flags", "email", "scent_sensitivity", "smoking"]
+      },
+      "BookingClientRelation": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Booking"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Client"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "Whether this client is the primary client for the booking"
+          }
+        },
+        "required": ["booking_id", "client_id", "is_primary"]
+      },
+      "BookingVolunteerRelation": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Booking"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Volunteer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Possible", "Left Voicemail", "Emailed", "Assigned", "Unavailable"],
+            "description": "Status of the volunteer for this booking"
+          }
+        },
+        "required": ["booking_id", "volunteer_id", "status"]
+      },
+      "EventAttendee": {
+        "type": "object",
+        "properties": {
+          "event_booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to EventBooking"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to User, nullable for external attendees"
+          },
+          "external_name": {
+            "type": ["string", "null"],
+            "description": "Name of external attendee, nullable for system users"
+          },
+          "user_type": {
+            "type": "string",
+            "enum": ["Client", "Volunteer", "Staff", "External"],
+            "description": "Type of user attending the event"
+          }
+        },
+        "required": ["event_booking_id", "user_type"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "user_type": { "enum": ["External"] } }
+            },
+            "then": {
+              "required": ["external_name"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "user_type": { "enum": ["Client", "Volunteer", "Staff"] } }
+            },
+            "then": {
+              "required": ["user_id"]
+            }
+          }
+        ]
+      },
+      "VolunteerAbsence": {
+        "type": "object",
+        "properties": {
+          "absence_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the absence"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Volunteer"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the absence"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "End date of the absence"
+          },
+          "is_one_day": {
+            "type": "boolean",
+            "description": "Whether the absence is for a single day"
+          },
+          "reason": {
+            "type": ["string", "null"],
+            "description": "Reason for the absence, optional"
+          }
+        },
+        "required": ["absence_id", "volunteer_id", "start_date", "end_date", "is_one_day"]
+      },
+      "JobHistory": {
+        "type": "object",
+        "properties": {
+          "history_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the history entry"
+          },
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Booking"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to database user"
+          },
+          "action": {
+            "type": "string",
+            "description": "Text description of the action taken"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the action occurred"
+          }
+        },
+        "required": ["history_id", "booking_id", "user_id", "action", "timestamp"]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "bookings": {
+        "type": "array",
+        "items": {
+          "oneOf": [{ "$ref": "#/definitions/ServiceProgramBooking" }, { "$ref": "#/definitions/EventBooking" }]
+        }
+      },
+      "clients": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Client"
+        }
+      },
+      "volunteers": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Volunteer"
+        }
+      },
+      "booking_client_relations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/BookingClientRelation"
+        }
+      },
+      "booking_volunteer_relations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/BookingVolunteerRelation"
+        }
+      },
+      "event_attendees": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventAttendee"
+        }
+      },
+      "volunteer_absences": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/VolunteerAbsence"
+        }
+      },
+      "job_history": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/JobHistory"
+        }
+      }
+    }
+  }
+},
+{
+  "donations": {
+    "title": "Donation Management System",
+    "description": "JSON Schema for donation management system entities",
+    "definitions": {
+      "Donation": {
+        "type": "object",
+        "properties": {
+          "donation_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the donation"
+          },
+          "donation_type": {
+            "type": "string",
+            "enum": ["Personal", "Corporate", "Grant", "Bequeathed", "Other"],
+            "description": "Type of donation"
+          },
+          "donor_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Donor"
+          },
+          "donation_amount": {
+            "type": "number",
+            "description": "Amount of the donation with precision to cents"
+          },
+          "eligible_amount": {
+            "type": "number",
+            "description": "Eligible amount for tax purposes, defaults to donation_amount"
+          },
+          "value_advantage": {
+            "type": "number",
+            "description": "Value advantage amount, defaults to 0.00"
+          },
+          "payment_type": {
+            "type": "string",
+            "enum": ["Cheque", "Cash", "Third Party", "Direct Debit", "Other"],
+            "description": "Method of payment"
+          },
+          "receipt_type": {
+            "type": "string",
+            "enum": ["Required", "Sent via CanadaHelps", "Not Needed"],
+            "description": "Type of receipt required"
+          },
+          "receipt_sent_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when receipt was sent, nullable"
+          },
+          "received_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when donation was received, defaults to current date"
+          },
+          "processed_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when donation was processed, defaults to current date"
+          },
+          "deposit_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when donation was deposited, defaults to current date"
+          },
+          "notes": {
+            "type": ["string", "null"],
+            "description": "Additional notes about the donation, optional"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donation record was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donation record was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Foreign key reference to User who created the record"
+          },
+          "updated_by": {
+            "type": "integer",
+            "description": "Foreign key reference to User who last updated the record"
+          }
+        },
+        "required": [
+          "donation_id",
+          "donation_type",
+          "donor_id",
+          "donation_amount",
+          "eligible_amount",
+          "value_advantage",
+          "payment_type",
+          "receipt_type",
+          "received_date",
+          "processed_date",
+          "deposit_date",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "updated_by"
+        ]
+      },
+      "Donor": {
+        "type": "object",
+        "properties": {
+          "donor_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the donor"
+          },
+          "donor_type": {
+            "type": "string",
+            "enum": ["Individual", "Organization"],
+            "description": "Type of donor"
+          },
+          "first_name": {
+            "type": ["string", "null"],
+            "description": "First name of the donor, for individuals"
+          },
+          "last_name": {
+            "type": ["string", "null"],
+            "description": "Last name of the donor, for individuals"
+          },
+          "organization_name": {
+            "type": ["string", "null"],
+            "description": "Name of the organization, for organizations"
+          },
+          "email": {
+            "type": ["string", "null"],
+            "format": "email",
+            "description": "Email address of the donor"
+          },
+          "phone": {
+            "type": ["string", "null"],
+            "description": "Phone number of the donor"
+          },
+          "address_street": {
+            "type": ["string", "null"],
+            "description": "Street address of the donor"
+          },
+          "address_city": {
+            "type": ["string", "null"],
+            "description": "City of the donor's address"
+          },
+          "address_province": {
+            "type": ["string", "null"],
+            "description": "Province/state of the donor's address"
+          },
+          "address_postal_code": {
+            "type": ["string", "null"],
+            "description": "Postal/zip code of the donor's address"
+          },
+          "tax_receipt_address": {
+            "type": "boolean",
+            "description": "Indicates if address can be used for tax receipts"
+          },
+          "is_anonymous": {
+            "type": "boolean",
+            "description": "Indicates if the donor wishes to remain anonymous"
+          },
+          "donation_history_summary": {
+            "type": "object",
+            "description": "Virtual field - calculated summary of donation history",
+            "properties": {
+              "total_donations": {
+                "type": "number",
+                "description": "Total amount donated"
+              },
+              "donation_count": {
+                "type": "integer",
+                "description": "Number of donations made"
+              },
+              "first_donation_date": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Date of first donation"
+              },
+              "last_donation_date": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Date of most recent donation"
+              },
+              "average_donation": {
+                "type": "number",
+                "description": "Average donation amount"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donor record was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the donor record was last updated"
+          }
+        },
+        "required": ["donor_id", "donor_type", "tax_receipt_address", "is_anonymous", "created_at", "updated_at"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "donor_type": { "enum": ["Individual"] } }
+            },
+            "then": {
+              "required": ["first_name", "last_name"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "donor_type": { "enum": ["Organization"] } }
+            },
+            "then": {
+              "required": ["organization_name"]
+            }
+          }
+        ]
+      },
+      "Receipt": {
+        "type": "object",
+        "properties": {
+          "receipt_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the receipt"
+          },
+          "donation_id": {
+            "type": "integer",
+            "description": "Foreign key reference to Donation"
+          },
+          "receipt_number": {
+            "type": "string",
+            "description": "Unique receipt number"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the receipt was issued"
+          },
+          "sent_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the receipt was sent, nullable"
+          },
+          "sent_method": {
+            "type": "string",
+            "enum": ["Email", "Mail", "In Person"],
+            "description": "Method used to send the receipt"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Pending", "Sent", "Void"],
+            "description": "Current status of the receipt"
+          },
+          "pdf_file_path": {
+            "type": "string",
+            "description": "Path to the stored receipt PDF file"
+          }
+        },
+        "required": [
+          "receipt_id",
+          "donation_id",
+          "receipt_number",
+          "issue_date",
+          "sent_method",
+          "status",
+          "pdf_file_path"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "donations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Donation"
+        }
+      },
+      "donors": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Donor"
+        }
+      },
+      "receipts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Receipt"
+        }
+      }
+    }
+  }
+},
+{
+  "events": {
+    "title": "Event Management System",
+    "description": "JSON Schema for event management system entities",
+    "definitions": {
+      "Event": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the event"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the event"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": ["Program", "Other"],
+            "description": "Type of event"
+          },
+          "event_category": {
+            "type": "integer",
+            "description": "Foreign key reference to EventCategory"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the event"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the event"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "End date of the event, null for single-day events"
+          },
+          "start_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "Start time of the event"
+          },
+          "end_time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "End time of the event"
+          },
+          "location_name": {
+            "type": "string",
+            "description": "Name of the event location"
+          },
+          "location_address": {
+            "type": "string",
+            "description": "Address of the event location"
+          },
+          "location_city": {
+            "type": "string",
+            "description": "City of the event location"
+          },
+          "max_attendees": {
+            "type": ["integer", "null"],
+            "description": "Maximum number of attendees, null if unlimited"
+          },
+          "max_volunteers": {
+            "type": ["integer", "null"],
+            "description": "Maximum number of volunteers, null if unlimited"
+          },
+          "is_recurring": {
+            "type": "boolean",
+            "description": "Whether this is a recurring event"
+          },
+          "recurrence_pattern": {
+            "type": ["object", "null"],
+            "description": "JSON object defining the recurrence pattern, null for non-recurring events"
+          },
+          "registration_required": {
+            "type": "boolean",
+            "description": "Whether registration is required for this event"
+          },
+          "registration_deadline": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Deadline for registration, null if no deadline"
+          },
+          "registration_url": {
+            "type": ["string", "null"],
+            "description": "URL for external registration, null if not applicable"
+          },
+          "contact_person": {
+            "type": "string",
+            "description": "Name of the contact person for the event"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the contact person"
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "Phone number of the contact person"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the event"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Planned", "Active", "Completed", "Cancelled"],
+            "description": "Current status of the event"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who created the event"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the event (calculated field based on start_date)"
+          }
+        },
+        "required": [
+          "event_id",
+          "name",
+          "event_type",
+          "event_category",
+          "description",
+          "start_date",
+          "start_time",
+          "end_time",
+          "location_name",
+          "location_address",
+          "location_city",
+          "is_recurring",
+          "registration_required",
+          "contact_person",
+          "contact_email",
+          "status",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "fiscal_year"
+        ]
+      },
+      "EventCategory": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the category"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "parent_category_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to parent category, null for top-level categories"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Program", "Other"],
+            "description": "Type of category"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the category"
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Order in which to display this category"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether this category is active"
+          }
+        },
+        "required": ["category_id", "name", "type", "display_order", "is_active"]
+      },
+      "EventAttendee": {
+        "type": "object",
+        "properties": {
+          "attendee_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the attendee record"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to the user, null for external attendees"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name of the attendee (for external attendees)"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name of the attendee (for external attendees)"
+          },
+          "email": {
+            "type": ["string", "null"],
+            "format": "email",
+            "description": "Email of the attendee, null if not provided"
+          },
+          "phone": {
+            "type": ["string", "null"],
+            "description": "Phone number of the attendee, null if not provided"
+          },
+          "registration_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the attendee registered"
+          },
+          "attendance_status": {
+            "type": "string",
+            "enum": ["Registered", "Attended", "No-Show", "Cancelled"],
+            "description": "Status of the attendee's attendance"
+          },
+          "check_in_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when the attendee checked in, null if not checked in"
+          },
+          "check_out_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when the attendee checked out, null if not checked out"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the attendee"
+          },
+          "special_needs": {
+            "type": "string",
+            "description": "Special needs or accommodations required by the attendee"
+          },
+          "is_external": {
+            "type": "boolean",
+            "description": "Whether this is an external attendee (not in the system)"
+          }
+        },
+        "required": ["attendee_id", "event_id", "registration_date", "attendance_status", "is_external"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "is_external": { "enum": [true] } }
+            },
+            "then": {
+              "required": ["first_name", "last_name"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "is_external": { "enum": [false] } }
+            },
+            "then": {
+              "required": ["user_id"]
+            }
+          }
+        ]
+      },
+      "EventVolunteer": {
+        "type": "object",
+        "properties": {
+          "volunteer_assignment_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the volunteer assignment"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the volunteer user"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the volunteer at the event"
+          },
+          "assignment_status": {
+            "type": "string",
+            "enum": ["Invited", "Confirmed", "Declined", "No-Show"],
+            "description": "Status of the volunteer assignment"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start time of the volunteer's shift"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End time of the volunteer's shift"
+          },
+          "hours_worked": {
+            "type": "number",
+            "description": "Hours worked by the volunteer (calculated or manually entered)"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the volunteer assignment"
+          }
+        },
+        "required": [
+          "volunteer_assignment_id",
+          "event_id",
+          "volunteer_id",
+          "role",
+          "assignment_status",
+          "start_time",
+          "end_time",
+          "hours_worked"
+        ]
+      },
+      "EventTask": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the task"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the task"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the task"
+          },
+          "assigned_to": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to the assigned user, null if unassigned"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Due date for the task"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Not Started", "In Progress", "Completed", "Cancelled"],
+            "description": "Current status of the task"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["Low", "Medium", "High"],
+            "description": "Priority level of the task"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the task"
+          }
+        },
+        "required": ["task_id", "event_id", "name", "due_date", "status", "priority"]
+      },
+      "EventResource": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the resource"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the resource"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Document", "Image", "Link", "Other"],
+            "description": "Type of resource"
+          },
+          "file_path": {
+            "type": ["string", "null"],
+            "description": "Path to the resource file, null if not applicable"
+          },
+          "url": {
+            "type": ["string", "null"],
+            "description": "URL of the resource, null if not applicable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the resource"
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the resource is publicly accessible"
+          },
+          "upload_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the resource was uploaded"
+          },
+          "uploaded_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who uploaded the resource"
+          }
+        },
+        "required": [
+          "resource_id",
+          "event_id",
+          "name",
+          "type",
+          "description",
+          "is_public",
+          "upload_date",
+          "uploaded_by"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "type": { "enum": ["Document", "Image"] } }
+            },
+            "then": {
+              "required": ["file_path"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "enum": ["Link"] } }
+            },
+            "then": {
+              "required": ["url"]
+            }
+          }
+        ]
+      },
+      "EventFeedback": {
+        "type": "object",
+        "properties": {
+          "feedback_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the feedback"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to the user, null for anonymous feedback"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Rating from 1 to 5"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Feedback comments"
+          },
+          "submission_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the feedback was submitted"
+          },
+          "is_anonymous": {
+            "type": "boolean",
+            "description": "Whether the feedback is anonymous"
+          }
+        },
+        "required": ["feedback_id", "event_id", "rating", "submission_date", "is_anonymous"],
+        "allOf": [
+          {
+            "if": {
+              "properties": { "is_anonymous": { "enum": [false] } }
+            },
+            "then": {
+              "required": ["user_id"]
+            }
+          }
+        ]
+      },
+      "EventMetrics": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "attendee_count": {
+            "type": "integer",
+            "description": "Count of attendees (calculated)"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Count of volunteers (calculated)"
+          },
+          "total_volunteer_hours": {
+            "type": "number",
+            "description": "Total volunteer hours (calculated)"
+          },
+          "attendance_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Attendance rate calculated as attended/registered"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the event"
+          }
+        },
+        "required": [
+          "event_id",
+          "attendee_count",
+          "volunteer_count",
+          "total_volunteer_hours",
+          "attendance_rate",
+          "fiscal_year"
+        ]
+      },
+      "CategoryMetrics": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event category"
+          },
+          "event_count": {
+            "type": "integer",
+            "description": "Count of events (calculated)"
+          },
+          "total_attendees": {
+            "type": "integer",
+            "description": "Total attendees (calculated)"
+          },
+          "total_volunteers": {
+            "type": "integer",
+            "description": "Total volunteers (calculated)"
+          },
+          "total_volunteer_hours": {
+            "type": "number",
+            "description": "Total volunteer hours (calculated)"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          }
+        },
+        "required": [
+          "category_id",
+          "event_count",
+          "total_attendees",
+          "total_volunteers",
+          "total_volunteer_hours",
+          "fiscal_year"
+        ]
+      },
+      "FiscalYearMetrics": {
+        "type": "object",
+        "properties": {
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          },
+          "total_events": {
+            "type": "integer",
+            "description": "Total events (calculated)"
+          },
+          "total_attendees": {
+            "type": "integer",
+            "description": "Total attendees (calculated)"
+          },
+          "total_volunteers": {
+            "type": "integer",
+            "description": "Total volunteers (calculated)"
+          },
+          "total_volunteer_hours": {
+            "type": "number",
+            "description": "Total volunteer hours (calculated)"
+          },
+          "program_event_count": {
+            "type": "integer",
+            "description": "Count of program events (calculated)"
+          },
+          "other_event_count": {
+            "type": "integer",
+            "description": "Count of other events (calculated)"
+          }
+        },
+        "required": [
+          "fiscal_year",
+          "total_events",
+          "total_attendees",
+          "total_volunteers",
+          "total_volunteer_hours",
+          "program_event_count",
+          "other_event_count"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "events": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Event"
+        }
+      },
+      "event_categories": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventCategory"
+        }
+      },
+      "event_attendees": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventAttendee"
+        }
+      },
+      "event_volunteers": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventVolunteer"
+        }
+      },
+      "event_tasks": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventTask"
+        }
+      },
+      "event_resources": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventResource"
+        }
+      },
+      "event_feedback": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventFeedback"
+        }
+      },
+      "event_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/EventMetrics"
+        }
+      },
+      "category_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CategoryMetrics"
+        }
+      },
+      "fiscal_year_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/FiscalYearMetrics"
+        }
+      }
+    }
+  }
+},
+{
+  "homepage": {
+    "title": "Homepage Components Schema",
+    "description": "JSON Schema for the homepage components including Journal, UpcomingJobs, and Navigation",
+    "definitions": {
+      "Journal": {
+        "type": "object",
+        "required": [
+          "journal_entry_id",
+          "title",
+          "content",
+          "author_id",
+          "creation_date",
+          "importance_level",
+          "is_pinned",
+          "visibility",
+          "comments_enabled"
+        ],
+        "properties": {
+          "journal_entry_id": {
+            "type": "integer",
+            "description": "Primary key for the journal entry"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the journal entry"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the journal entry"
+          },
+          "author_id": {
+            "type": "integer",
+            "description": "Foreign key to the User who created the entry"
+          },
+          "creation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the entry was created"
+          },
+          "last_edited_date": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Timestamp when the entry was last edited"
+          },
+          "last_edited_by": {
+            "type": ["integer", "null"],
+            "description": "Foreign key to the User who last edited the entry"
+          },
+          "importance_level": {
+            "type": "string",
+            "enum": ["Normal", "Important", "Urgent"],
+            "description": "Importance level of the journal entry"
+          },
+          "expiry_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the entry expires"
+          },
+          "is_pinned": {
+            "type": "boolean",
+            "description": "Whether the entry is pinned to the top"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": ["AllStaff", "Admins", "AllUsers"],
+            "description": "Who can see this journal entry"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with the journal entry"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "filename", "file_path", "file_type", "upload_date"],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "description": "Unique identifier for the attachment"
+                },
+                "filename": {
+                  "type": "string",
+                  "description": "Original filename of the attachment"
+                },
+                "file_path": {
+                  "type": "string",
+                  "description": "Path to the stored file"
+                },
+                "file_type": {
+                  "type": "string",
+                  "description": "MIME type of the file"
+                },
+                "file_size": {
+                  "type": "integer",
+                  "description": "Size of the file in bytes"
+                },
+                "upload_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the file was uploaded"
+                }
+              }
+            },
+            "description": "Attachments for the journal entry"
+          },
+          "comments_enabled": {
+            "type": "boolean",
+            "description": "Whether comments are enabled for this entry"
+          }
+        }
+      },
+      "JournalComment": {
+        "type": "object",
+        "required": ["comment_id", "journal_entry_id", "author_id", "content", "creation_date", "is_deleted"],
+        "properties": {
+          "comment_id": {
+            "type": "integer",
+            "description": "Primary key for the comment"
+          },
+          "journal_entry_id": {
+            "type": "integer",
+            "description": "Foreign key to the Journal entry"
+          },
+          "author_id": {
+            "type": "integer",
+            "description": "Foreign key to the User who created the comment"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the comment"
+          },
+          "creation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the comment was created"
+          },
+          "last_edited_date": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Timestamp when the comment was last edited"
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "description": "Whether the comment has been deleted"
+          }
+        }
+      },
+      "UpcomingJob": {
+        "type": "object",
+        "required": [
+          "booking_id",
+          "booking_type",
+          "service_type",
+          "client_name",
+          "date",
+          "start_time",
+          "duration",
+          "status",
+          "location",
+          "is_assigned"
+        ],
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key to the Booking"
+          },
+          "booking_type": {
+            "type": "string",
+            "description": "Type of booking"
+          },
+          "service_type": {
+            "type": "string",
+            "description": "Type of service"
+          },
+          "client_name": {
+            "type": "string",
+            "description": "Name of the client"
+          },
+          "volunteer_name": {
+            "type": ["string", "null"],
+            "description": "Name of the volunteer, if assigned"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the job"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "time",
+            "description": "Start time of the job"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Duration of the job in minutes"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the job"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location of the job"
+          },
+          "is_assigned": {
+            "type": "boolean",
+            "description": "Whether the job is assigned to a volunteer"
+          },
+          "days_until": {
+            "type": "integer",
+            "description": "Number of days until the job"
+          },
+          "priority_level": {
+            "type": "string",
+            "description": "Priority level calculated based on assignment status and proximity"
+          }
+        }
+      },
+      "NavigationMenuItem": {
+        "type": "object",
+        "required": ["menu_item_id", "name", "display_name", "url", "order", "is_visible"],
+        "properties": {
+          "menu_item_id": {
+            "type": "integer",
+            "description": "Primary key for the menu item"
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal name of the menu item"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name of the menu item"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for the menu item"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon for the menu item"
+          },
+          "parent_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key to parent menu item for nested menus"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Display order of the menu item"
+          },
+          "is_visible": {
+            "type": "boolean",
+            "description": "Whether the menu item is visible"
+          },
+          "required_permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Permissions required to see this menu item"
+          },
+          "badge_counter_source": {
+            "type": ["string", "null"],
+            "description": "Reference to counter function for badge display"
+          }
+        }
+      },
+      "UserDashboardPreference": {
+        "type": "object",
+        "required": ["preference_id", "user_id", "widget_type", "is_visible", "order", "size"],
+        "properties": {
+          "preference_id": {
+            "type": "integer",
+            "description": "Primary key for the preference"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key to the User"
+          },
+          "widget_type": {
+            "type": "string",
+            "enum": ["Journal", "UpcomingJobs", "QuickLinks", "Stats", "Calendar"],
+            "description": "Type of widget"
+          },
+          "is_visible": {
+            "type": "boolean",
+            "description": "Whether the widget is visible"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Display order of the widget"
+          },
+          "size": {
+            "type": "string",
+            "enum": ["Small", "Medium", "Large"],
+            "description": "Size of the widget"
+          },
+          "custom_settings": {
+            "type": "object",
+            "description": "Widget-specific settings"
+          }
+        }
+      },
+      "QuickLink": {
+        "type": "object",
+        "required": ["link_id", "name", "url", "category", "is_system", "order"],
+        "properties": {
+          "link_id": {
+            "type": "integer",
+            "description": "Primary key for the quick link"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the quick link"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for the quick link"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon for the quick link"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the quick link"
+          },
+          "is_system": {
+            "type": "boolean",
+            "description": "Whether this is a system-defined link"
+          },
+          "created_by": {
+            "type": ["integer", "null"],
+            "description": "Foreign key to the User who created the link"
+          },
+          "visible_to_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Roles that can see this quick link"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Display order of the quick link"
+          }
+        }
+      },
+      "DashboardStat": {
+        "type": "object",
+        "required": [
+          "stat_id",
+          "name",
+          "description",
+          "calculation_method",
+          "display_format",
+          "refresh_interval",
+          "is_enabled"
+        ],
+        "properties": {
+          "stat_id": {
+            "type": "integer",
+            "description": "Primary key for the stat"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the stat"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the stat"
+          },
+          "calculation_method": {
+            "type": "string",
+            "description": "Reference to calculation function"
+          },
+          "display_format": {
+            "type": "string",
+            "description": "Format for displaying the stat"
+          },
+          "icon": {
+            "type": ["string", "null"],
+            "description": "Icon for the stat"
+          },
+          "color": {
+            "type": ["string", "null"],
+            "description": "Color for the stat"
+          },
+          "visible_to_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Roles that can see this stat"
+          },
+          "refresh_interval": {
+            "type": "integer",
+            "description": "Refresh interval in minutes"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether the stat is enabled"
+          }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "journals": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Journal"
+        }
+      },
+      "journal_comments": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/JournalComment"
+        }
+      },
+      "upcoming_jobs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UpcomingJob"
+        }
+      },
+      "navigation_menu": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NavigationMenuItem"
+        }
+      },
+      "user_dashboard_preferences": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UserDashboardPreference"
+        }
+      },
+      "quick_links": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/QuickLink"
+        }
+      },
+      "dashboard_stats": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/DashboardStat"
+        }
+      }
+    }
+  }
+},
+{
+  "notifications": {
+    "title": "Core Notification Components",
+    "description": "JSON Schema for notification system components",
+    "definitions": {
+      "NotificationType": {
+        "type": "object",
+        "properties": {
+          "notification_type_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the notification type"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the notification type (e.g., 'CRC Renewal', 'Driver Abstract Renewal')"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the notification type"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["Credential", "Booking", "System", "Custom"],
+            "description": "Category of the notification"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["Info", "Warning", "Critical"],
+            "description": "Severity level of the notification"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Path to the icon file representing this notification type"
+          },
+          "color_code": {
+            "type": "string",
+            "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+            "description": "Hex color code for visual representation"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether this notification type is currently active"
+          },
+          "affects_booking": {
+            "type": "boolean",
+            "description": "Whether this notification affects booking capabilities"
+          },
+          "affected_services": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of service codes affected by this notification"
+          },
+          "auto_status_change": {
+            "type": "boolean",
+            "description": "Whether this notification automatically changes user status"
+          },
+          "new_status": {
+            "type": ["string", "null"],
+            "description": "New status to set when auto_status_change is true"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this notification type was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this notification type was last updated"
+          }
+        },
+        "required": [
+          "notification_type_id",
+          "name",
+          "category",
+          "severity",
+          "is_active",
+          "affects_booking",
+          "auto_status_change",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "NotificationTemplate": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the template"
+          },
+          "notification_type_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationType"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the notification template"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject line for email notifications"
+          },
+          "body_text": {
+            "type": "string",
+            "description": "Plain text version of the notification content"
+          },
+          "body_html": {
+            "type": "string",
+            "description": "HTML formatted version of the notification content"
+          },
+          "delivery_method": {
+            "type": "string",
+            "enum": ["Email", "SMS", "InApp", "Multiple"],
+            "description": "Method(s) used to deliver this notification"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "Whether this is the default template for its notification type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this template was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this template was last updated"
+          }
+        },
+        "required": [
+          "template_id",
+          "notification_type_id",
+          "name",
+          "subject",
+          "body_text",
+          "delivery_method",
+          "is_default",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "NotificationRule": {
+        "type": "object",
+        "properties": {
+          "rule_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the rule"
+          },
+          "notification_type_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationType"
+          },
+          "template_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationTemplate"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the notification rule"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the rule"
+          },
+          "trigger_type": {
+            "type": "string",
+            "enum": ["TimeBeforeExpiry", "TimeAfterExpiry", "Status", "Custom"],
+            "description": "Type of trigger that activates this rule"
+          },
+          "trigger_value": {
+            "type": "integer",
+            "description": "Value associated with the trigger (e.g., number of days/weeks)"
+          },
+          "trigger_unit": {
+            "type": "string",
+            "enum": ["Days", "Weeks", "Months"],
+            "description": "Unit of time for the trigger value"
+          },
+          "recipient_type": {
+            "type": "string",
+            "enum": ["User", "Admin", "Coordinator", "Custom"],
+            "description": "Type of recipient for the notification"
+          },
+          "custom_recipients": {
+            "type": ["array", "null"],
+            "items": {
+              "type": ["integer", "string"]
+            },
+            "description": "Array of user IDs or roles for custom recipients"
+          },
+          "is_recurring": {
+            "type": "boolean",
+            "description": "Whether this notification recurs multiple times"
+          },
+          "recurrence_interval": {
+            "type": ["integer", "null"],
+            "description": "Interval between recurring notifications"
+          },
+          "recurrence_unit": {
+            "type": ["string", "null"],
+            "enum": ["Days", "Weeks", "Months", null],
+            "description": "Unit of time for recurrence interval"
+          },
+          "max_recurrences": {
+            "type": ["integer", "null"],
+            "description": "Maximum number of times this notification should recur"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether this rule is currently active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this rule was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this rule was last updated"
+          }
+        },
+        "required": [
+          "rule_id",
+          "notification_type_id",
+          "template_id",
+          "name",
+          "trigger_type",
+          "trigger_value",
+          "trigger_unit",
+          "recipient_type",
+          "is_recurring",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "NotificationInstance": {
+        "type": "object",
+        "properties": {
+          "notification_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the notification instance"
+          },
+          "rule_id": {
+            "type": "integer",
+            "description": "Foreign key reference to NotificationRule"
+          },
+          "user_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to User, nullable for system notifications"
+          },
+          "related_entity_type": {
+            "type": "string",
+            "description": "Type of entity this notification relates to (e.g., 'Credential', 'Booking')"
+          },
+          "related_entity_id": {
+            "type": "integer",
+            "description": "ID of the related entity"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Pending", "Sent", "Failed", "Acknowledged"],
+            "description": "Current status of the notification"
+          },
+          "scheduled_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when this notification is scheduled to be sent"
+          },
+          "sent_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when this notification was actually sent"
+          },
+          "acknowledged_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time when this notification was acknowledged"
+          },
+          "acknowledged_by": {
+            "type": ["integer", "null"],
+            "description": "User ID of who acknowledged the notification"
+          },
+          "delivery_method": {
+            "type": "string",
+            "enum": ["Email", "SMS", "InApp", "Multiple"],
+            "description": "Method used to deliver this notification"
+          },
+          "delivery_details": {
+            "type": "object",
+            "description": "Details about the delivery (e.g., email address, phone number)"
+          },
+          "error_message": {
+            "type": ["string", "null"],
+            "description": "Error message if delivery failed"
+          },
+          "retry_count": {
+            "type": "integer",
+            "default": 0,
+            "description": "Number of delivery retry attempts"
+          },
+          "next_retry_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Time for the next retry attempt"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this notification instance was created"
+          }
+        },
+        "required": [
+          "notification_id",
+          "rule_id",
+          "related_entity_type",
+          "related_entity_id",
+          "status",
+          "scheduled_time",
+          "delivery_method",
+          "delivery_details",
+          "retry_count",
+          "created_at"
+        ]
+      },
+      "UserNotificationPreference": {
+        "type": "object",
+        "properties": {
+          "preference_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the preference"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to User"
+          },
+          "notification_type_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key reference to NotificationType, null for global preferences"
+          },
+          "delivery_method": {
+            "type": "string",
+            "enum": ["Email", "SMS", "InApp", "Multiple", "None"],
+            "description": "Preferred delivery method for notifications"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether notifications of this type are enabled for this user"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this preference was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this preference was last updated"
+          }
+        },
+        "required": ["preference_id", "user_id", "delivery_method", "is_enabled", "created_at", "updated_at"]
+      },
+      "UserCredential": {
+        "type": "object",
+        "properties": {
+          "credential_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the credential"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to User"
+          },
+          "credential_type": {
+            "type": "string",
+            "enum": ["CRC", "DriversAbstract", "Training", "Other"],
+            "description": "Type of credential"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the credential was issued"
+          },
+          "expiry_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the credential expires"
+          },
+          "document_path": {
+            "type": "string",
+            "description": "Path to the stored credential document"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Valid", "Pending", "Expired", "Revoked"],
+            "description": "Current status of the credential"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the credential"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this credential was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this credential was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "User ID of who created this credential record"
+          },
+          "updated_by": {
+            "type": "integer",
+            "description": "User ID of who last updated this credential record"
+          }
+        },
+        "required": [
+          "credential_id",
+          "user_id",
+          "credential_type",
+          "issue_date",
+          "expiry_date",
+          "status",
+          "created_at",
+          "updated_at",
+          "created_by"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "notification_types": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationType"
+        }
+      },
+      "notification_templates": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationTemplate"
+        }
+      },
+      "notification_rules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationRule"
+        }
+      },
+      "notification_instances": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/NotificationInstance"
+        }
+      },
+      "user_notification_preferences": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UserNotificationPreference"
+        }
+      },
+      "user_credentials": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/UserCredential"
+        }
+      }
+    }
+  }
+},
+{
+  "programs": {
+    "title": "Program Management System",
+    "description": "JSON Schema for program management system entities",
+    "definitions": {
+      "Program": {
+        "type": "object",
+        "properties": {
+          "program_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the program"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the program"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique identifier code for the program"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the program"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Planned"],
+            "description": "Current status of the program"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the program started"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the program ended, null for ongoing programs"
+          },
+          "coordinator_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program coordinator"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Contact email for the program"
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "Contact phone number for the program"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the program"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the program was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the program was last updated"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who created the program"
+          },
+          "has_events": {
+            "type": "boolean",
+            "description": "Whether this program has associated events"
+          },
+          "has_bookings": {
+            "type": "boolean",
+            "description": "Whether this program has associated bookings"
+          },
+          "has_map_function": {
+            "type": "boolean",
+            "description": "Whether this program uses the map function"
+          },
+          "program_type": {
+            "type": "string",
+            "enum": ["Service", "Support", "Community"],
+            "description": "Type of program"
+          }
+        },
+        "required": [
+          "program_id",
+          "name",
+          "code",
+          "description",
+          "status",
+          "start_date",
+          "coordinator_id",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "has_events",
+          "has_bookings",
+          "has_map_function",
+          "program_type"
+        ]
+      },
+      "ProgramParticipant": {
+        "type": "object",
+        "properties": {
+          "participant_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the participant"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the user"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["Client", "Volunteer", "Staff", "Other"],
+            "description": "Role of the participant in the program"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the participant started in the program"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the participant ended in the program, null for active participants"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Waitlisted", "Completed"],
+            "description": "Current status of the participant"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the participant"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the participant record was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the participant record was last updated"
+          }
+        },
+        "required": [
+          "participant_id",
+          "program_id",
+          "user_id",
+          "role",
+          "start_date",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ProgramBooking": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the booking"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "booking_type": {
+            "type": "string",
+            "description": "Type of booking"
+          },
+          "duration_hours": {
+            "type": "number",
+            "description": "Duration of the booking in hours"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client"
+          },
+          "volunteer_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the volunteer"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the booking (calculated field)"
+          }
+        },
+        "required": [
+          "booking_id",
+          "program_id",
+          "booking_type",
+          "duration_hours",
+          "client_id",
+          "volunteer_id",
+          "fiscal_year"
+        ]
+      },
+      "ProgramEvent": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Type of event"
+          },
+          "attendance_count": {
+            "type": "integer",
+            "description": "Number of attendees at the event"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Number of volunteers at the event"
+          },
+          "duration_hours": {
+            "type": "number",
+            "description": "Duration of the event in hours"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the event (calculated field)"
+          }
+        },
+        "required": [
+          "event_id",
+          "program_id",
+          "event_type",
+          "attendance_count",
+          "volunteer_count",
+          "duration_hours",
+          "fiscal_year"
+        ]
+      },
+      "ProgramResource": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the resource"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the resource"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Document", "Image", "Link", "Other"],
+            "description": "Type of resource"
+          },
+          "file_path": {
+            "type": ["string", "null"],
+            "description": "Path to the resource file, null if not applicable"
+          },
+          "url": {
+            "type": ["string", "null"],
+            "description": "URL of the resource, null if not applicable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the resource"
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the resource is publicly accessible"
+          },
+          "upload_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the resource was uploaded"
+          },
+          "uploaded_by": {
+            "type": "integer",
+            "description": "Foreign key reference to the user who uploaded the resource"
+          }
+        },
+        "required": [
+          "resource_id",
+          "program_id",
+          "name",
+          "type",
+          "description",
+          "is_public",
+          "upload_date",
+          "uploaded_by"
+        ]
+      },
+      "ProgramMetric": {
+        "type": "object",
+        "properties": {
+          "metric_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the metric"
+          },
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "metric_name": {
+            "type": "string",
+            "description": "Name of the metric"
+          },
+          "metric_value": {
+            "type": "number",
+            "description": "Value of the metric"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metric"
+          },
+          "quarter": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "description": "Quarter (1-4) for the metric"
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month (1-12) for the metric"
+          },
+          "calculation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the metric was calculated"
+          }
+        },
+        "required": ["metric_id", "program_id", "metric_name", "metric_value", "fiscal_year", "calculation_date"]
+      },
+      "AmbassadorActivity": {
+        "type": "object",
+        "properties": {
+          "activity_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the activity"
+          },
+          "ambassador_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the ambassador user"
+          },
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the ambassador at the event"
+          },
+          "hours": {
+            "type": "number",
+            "description": "Hours contributed by the ambassador"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the activity"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the activity (calculated field)"
+          }
+        },
+        "required": ["activity_id", "ambassador_id", "event_id", "role", "hours", "fiscal_year"]
+      },
+      "CompanionPet": {
+        "type": "object",
+        "properties": {
+          "pet_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the pet"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the pet"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of pet"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the pet"
+          },
+          "image_path": {
+            "type": ["string", "null"],
+            "description": "Path to the pet's image, null if not available"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Available", "Assigned", "Retired"],
+            "description": "Current status of the pet"
+          },
+          "acquisition_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the pet was acquired"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the pet"
+          }
+        },
+        "required": ["pet_id", "name", "type", "description", "status", "acquisition_date"]
+      },
+      "CompanionPetAssignment": {
+        "type": "object",
+        "properties": {
+          "assignment_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the assignment"
+          },
+          "pet_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the pet"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the assignment started"
+          },
+          "end_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date when the assignment ended, null for current assignments"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the assignment"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year of the assignment (calculated field)"
+          }
+        },
+        "required": ["assignment_id", "pet_id", "client_id", "start_date", "fiscal_year"]
+      },
+      "CulturalEvent": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the event"
+          },
+          "culture": {
+            "type": "string",
+            "description": "Culture represented by the event"
+          },
+          "cultural_significance": {
+            "type": "string",
+            "description": "Cultural significance of the event"
+          },
+          "language": {
+            "type": "string",
+            "description": "Primary language of the event"
+          },
+          "special_requirements": {
+            "type": "string",
+            "description": "Special requirements for the event"
+          }
+        },
+        "required": ["event_id", "culture", "cultural_significance", "language"]
+      },
+      "SnowAngelsLocation": {
+        "type": "object",
+        "properties": {
+          "location_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the location"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of the location"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the location"
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the location"
+          },
+          "service_area": {
+            "type": "string",
+            "description": "Service area of the location"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["Low", "Medium", "High"],
+            "description": "Priority level of the location"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the location"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether the location is currently active"
+          }
+        },
+        "required": [
+          "location_id",
+          "client_id",
+          "address",
+          "latitude",
+          "longitude",
+          "service_area",
+          "priority",
+          "is_active"
+        ]
+      },
+      "BetterAtHomeClient": {
+        "type": "object",
+        "properties": {
+          "bah_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the Better at Home client"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the client user"
+          },
+          "bah_number": {
+            "type": "integer",
+            "description": "Better at Home client number"
+          },
+          "intake_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of client intake"
+          },
+          "first_service_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date of first service, null if not yet served"
+          },
+          "end_service_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Date of service termination, null if still active"
+          },
+          "living_situation": {
+            "type": "string",
+            "description": "Living situation of the client"
+          },
+          "language": {
+            "type": "string",
+            "description": "Primary language of the client"
+          },
+          "sociocultural_info": {
+            "type": "string",
+            "description": "Sociocultural information about the client"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Inactive", "Waitlisted"],
+            "description": "Current status of the client"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the client"
+          }
+        },
+        "required": ["bah_id", "client_id", "bah_number", "intake_date", "living_situation", "language", "status"]
+      },
+      "ProgramSummaryMetrics": {
+        "type": "object",
+        "properties": {
+          "program_id": {
+            "type": "integer",
+            "description": "Foreign key reference to the program"
+          },
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          },
+          "booking_count": {
+            "type": "integer",
+            "description": "Count of bookings (calculated)"
+          },
+          "total_hours": {
+            "type": "number",
+            "description": "Total hours (calculated)"
+          },
+          "client_count": {
+            "type": "integer",
+            "description": "Count of clients, excluding Better at Home (calculated)"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Count of volunteers (calculated)"
+          }
+        },
+        "required": ["program_id", "fiscal_year", "booking_count", "total_hours", "client_count", "volunteer_count"]
+      },
+      "FiscalYearProgramMetrics": {
+        "type": "object",
+        "properties": {
+          "fiscal_year": {
+            "type": "string",
+            "description": "Fiscal year for the metrics"
+          },
+          "total_program_bookings": {
+            "type": "integer",
+            "description": "Total program bookings (calculated)"
+          },
+          "total_program_hours": {
+            "type": "number",
+            "description": "Total program hours (calculated)"
+          },
+          "total_program_clients": {
+            "type": "integer",
+            "description": "Total program clients, excluding Better at Home (calculated)"
+          },
+          "total_program_volunteers": {
+            "type": "integer",
+            "description": "Total program volunteers (calculated)"
+          }
+        },
+        "required": [
+          "fiscal_year",
+          "total_program_bookings",
+          "total_program_hours",
+          "total_program_clients",
+          "total_program_volunteers"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "programs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Program"
+        }
+      },
+      "program_participants": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramParticipant"
+        }
+      },
+      "program_bookings": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramBooking"
+        }
+      },
+      "program_events": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramEvent"
+        }
+      },
+      "program_resources": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramResource"
+        }
+      },
+      "program_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramMetric"
+        }
+      },
+      "ambassador_activities": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/AmbassadorActivity"
+        }
+      },
+      "companion_pets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CompanionPet"
+        }
+      },
+      "companion_pet_assignments": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CompanionPetAssignment"
+        }
+      },
+      "cultural_events": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CulturalEvent"
+        }
+      },
+      "snow_angels_locations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SnowAngelsLocation"
+        }
+      },
+      "better_at_home_clients": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/BetterAtHomeClient"
+        }
+      },
+      "program_summary_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ProgramSummaryMetrics"
+        }
+      },
+      "fiscal_year_program_metrics": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/FiscalYearProgramMetrics"
+        }
+      }
+    }
+  }
+},
+{
+  "reports": {
+    "title": "Core Reporting Components",
+    "description": "JSON Schema for reporting system components",
+    "definitions": {
+      "ReportDefinition": {
+        "type": "object",
+        "properties": {
+          "report_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the report definition"
+          },
+          "report_name": {
+            "type": "string",
+            "description": "Name of the report"
+          },
+          "report_category": {
+            "type": "string",
+            "enum": ["Bookings", "Users", "Clients", "Volunteers", "Donors", "Mailing", "Custom"],
+            "description": "Category of the report"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the report"
+          },
+          "query_definition": {
+            "type": "object",
+            "description": "JSON object defining the report query logic"
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of parameter definitions"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of column definitions"
+          },
+          "default_sort_field": {
+            "type": "string",
+            "description": "Default field to sort results by"
+          },
+          "default_sort_direction": {
+            "type": "string",
+            "enum": ["Ascending", "Descending"],
+            "description": "Default sort direction"
+          },
+          "permissions_required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of permission strings required to access this report"
+          },
+          "is_system": {
+            "type": "boolean",
+            "description": "Indicates if it's a predefined system report"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Foreign key to User who created the report"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the report was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the report was last updated"
+          }
+        },
+        "required": [
+          "report_id",
+          "report_name",
+          "report_category",
+          "description",
+          "query_definition",
+          "parameters",
+          "columns",
+          "default_sort_direction",
+          "permissions_required",
+          "is_system",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ReportParameter": {
+        "type": "object",
+        "properties": {
+          "parameter_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the parameter"
+          },
+          "report_id": {
+            "type": "integer",
+            "description": "Foreign key to ReportDefinition"
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal name of the parameter"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name shown to users"
+          },
+          "parameter_type": {
+            "type": "string",
+            "enum": ["Date", "DateRange", "Dropdown", "MultiSelect", "Text", "Number", "Boolean"],
+            "description": "Type of parameter"
+          },
+          "default_value": {
+            "type": ["string", "object", "number", "boolean", "null"],
+            "description": "Default value for the parameter"
+          },
+          "options": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of options for dropdowns/multiselect"
+          },
+          "is_required": {
+            "type": "boolean",
+            "description": "Whether this parameter is required"
+          },
+          "validation": {
+            "type": ["object", "null"],
+            "description": "JSON object with validation rules"
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Order in which to display this parameter"
+          }
+        },
+        "required": [
+          "parameter_id",
+          "report_id",
+          "name",
+          "display_name",
+          "parameter_type",
+          "is_required",
+          "display_order"
+        ]
+      },
+      "ReportColumn": {
+        "type": "object",
+        "properties": {
+          "column_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the column"
+          },
+          "report_id": {
+            "type": "integer",
+            "description": "Foreign key to ReportDefinition"
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal name of the column"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name shown to users"
+          },
+          "data_type": {
+            "type": "string",
+            "enum": ["Text", "Number", "Date", "Boolean", "Link", "Calculated"],
+            "description": "Data type of the column"
+          },
+          "source_field": {
+            "type": "string",
+            "description": "Source field in the database"
+          },
+          "calculation_formula": {
+            "type": ["string", "null"],
+            "description": "Formula for calculated columns"
+          },
+          "format": {
+            "type": ["string", "null"],
+            "description": "Format string (e.g., 'currency', 'date', 'percent')"
+          },
+          "is_visible": {
+            "type": "boolean",
+            "description": "Whether this column is visible in the report"
+          },
+          "is_sortable": {
+            "type": "boolean",
+            "description": "Whether this column can be sorted"
+          },
+          "is_filterable": {
+            "type": "boolean",
+            "description": "Whether this column can be filtered"
+          },
+          "link_target": {
+            "type": ["string", "null"],
+            "description": "Target URL for link columns"
+          },
+          "link_field": {
+            "type": ["string", "null"],
+            "description": "Field to use as link parameter"
+          },
+          "width": {
+            "type": ["string", "null"],
+            "description": "Width of the column (CSS value)"
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Order in which to display this column"
+          }
+        },
+        "required": [
+          "column_id",
+          "report_id",
+          "name",
+          "display_name",
+          "data_type",
+          "source_field",
+          "is_visible",
+          "is_sortable",
+          "is_filterable",
+          "display_order"
+        ]
+      },
+      "SavedReport": {
+        "type": "object",
+        "properties": {
+          "saved_report_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the saved report"
+          },
+          "report_id": {
+            "type": "integer",
+            "description": "Foreign key to ReportDefinition"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key to User who saved the report"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the saved report"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "JSON object of parameter values"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the report was saved"
+          },
+          "last_run": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Timestamp when the report was last run"
+          },
+          "is_favorite": {
+            "type": "boolean",
+            "description": "Whether this is a favorite report"
+          },
+          "schedule_id": {
+            "type": ["integer", "null"],
+            "description": "Foreign key to ReportSchedule, nullable"
+          }
+        },
+        "required": ["saved_report_id", "report_id", "user_id", "name", "parameters", "created_at", "is_favorite"]
+      },
+      "ReportSchedule": {
+        "type": "object",
+        "properties": {
+          "schedule_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the schedule"
+          },
+          "saved_report_id": {
+            "type": "integer",
+            "description": "Foreign key to SavedReport"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": ["Daily", "Weekly", "Monthly", "Quarterly", "Annually"],
+            "description": "Frequency of the schedule"
+          },
+          "day_of_week": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 7,
+            "description": "Day of week (1-7) for weekly schedules"
+          },
+          "day_of_month": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 31,
+            "description": "Day of month (1-31) for monthly schedules"
+          },
+          "month": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month (1-12) for annual schedules"
+          },
+          "time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$",
+            "description": "Time of day for the schedule"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["PDF", "Excel", "CSV", "HTML"],
+            "description": "Output format for the report"
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "JSON array of email addresses"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Email subject line"
+          },
+          "message": {
+            "type": "string",
+            "description": "Email message body"
+          },
+          "last_run": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Timestamp when the schedule was last run"
+          },
+          "next_run": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp for the next scheduled run"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Whether this schedule is active"
+          }
+        },
+        "required": [
+          "schedule_id",
+          "saved_report_id",
+          "frequency",
+          "time",
+          "format",
+          "recipients",
+          "subject",
+          "next_run",
+          "is_active"
+        ]
+      },
+      "ReportExecution": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the execution"
+          },
+          "report_id": {
+            "type": "integer",
+            "description": "Foreign key to ReportDefinition"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key to User who executed the report"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "JSON object of parameter values"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when execution started"
+          },
+          "end_time": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Timestamp when execution completed"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Running", "Completed", "Failed"],
+            "description": "Status of the execution"
+          },
+          "row_count": {
+            "type": ["integer", "null"],
+            "description": "Number of rows in the result"
+          },
+          "error_message": {
+            "type": ["string", "null"],
+            "description": "Error message if execution failed"
+          },
+          "result_file_path": {
+            "type": ["string", "null"],
+            "description": "Path to the result file"
+          }
+        },
+        "required": ["execution_id", "report_id", "user_id", "parameters", "start_time", "status"]
+      },
+      "BookingCountReport": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "start_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Start date for the report"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date",
+                "description": "End date for the report"
+              },
+              "view_type": {
+                "type": "string",
+                "enum": ["ByFrequency", "ByType", "ByCategory"],
+                "description": "Type of view for the report"
+              }
+            },
+            "required": ["start_date", "end_date", "view_type"]
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "booking_count": {
+                "type": "integer",
+                "description": "Count of bookings"
+              },
+              "total_hours": {
+                "type": "number",
+                "description": "Total hours"
+              },
+              "breakdown": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "Breakdown by selected view type"
+              }
+            },
+            "required": ["booking_count", "total_hours", "breakdown"]
+          }
+        },
+        "required": ["parameters", "metrics"]
+      },
+      "DetailedBookingReport": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "booking_type": {
+                "type": "string",
+                "description": "Type of booking"
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Start date for the report"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date",
+                "description": "End date for the report"
+              },
+              "sort_direction": {
+                "type": "string",
+                "enum": ["NewestFirst", "OldestFirst"],
+                "description": "Sort direction for results"
+              }
+            },
+            "required": ["start_date", "end_date", "sort_direction"]
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Column name"
+                },
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name for the column"
+                },
+                "is_link": {
+                  "type": "boolean",
+                  "description": "Whether this column contains links"
+                },
+                "link_target": {
+                  "type": ["string", "null"],
+                  "description": "Target for links"
+                }
+              },
+              "required": ["name", "display_name"]
+            },
+            "description": "Columns in the report"
+          }
+        },
+        "required": ["parameters", "columns"]
+      },
+      "UserStatusReport": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "user_type": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["Client", "Volunteer", "Donor", "Funder", "Staff"]
+                },
+                "description": "Types of users to include"
+              },
+              "status": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["Active", "Inactive", "Pending"]
+                },
+                "description": "Statuses to include"
+              },
+              "as_of_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date for which to generate the report"
+              }
+            },
+            "required": ["user_type", "status", "as_of_date"]
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "counts_by_type_status": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "Count by user type and status"
+              },
+              "trend": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "Trend over time (monthly counts)"
+              }
+            },
+            "required": ["counts_by_type_status", "trend"]
+          }
+        },
+        "required": ["parameters", "metrics"]
+      },
+      "ActiveClientReport": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "as_of_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date for which to generate the report"
+              },
+              "include_bah": {
+                "type": "boolean",
+                "description": "Whether to include Better at Home clients"
+              }
+            },
+            "required": ["as_of_date", "include_bah"]
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Column name"
+                },
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name for the column"
+                },
+                "is_link": {
+                  "type": "boolean",
+                  "description": "Whether this column contains links"
+                },
+                "link_target": {
+                  "type": ["string", "null"],
+                  "description": "Target for links"
+                }
+              },
+              "required": ["name", "display_name"]
+            },
+            "description": "Columns in the report"
+          }
+        },
+        "required": ["parameters", "columns"]
+      },
+      "BAHReport": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "as_of_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date for which to generate the report"
+              },
+              "status": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["Active", "Inactive", "Waitlisted"]
+                },
+                "description": "Statuses to include"
+              }
+            },
+            "required": ["as_of_date", "status"]
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Column name"
+                },
+                "display_name": {
+                  "type": "string",
+                  "description": "Display name for the column"
+                },
+                "is_link": {
+                  "type": "boolean",
+                  "description": "Whether this column contains links"
+                },
+                "link_target": {
+                  "type": ["string", "null"],
+                  "description": "Target for links"
+                }
+              },
+              "required": ["name", "display_name"]
+            },
+            "description": "Columns in the report"
+          }
+        },
+        "required": ["parameters", "columns"]
+      },
+      "VolunteerReports": {
+        "type": "object",
+        "properties": {
+          "common_parameters": {
+            "type": "object",
+            "properties": {
+              "as_of_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date for which to generate the report"
+              },
+              "status": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["Active", "Inactive", "Pending"]
+                },
+                "description": "Statuses to include"
+              }
+            },
+            "required": ["as_of_date", "status"]
+          },
+          "specialized_reports": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "report_type": {
+                  "type": "string",
+                  "enum": ["Birthday", "CriminalRecordCheck", "DriversAbstract", "Milestone"],
+                  "description": "Type of specialized report"
+                },
+                "parameters": {
+                  "type": "object",
+                  "description": "Additional parameters specific to this report type"
+                },
+                "columns": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "description": "Columns specific to this report type"
+                }
+              },
+              "required": ["report_type", "parameters", "columns"]
+            },
+            "description": "Specialized volunteer reports"
+          }
+        },
+        "required": ["common_parameters", "specialized_reports"]
+      },
+      "MailingListReports": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "list_type": {
+                "type": "string",
+                "enum": ["ENews", "LetterMail"],
+                "description": "Type of mailing list"
+              },
+              "user_types": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["Board", "Clients", "Donors", "EventAttendees", "Funders", "Volunteers"]
+                },
+                "description": "Types of users to include"
+              },
+              "custom_filters": {
+                "type": "object",
+                "description": "Custom filters for the mailing list"
+              }
+            },
+            "required": ["list_type", "user_types"]
+          },
+          "columns": {
+            "type": "object",
+            "properties": {
+              "ENews": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Columns for ENews mailing list"
+              },
+              "LetterMail": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Columns for LetterMail mailing list"
+              }
+            },
+            "required": ["ENews", "LetterMail"]
+          }
+        },
+        "required": ["parameters", "columns"]
+      },
+      "BookingMetrics": {
+        "type": "object",
+        "properties": {
+          "time_period": {
+            "type": "string",
+            "enum": ["Day", "Week", "Month", "Quarter", "Year"],
+            "description": "Time period for the metrics"
+          },
+          "period_start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the period"
+          },
+          "booking_type": {
+            "type": "string",
+            "description": "Type of booking"
+          },
+          "service_category": {
+            "type": "string",
+            "description": "Category of service"
+          },
+          "specific_service": {
+            "type": "string",
+            "description": "Specific service"
+          },
+          "booking_count": {
+            "type": "integer",
+            "description": "Count of bookings"
+          },
+          "total_hours": {
+            "type": "number",
+            "description": "Total hours"
+          },
+          "client_count": {
+            "type": "integer",
+            "description": "Count of clients"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Count of volunteers"
+          }
+        },
+        "required": [
+          "time_period",
+          "period_start_date",
+          "booking_count",
+          "total_hours",
+          "client_count",
+          "volunteer_count"
+        ]
+      },
+      "UserMetrics": {
+        "type": "object",
+        "properties": {
+          "time_period": {
+            "type": "string",
+            "enum": ["Month", "Quarter", "Year"],
+            "description": "Time period for the metrics"
+          },
+          "period_start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the period"
+          },
+          "user_type": {
+            "type": "string",
+            "description": "Type of user"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of users"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Total count of users"
+          },
+          "new_count": {
+            "type": "integer",
+            "description": "Count of new users"
+          },
+          "inactive_count": {
+            "type": "integer",
+            "description": "Count of inactive users"
+          }
+        },
+        "required": ["time_period", "period_start_date", "user_type", "status", "count", "new_count", "inactive_count"]
+      },
+      "ServiceEngagementMetrics": {
+        "type": "object",
+        "properties": {
+          "service_type": {
+            "type": "string",
+            "description": "Type of service"
+          },
+          "specific_service": {
+            "type": "string",
+            "description": "Specific service"
+          },
+          "time_period": {
+            "type": "string",
+            "enum": ["Month", "Quarter", "Year"],
+            "description": "Time period for the metrics"
+          },
+          "period_start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the period"
+          },
+          "client_count": {
+            "type": "integer",
+            "description": "Count of clients"
+          },
+          "volunteer_count": {
+            "type": "integer",
+            "description": "Count of volunteers"
+          },
+          "booking_count": {
+            "type": "integer",
+            "description": "Count of bookings"
+          },
+          "total_hours": {
+            "type": "number",
+            "description": "Total hours"
+          }
+        },
+        "required": [
+          "service_type",
+          "time_period",
+          "period_start_date",
+          "client_count",
+          "volunteer_count",
+          "booking_count",
+          "total_hours"
+        ]
+      },
+      "ReportTemplate": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the template"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the template"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the template"
+          },
+          "base_entity": {
+            "type": "string",
+            "enum": ["Bookings", "Users", "Clients", "Volunteers", "Donors", "Events"],
+            "description": "Base entity for the template"
+          },
+          "available_fields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of field definitions"
+          },
+          "available_filters": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of filter definitions"
+          },
+          "available_aggregations": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of aggregation definitions"
+          },
+          "sample_report": {
+            "type": "object",
+            "description": "JSON object with sample configuration"
+          }
+        },
+        "required": [
+          "template_id",
+          "name",
+          "description",
+          "base_entity",
+          "available_fields",
+          "available_filters",
+          "available_aggregations"
+        ]
+      },
+      "CustomReport": {
+        "type": "object",
+        "properties": {
+          "custom_report_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the custom report"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key to User who created the report"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the custom report"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the custom report"
+          },
+          "template_id": {
+            "type": "integer",
+            "description": "Foreign key to ReportTemplate"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of selected fields"
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of filter conditions"
+          },
+          "aggregations": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of aggregation settings"
+          },
+          "sort_fields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of sort settings"
+          },
+          "visualization_type": {
+            "type": "string",
+            "enum": ["Table", "BarChart", "LineChart", "PieChart", "Map"],
+            "description": "Type of visualization"
+          },
+          "visualization_settings": {
+            "type": "object",
+            "description": "JSON object with visualization settings"
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether this report is public"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the report was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the report was last updated"
+          }
+        },
+        "required": [
+          "custom_report_id",
+          "user_id",
+          "name",
+          "template_id",
+          "fields",
+          "visualization_type",
+          "is_public",
+          "created_at",
+          "updated_at"
+        ]
+      }
+    },
+    "type": "object",
+    "properties": {
+      "report_definitions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ReportDefinition"
+        }
+      },
+      "report_parameters": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ReportParameter"
+        }
+      },
+      "report_columns": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ReportColumn"
+        }
+      },
+      "saved_reports": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SavedReport"
+        }
+      },
+      "report_schedules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ReportSchedule"
+        }
+      },
+      "report_executions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ReportExecution"
+        }
+      },
+      "report_templates": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ReportTemplate"
+        }
+      },
+      "custom_reports": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CustomReport"
+        }
+      }
+    }
+  }
+},
+{
+  "searches": {
+    "title": "Search System Components",
+    "description": "JSON Schema for search functionality components",
+    "definitions": {
+      "SearchConfiguration": {
+        "type": "object",
+        "properties": {
+          "search_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the search configuration"
+          },
+          "search_type": {
+            "type": "string",
+            "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"],
+            "description": "Type of search"
+          },
+          "tab_id": {
+            "type": "integer",
+            "description": "Foreign key reference to SearchTab"
+          },
+          "default_sort_field": {
+            "type": "string",
+            "description": "Default field to sort results by"
+          },
+          "default_sort_direction": {
+            "type": "string",
+            "enum": ["Ascending", "Descending"],
+            "description": "Default sort direction"
+          },
+          "results_per_page": {
+            "type": "integer",
+            "description": "Number of results to display per page, defaults based on search type"
+          },
+          "search_fields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of field configurations for search form"
+          },
+          "result_fields": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of field configurations for results display"
+          },
+          "permissions_required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of permission strings required to access this search"
+          }
+        },
+        "required": [
+          "search_id",
+          "search_type",
+          "tab_id",
+          "default_sort_direction",
+          "results_per_page",
+          "search_fields",
+          "result_fields",
+          "permissions_required"
+        ]
+      },
+      "SearchTab": {
+        "type": "object",
+        "properties": {
+          "tab_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the search tab"
+          },
+          "search_type": {
+            "type": "string",
+            "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"],
+            "description": "Type of search this tab belongs to"
+          },
+          "tab_name": {
+            "type": "string",
+            "description": "Display name of the tab"
+          },
+          "tab_order": {
+            "type": "integer",
+            "description": "Order in which to display this tab"
+          },
+          "filter_criteria": {
+            "type": "object",
+            "description": "JSON object of default filters for this tab"
+          },
+          "visible_to_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of role strings that can see this tab"
+          }
+        },
+        "required": ["tab_id", "search_type", "tab_name", "tab_order", "filter_criteria", "visible_to_roles"]
+      },
+      "SearchField": {
+        "type": "object",
+        "properties": {
+          "field_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the search field"
+          },
+          "field_name": {
+            "type": "string",
+            "description": "Database column name"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "UI display name"
+          },
+          "field_type": {
+            "type": "string",
+            "enum": ["Text", "Number", "Date", "DateRange", "Dropdown", "MultiSelect", "Checkbox", "Radio"],
+            "description": "Type of field"
+          },
+          "search_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"]
+            },
+            "description": "Array of search types where this field is used"
+          },
+          "search_tabs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Array of tab IDs where this field appears"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "Whether this field is included in the default search form"
+          },
+          "default_value": {
+            "type": ["string", "object", "null"],
+            "description": "Default value for the field, nullable"
+          },
+          "options": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "object"
+            },
+            "description": "JSON array of options for dropdowns/multiselect"
+          },
+          "placeholder": {
+            "type": "string",
+            "description": "Placeholder text for the field"
+          },
+          "validation": {
+            "type": ["object", "null"],
+            "description": "JSON object with validation rules"
+          },
+          "width": {
+            "type": "string",
+            "description": "CSS width value"
+          },
+          "search_behavior": {
+            "type": "string",
+            "enum": ["Exact", "Contains", "StartsWith", "FuzzyMatch"],
+            "description": "How the search should match this field"
+          }
+        },
+        "required": [
+          "field_id",
+          "field_name",
+          "display_name",
+          "field_type",
+          "search_type",
+          "search_tabs",
+          "is_default",
+          "search_behavior"
+        ]
+      },
+      "ResultField": {
+        "type": "object",
+        "properties": {
+          "field_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the result field"
+          },
+          "field_name": {
+            "type": "string",
+            "description": "Database column name"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "UI display name"
+          },
+          "search_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"]
+            },
+            "description": "Array of search types where this field is used"
+          },
+          "search_tabs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Array of tab IDs where this field appears"
+          },
+          "is_sortable": {
+            "type": "boolean",
+            "description": "Whether this field can be sorted"
+          },
+          "is_filterable": {
+            "type": "boolean",
+            "description": "Whether this field can be filtered"
+          },
+          "formatter": {
+            "type": ["string", "null"],
+            "description": "Function name to format display"
+          },
+          "width": {
+            "type": "string",
+            "description": "CSS width value"
+          },
+          "is_editable": {
+            "type": "boolean",
+            "description": "Whether this field can be edited inline"
+          },
+          "edit_permissions": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of permission strings required to edit this field"
+          }
+        },
+        "required": [
+          "field_id",
+          "field_name",
+          "display_name",
+          "search_type",
+          "search_tabs",
+          "is_sortable",
+          "is_filterable",
+          "is_editable"
+        ]
+      },
+      "SavedSearch": {
+        "type": "object",
+        "properties": {
+          "saved_search_id": {
+            "type": "integer",
+            "description": "Primary key identifier for the saved search"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "Foreign key reference to User"
+          },
+          "search_type": {
+            "type": "string",
+            "enum": ["UserSearch", "BookingSearch", "DonationSearch", "EventSearch"],
+            "description": "Type of search"
+          },
+          "tab_id": {
+            "type": "integer",
+            "description": "Foreign key reference to SearchTab"
+          },
+          "search_name": {
+            "type": "string",
+            "description": "Name of the saved search"
+          },
+          "search_criteria": {
+            "type": "object",
+            "description": "JSON object of search parameters"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "Whether this is the default search for this user and type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the search was saved"
+          },
+          "last_used": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the search was last used"
+          }
+        },
+        "required": [
+          "saved_search_id",
+          "user_id",
+          "search_type",
+          "tab_id",
+          "search_name",
+          "search_criteria",
+          "is_default",
+          "created_at"
+        ]
+      },
+      "UserSearchTabs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "tab_id": {
+              "type": "integer",
+              "description": "Tab identifier"
+            },
+            "tab_name": {
+              "type": "string",
+              "enum": [
+                "All Users",
+                "Clients",
+                "Volunteers",
+                "Donors",
+                "Funders",
+                "Better at Home (BaH)",
+                "Event Attendees"
+              ],
+              "description": "Name of the user search tab"
+            },
+            "tab_order": {
+              "type": "integer",
+              "description": "Display order of the tab"
+            },
+            "filter_criteria": {
+              "type": "object",
+              "description": "Default filters for this tab"
+            }
+          },
+          "required": ["tab_id", "tab_name", "tab_order", "filter_criteria"]
+        },
+        "description": "Predefined tabs for user search"
+      },
+      "UserSearchFields": {
+        "type": "object",
+        "properties": {
+          "common": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["first_name", "last_name", "phone", "email", "status", "active_date", "custom"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Text", "Dropdown", "DateRange", "Text"]
+                },
+                "search_behavior": {
+                  "type": "string",
+                  "enum": ["FuzzyMatch", "Exact", "Contains"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type", "search_behavior"]
+            },
+            "description": "Common search fields for all user types"
+          },
+          "client_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["services"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["MultiSelect"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Client-specific search fields"
+          },
+          "volunteer_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["current_services", "service_interests"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["MultiSelect"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Volunteer-specific search fields"
+          },
+          "donor_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["helping_hearts_donor"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Checkbox"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Donor-specific search fields"
+          },
+          "funder_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["name"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Text"]
+                },
+                "search_behavior": {
+                  "type": "string",
+                  "enum": ["FuzzyMatch"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type", "search_behavior"]
+            },
+            "description": "Funder-specific search fields"
+          },
+          "bah_specific": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "integer"
+                },
+                "field_name": {
+                  "type": "string",
+                  "enum": ["sociocultural_info", "intake_date", "language"]
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "field_type": {
+                  "type": "string",
+                  "enum": ["Text", "DateRange", "Dropdown"]
+                }
+              },
+              "required": ["field_id", "field_name", "display_name", "field_type"]
+            },
+            "description": "Better at Home-specific search fields"
+          }
+        },
+        "required": ["common"],
+        "description": "Search fields for different user types"
+      }
+    },
+    "type": "object",
+    "properties": {
+      "search_configurations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SearchConfiguration"
+        }
+      },
+      "search_tabs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SearchTab"
+        }
+      },
+      "search_fields": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SearchField"
+        }
+      },
+      "result_fields": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ResultField"
+        }
+      },
+      "saved_searches": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/SavedSearch"
+        }
+      },
+      "user_search_configuration": {
+        "type": "object",
+        "properties": {
+          "tabs": {
+            "$ref": "#/definitions/UserSearchTabs"
+          },
+          "fields": {
+            "$ref": "#/definitions/UserSearchFields"
+          }
+        },
+        "required": ["tabs", "fields"]
+      }
+    }
+  }
+},
+{
+	"users": {
+		"general_information": {
+			"user_id": "UUID",
+			"roles": [
+				"Client",
+				"Donor",
+				"Volunteer",
+				"Staff": [ // Need Staff Roles
+					"Volunteer Coordinator",
+					"Admin"
+				],
+				"Board",
+				"BAH", // Group into Client
+				"Event Attendee",
+				"Other" // Spouse, Roommates, etc.
+			],
+			"enews_subscription": "boolean",
+			"letter_mail_subscription": "boolean",
+			"referred_by": [
+				"211",
+				"Advertising",
+				"Family/Friend",
+				"Support Service",
+				"Web Search",
+				"Other",
+				"Unknown"
+			],
+			"created_at": "timestamp",
+			"updated_at": "timestamp"
+		},
+		"personal_information": {
+			"first_name": "string",
+			"preferred_name": "string",
+			"last_name": "string",
+			"email": "string",
+			"cell_phone": "string",
+			"home_phone": "string",
+			"date_of_birth": "date",
+			"home_address": {
+				"street_address": "string",
+				"city": "string",
+				"province": "string",
+				"country": "string",
+				"postal_code": "string"
+			},
+			"gender": [
+				"Male",
+				"Female",
+				"Non-binary",
+				"Other"
+			],
+
+			"interests": ["string"],
+			"skills": ["string"],
+			"languages": {
+				"primary_language": [
+					"English",
+					"French",
+					"Arabic",
+					"Bengali",
+					"Bulgarian",
+					"Cantonese",
+					"Croatian",
+					"Czech",
+					"Dutch",
+					"German",
+					"Greek",
+					"Hebrew",
+					"Hindi",
+					"Iranian",
+					"Italian",
+					"Japanese",
+					"Korean",
+					"Mandarin",
+					"PND", // What is PND?
+					"Punjabi",
+					"Russian",
+					"Samoan",
+					"Spanish",
+					"Swedish",
+					"Tagalog",
+					"Ukranian",
+					"Unknown",
+					"Urdu"
+				], // Multiple Choice and Add More Button
+				"other_languages": [
+					"English",
+					"French",
+					"Arabic",
+					"Bengali",
+					"Bulgarian",
+					"Cantonese",
+					"Croatian",
+					"Czech",
+					"Dutch",
+					"German",
+					"Greek",
+					"Hebrew",
+					"Hindi",
+					"Iranian",
+					"Italian",
+					"Japanese",
+					"Korean",
+					"Mandarin",
+					"PND", // What is PND?
+					"Punjabi",
+					"Russian",
+					"Samoan",
+					"Spanish",
+					"Swedish",
+					"Tagalog",
+					"Ukranian",
+					"Unknown",
+					"Urdu"
+				], // Checkbox and Add More Button
+				"notes": "string"
+			},
+			"ethnicity": [
+				"Aboriginal/First Nations/Metis",
+				"Arab",
+				"Black",
+				"Chinese",
+				"Filipino",
+				"Japanese",
+				"Korean",
+				"Latin American",
+				"Other",
+				"PND",
+				"South Asia",
+				"Southeast Asia",
+				"Unknown",
+				"West Asia",
+				"White"
+			],
+			"spouse_partner": {
+				"id": "UUID",
+				"name": "string"
+			},
+			"emergency_contacts": [
+				{
+					"emergency_contact_id": "UUID",
+					"name": "string",
+					"relationship": "string",
+					"home_phone": "string",
+					"cell_phone": "string",
+					"work_phone": "string",
+					"email": "string",
+					"notes": "string"
+				}
+			],
+		},
+		"health_information": {
+			"allergies": ["string"],
+			"dnr": "boolean",
+			"dnr_notes": "string",
+			"smoker": "boolean",
+			"healthConditions": {
+				"health_condition_id": "UUID",
+				"health_condition_type": [
+					"Asthma",
+					"Arthritis",
+					"Back Problems",
+					"Brain Injury",
+					"Broken Hip",
+					"Cancer",
+					"Chronic Pain",
+					"COPD",
+					"Dementia or Memory Loss",
+					"Diabetes",
+					"Dizziness/Vertigo",
+					"Heart Condition",
+					"Mental Health",
+					"Multiple Sclerosis",
+					"Osteoporosis",
+					"Parkinsons",
+					"Seizures",
+					"Stroke",
+					"Syncope (Fainting Disorder)",
+					"Other",
+					"Add More button (adds additional Other checkboxes with fillable boxes)"
+				],
+				"notes": "string"
+			},
+			"accessibility_needs": {
+				"accessibility_need_id": "UUID",
+				"accessibility_need_type": [
+					"Blind",
+					"Vision Loss",
+					"Deaf",
+					"Hearing Loss",
+					"Immunocompromised - Requests that you wear a mask",
+					"Intellectual or Developmental Disability",
+					"Scent Sensitive",
+					"Sound Sensitive",
+					"Other",
+					"Add More button (adds additional Other checkboxes with fillable boxes)"
+				],
+				"notes": "string"
+			}
+		},
+		"client_information": {
+			"current_status": [
+				"Active",
+				"Away",
+				"Inactive",
+				"New",
+				"Pending"
+			],
+			"client_start_date": "date",
+			"internal_flags": ["string"],
+			"booking_flags": ["string"],
+			"volunteer_exceptions": ["string"],
+			"family_involvement": "string",
+			"mobility_aids": [
+				"Cane",
+				"Walking Poles",
+				"Walker",
+				"Wheelchair"
+			],
+			"vehicle_requirements": [
+				"Coupe",
+				"Sedan",
+				"Crossover",
+				"SUV",
+				"Minivan",
+				"Van",
+				"Truck"
+			],
+			"client_living_arrangements": {
+				"living_arrangement_id": "UUID",
+				"arrangement_type": [
+					"Lives Alone in Apartment/Condo",
+					"Lives Alone in House",
+					"Lives Communally in Low-Income Housing Facility",
+					"Lives Communally in Seniors’ Retirement Facility",
+					"Lives with a Roommate/Partner in House",
+					"Lives with a Roommate/Partner in Apartment/Condo"
+				],
+				"lives_with_contact_id": "UUID",
+				"notes": "string"
+			},
+			"client_services": {
+				"service_type": [
+					"Destination Walk",
+					"Document Assistance",
+					"Gardening",
+					"Medical Drive",
+					"Minor Home Repair",
+					"Miscellaneous Drive",
+					"Miscellaneous Service",
+					"Packing and Sorting",
+					"Reassurance Phone Call",
+					"Recreation Drive",
+					"Shopping Drive",
+					"Social Phone Call",
+					"Technology Support",
+					"Visiting",
+					"Visiting with Drive",
+					"Walking",
+					"Walking with Drive",
+					"Wheelchair Push"
+				],
+				"service_id": "UUID", // Add to Each Service Type
+				"is_active": "boolean", // Add to Each Service Type
+				"start_date": ["date"], // Add to Each Service Type
+				"end_date": ["date"], // Add to Each Service Type
+				"notes": "string" // Add to Each Service Type
+			},
+			"client_programs": {
+				"program_type": [
+					"Ambassador",
+					"Better at Home": {
+						"referral_date": "date",
+						"intake_date": "date",
+						"referred_by": [
+							"Ad",
+							"BaH Host Organization",
+							"Community Health Worker / Nurse (HA)",
+							"Doctor",
+							"Family/Friend",
+							"Group",
+							"Other",
+							"Unknown"
+						],
+						"receiving_other_publically_funded_home_support": "boolean"
+					},
+					"Companion Pets",
+					"Cultural Companions",
+					"Holiday Gift Exchange",
+					"Income Tax",
+					"Silent Disco",
+					"Snow Angels",
+					"Welcome Team"
+				],
+				"program_id": "UUID", // Add to Each Program Type
+				"is_active": "boolean", // Add to Each Program Type
+				"start_date": ["date"], // Add to Each Program Type
+				"end_date": ["date"], // Add to Each Program Type
+				"notes": "string" // Add to Each Program Type
+			},
+			"client_support_services": {
+				"support_service_type": [
+					"Better at Home Housekeeping",
+					"Island Health Support",
+					"Private Caregiving",
+					"Private Housekeeping",
+					"Return to Health"
+				],
+				"support_service_id": "UUID", // Add to Each Support Service Type
+				"is_active": "boolean", // Add to Each Support Service Type
+				"start_date": ["date"], // Add to Each Support Service Type
+				"end_date": ["date"], // Add to Each Support Service Type
+				"notes": "string" // Add to Each Support Service Type
+			},
+			"client_structured_programs": {
+				"structured_program_type": [
+					"Adult Day Program",
+					"Recreation Centre",
+					"Seniors’ Centre"
+				],
+				"structured_program_id": "UUID", // Add to Each Structured Program Type
+				"is_active": "boolean", // Add to Each Structured Program Type
+				"start_date": ["date"], // Add to Each Structured Program Type
+				"end_date": ["date"], // Add to Each Structured Program Type
+				"notes": "string" // Add to Each Structured Program Type
+			},
+			"client_bookings": [
+				{
+					"status": [
+						"Assigned",
+						"Cancelled",
+						"Completed",
+						"Deleted",
+						"Not Assigned"
+					],
+					"booking_number": "string",
+					"volunteer_id": "UUID",
+					"booking_type_category": [
+						"Client Service",
+						"Client Program",
+						"Client Support Service",
+						"Client Structured Program"
+					],
+					"booking_type": [
+						"${service_type}",
+						"${program_type}",
+						"${support_service_type}",
+						"${structured_program_type}"
+					],
+					"frequency": [
+						"One-Time",
+						"Ongoing",
+						"Recurring"
+					],
+					"booking_date": "date",
+					"booking_start_time": "string",
+					"booking_duration_hrs": "string",
+					"booking_pickup_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_destination_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_history": ["string"] // Events/Actions Taken While Booking and By who
+				}
+			],
+			"client_files": {
+				"file_id": "UUID",
+				"file_name": "string",
+				"file_type": "string",
+				"file_path": "string",
+				"uploaded_by": "UUID",
+				"upload_date": "timestamp",
+				"description": "string"
+			},
+			"client_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"volunteer_information": {
+			"current_status": [
+				"Active",
+				"Away",
+				"Inactive",
+				"New", // Lasts for 3 months and then auto-update to "Active" unless other option has been selected
+				"Pending" // Can't be booked for services, except using the manual override... Should update to Active before booking?
+			],
+			"volunteer_intake_date": "date",
+			"volunteer_orientation_date": "date",
+			"volunteer_start_date": "date",
+			"volunteer_end_date": "date",
+			"volunteer_experience": "string",
+			"work_experience": "string",
+			"education": "string",
+			"internal_flags": ["string"],
+			"booking_flags": ["string"],
+			"client_exceptions": ["string"],
+			"volunteer_services": {
+				"service_type": [
+					"Destination Walk",
+					"Document Assistance",
+					"Gardening",
+					"Medical Drive",
+					"Minor Home Repair",
+					"Miscellaneous Drive",
+					"Miscellaneous Service",
+					"Packing and Sorting",
+					"Reassurance Phone Call",
+					"Recreation Drive",
+					"Shopping Drive",
+					"Social Phone Call",
+					"Technology Support",
+					"Visiting",
+					"Visiting with Drive",
+					"Walking",
+					"Walking with Drive",
+					"Wheelchair Push"
+				],
+				"service_id": "UUID", // Add to Each Service Type
+				"is_active": "boolean", // Add to Each Service Type
+				"start_date": ["date"], // Add to Each Service Type
+				"end_date": ["date"], // Add to Each Service Type
+				"notes": "string" // Add to Each Service Type
+			},
+			"volunteer_programs": {
+				"program_type": [
+					"Ambassador",
+					"Better at Home",
+					"Companion Pets",
+					"Cultural Companions",
+					"Holiday Gift Exchange",
+					"Income Tax",
+					"Silent Disco",
+					"Snow Angels",
+					"Welcome Team"
+				],
+				"program_id": "UUID", // Add to Each Program Type
+				"is_active": "boolean", // Add to Each Program Type
+				"start_date": ["date"], // Add to Each Program Type
+				"end_date": ["date"], // Add to Each Program Type
+				"notes": "string" // Add to Each Program Type
+			},
+			"volunteer_support_services": {
+				"support_service_type": [ // Support Services don't match Client Support Service Types
+					"Accounting",
+					"Board",
+					"MarComm",
+					"Fundraising",
+					"Events",
+					"Miscellaneous Support",
+					"Helpline"
+				],
+				"support_service_id": "UUID", // Add to Each Support Service Type
+				"is_active": "boolean", // Add to Each Support Service Type
+				"start_date": ["date"], // Add to Each Support Service Type
+				"end_date": ["date"], // Add to Each Support Service Type
+				"notes": "string" // Add to Each Support Service Type
+			},
+			"volunteer_availability": {
+				"Monday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Tuesday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Wednesday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Thursday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Friday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Saturday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				},
+				"Sunday": {
+					"start_time": ["string"],
+					"end_time": ["string"],
+				}
+			},
+			"volunteer_unavailable_dates": {
+				"first_date_unavailable": ["date"],
+				"last_date_unavailable": ["date"]
+			},
+			"volunteer_driving_information": {
+				"accessible_parking_permit": {
+					"parking_permit": "boolean",
+					"parking_permit_number": "string",
+					"parking_permit_expiry_date": "date"
+				},
+				"drivers_license_number": "string",
+				"drivers_abstract": {
+					"completion_date": ["date"],
+					"expiration_date": "date",
+					"notes": "string"	
+				},
+				"vehicle_information": {
+					"vehicle_make": ["string"],
+					"vehicle_model": ["string"],
+					"vehicle_year": "string",
+					"vehicle_type": [
+						"Coupe",
+						"Crossover",
+						"Minivan",
+						"Truck",
+						"Sedan",
+						"SUV",
+						"Van"
+					],
+					"number_of_passengers": "string",
+					"accomodations": [
+						"Cane",
+						"Walking Poles",
+						"Walker",
+						"Wheelchair"
+					]
+				}
+			},
+			"security_clearance": {
+					"completion_date": ["date"],
+					"expiration_date": "date",
+					"notes": "string"			
+			},
+			"references": [
+				{
+					"first_name": "string",
+					"last_name": "string",
+					"relationship": "string",
+					"email": "string",
+					"cell_phone": "string",
+					"home_phone": "string",
+					"work_phone": "string",
+					"notes": "string",
+					"reference_check_completed_date": "date",
+					"reference_check_completed_by": "string"
+				}
+			],
+			"volunteer_bookings": [
+				{
+					"status": [
+						"Assigned",
+						"Cancelled",
+						"Completed",
+						"Deleted",
+						"Not Assigned"
+					],
+					"booking_number": "string",
+					"client_id": "UUID",
+					"booking_type_category": [
+						"Client Service",
+						"Client Program",
+						"Client Support Service",
+						"Client Structured Program"
+					],
+					"booking_type": [
+						"${service_type}",
+						"${program_type}",
+						"${support_service_type}",
+						"${structured_program_type}"
+					],
+					"frequency": [
+						"One-Time",
+						"Ongoing",
+						"Recurring"
+					],
+					"booking_date": "date",
+					"booking_start_time": "string",
+					"booking_duration_hrs": "string",
+					"booking_pickup_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_destination_address": {
+						"street_address": "string",
+						"city": "string",
+						"province": "string",
+						"country": "string",
+						"postal_code": "string"
+					},
+					"booking_history": ["string"] // Events/Actions Taken While Booking and By who
+				}
+			],
+			"volunteer_files": {
+				"file_id": "UUID",
+				"file_name": "string",
+				"file_type": "string",
+				"file_path": "string",
+				"uploaded_by": "UUID",
+				"upload_date": "timestamp",
+				"description": "string"
+			},
+			"volunteer_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"donor_information": {
+			"current_status": [
+				"Active",
+				"Inactive"
+			],
+			"active_engagement": "boolean",
+			"monthly_donor": "boolean",
+			"monthly_amount": "string",
+			"donations": [
+				{
+					"donation_date": "date",
+					"processed_date": "date",
+					"donation_type": ["string"],
+					"donation_amount": "string",
+					"donation_value_advantage": "string",
+					"donation_eligible_amount": "string",
+					"donation_receipt": "boolean"
+				}
+			],
+			"donor_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"funder_information": {
+			"organization_name": "string",
+			"grant_details": {
+				"name": "string",
+				"application_deadline": "date",
+				"grant_amount": "string"
+			},	
+			"contact": {
+				"first_name": "string",
+				"preferred_name": "string",
+				"last_name": "string",
+				"email": "string",
+				"cell_phone": "string",
+				"work_phone": "string"
+			},
+			"address": {
+				"street_address": "string",
+				"city": "string",
+				"province": "string",
+				"country": "string",
+				"postal_code": "string"
+			},
+			"current_status": [
+				"Active",
+				"Inactive"
+			],
+			"active_engagement": "boolean",
+			"donations": [
+				{
+					"donation_date": "date",
+					"processed_date": "date",
+					"donation_type": ["string"],
+					"donation_amount": "string",
+					"donation_value_advantage": "string",
+					"donation_eligible_amount": "string",
+					"donation_receipt": "boolean"
+				}
+			],
+			"funder_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		},
+		"event_attendee_information": {
+			"contact_for_events": [
+				"Silent Disco",
+				"Symphony"
+			],
+			"event_attendee_bookings": [
+				{
+					"status": [
+						"Assigned",
+						"Cancelled",
+						"Completed",
+						"Deleted",
+						"Not Assigned"
+					],
+					"booking_number": "string",
+					"booking_type_category": [
+						"Client Service",
+						"Client Program",
+						"Client Support Service",
+						"Client Structured Program"
+					],
+					"booking_type": [
+						"${service_type}",
+						"${program_type}",
+						"${support_service_type}",
+						"${structured_program_type}"
+					],
+					"booking_event_name": "string",
+					"booking_date": "date",
+					"booking_start_time": "string",
+					"booking_duration_hrs": "string",
+					"booking_history": ["string"] // Events/Actions Taken While Booking and By who
+				}
+			],
+			"event_attendee_notes": [
+				{
+					"date": "date",
+					"author": "string", // Automatically Populate
+					"note": "string"
+				}
+			],
+		}
+	}
+}
+
+
+
