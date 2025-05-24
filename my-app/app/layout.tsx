@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My App Admin Dashboard",
-  description: "Admin dashboard for managing users and bookings",
+  title: "OBVS Matrix",
+  description: "OBVS Matrix is a platform for user management",
 };
 
 export default function RootLayout({
