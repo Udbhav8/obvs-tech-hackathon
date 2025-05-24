@@ -33,6 +33,7 @@ import {
   LogOut,
   Settings,
   FileText,
+  DollarSign,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -60,6 +61,16 @@ const menuItems = [
     title: "Reports",
     url: "/admin/reports",
     icon: FileText,
+  },
+  {
+    title: "Events",
+    url: "/admin/events",
+    icon: Calendar,
+  },
+  {
+    title: "Donations",
+    url: "/admin/donations",
+    icon: DollarSign,
   },
 ];
 
