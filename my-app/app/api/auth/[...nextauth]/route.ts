@@ -42,6 +42,10 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Incorrect password");
           }
 
+          if (user.role !== 'admin') {
+            throw new Error('Access denied. Admin privileges required.');
+          }
+          
           return {
             id: user._id.toString(),
             email: user.email,
