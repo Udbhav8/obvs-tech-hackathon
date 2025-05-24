@@ -166,7 +166,7 @@ export default function LoginPage() {
             </form>
           </CardContent>
           {/* Disabling sign up option for now */}
-          {/* <CardFooter className="text-center block">
+          <CardFooter className="text-center block">
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link
@@ -176,7 +176,7 @@ export default function LoginPage() {
                 Sign up
               </Link>
             </p>
-          </CardFooter> */}
+          </CardFooter>
         </Card>
       </div>
     </div>
