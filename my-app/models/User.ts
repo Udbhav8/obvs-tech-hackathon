@@ -8,7 +8,7 @@ export enum UserRole {
   VOLUNTEER = "Volunteer",
   VOLUNTEER_COORDINATOR = "Volunteer Coordinator",
   STAFF = "Staff",
-  ADMIN = "Admin", // Added based on JSON schema structure within Staff
+  ADMIN = "admin", // Added based on JSON schema structure within Staff
   SUPER_ADMIN = "Super Admin", // Added based on JSON schema structure within Staff
   BOARD = "Board",
   SPP = "SPP", // Social Prescribing Participant - Added based on JSON schema
