@@ -69,6 +69,10 @@ export default function ReportsPage() {
   const [yearInput, setYearInput] = useState("");
   const [newVolunteers, setNewVolunteers] = useState([]);
 
+  const [selectedBirthdayMonth, setSelectedBirthdayMonth] = useState("");
+  const [birthdayPeople, setBirthdayPeople] = useState([]);
+
+
   const handleTabClick = (label) => {
     setActiveTab(label);
     setActiveSubTab(null); // reset sub-tab on main tab switch
@@ -97,6 +101,24 @@ export default function ReportsPage() {
         setNewVolunteers([]);
       });
   };
+
+  // Fetch new birthdays based on filters
+  const fetchBirthdays = () => {
+  if (!selectedBirthdayMonth) {
+    alert("Please select a month");
+    return;
+  }
+  fetch(`/api/reports?type=birthdays&month=${parseInt(selectedBirthdayMonth)}`)
+    .then((res) => res.json())
+    .then((data) => {
+      setBirthdayPeople(data.message || []);
+    })
+    .catch((err) => {
+      console.error("Error fetching birthdays:", err);
+      setBirthdayPeople([]);
+    });
+};
+
 
   return (
     <div className="space-y-6 p-6">
@@ -221,31 +243,56 @@ export default function ReportsPage() {
     {/* Filters */}
     <div className="flex gap-4 w-full">
       {/* Month Dropdown */}
-      <Select onValueChange={setSelectedMonth} value={selectedMonth}>
-                <SelectTrigger className="w-full border border-gray-300 rounded-md px-3 py-2">
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => {
-                    const month = (i + 1).toString().padStart(2, "0");
-                    return (
-                      <SelectItem key={month} value={month}>
-                        {month}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+      <Select onValueChange={setSelectedBirthdayMonth} value={selectedBirthdayMonth}>
+        <SelectTrigger className="w-full border border-gray-300 rounded-md px-3 py-2">
+          <SelectValue placeholder="Select month" />
+        </SelectTrigger>
+        <SelectContent>
+          {Array.from({ length: 12 }, (_, i) => {
+            const month = (i + 1).toString().padStart(2, "0");
+            return (
+              <SelectItem key={month} value={month}>
+                {month}
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+
       {/* Sort Button */}
-      <button className="flex-none border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100">
+      <Button
+        variant="outline"
+        className="w-full border border-gray-300 text-gray-700 hover:bg-gray-100"
+        onClick={fetchBirthdays}
+      >
         Sort
-      </button>
+      </Button>
     </div>
 
-    {/* Placeholder for birthdays table or content */}
-    <div className="text-gray-500 text-sm">Birthdays table will appear here...</div>
+    {/* Table */}
+    {birthdayPeople.length > 0 ? (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {birthdayPeople.map((person, index) => (
+            <TableRow key={index}>
+              <TableCell>{person.name}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    ) : (
+      <p className="text-gray-500 text-sm">No results yet.</p>
+    )}
   </div>
 )}
+
+
+{/* Content Box for ACTIVE SERVICES */}
 
 {!activeTab && (
   <div className="flex flex-col items-center justify-center h-96 text-gray-500">
