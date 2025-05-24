@@ -52,7 +52,7 @@ export default function LoginPage() {
             setError("An error occurred during sign in. Please try again.");
         }
       } else if (result?.ok) {
-        const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+        const callbackUrl = searchParams.get("callbackUrl") || "/admin";
         router.push(callbackUrl);
       }
     } catch (error) {

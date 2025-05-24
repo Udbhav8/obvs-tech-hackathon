@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       name: name || `${first_name} ${last_name}`.trim(),
       email: email,
       password: password,
-      role: "user", // Default legacy role
+      role: "admin", // Default legacy role
 
       // New schema structure
       general_information: {
@@ -84,9 +84,9 @@ export async function POST(req: NextRequest) {
         message: "User created successfully",
         user: {
           id: user._id.toString(),
-          email: user.getPrimaryEmail(),
-          name: user.getDisplayName(),
-          roles: user.general_information?.roles || [UserRole.USER],
+          email: user.personal_information?.email ?? "",
+          name: user.personal_information?.first_name ?? "",
+          roles: user.general_information?.roles || [UserRole.ADMIN],
         },
       },
       { status: 201 }
