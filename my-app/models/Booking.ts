@@ -1,15 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
-// Import necessary enums from the new booking-enums.ts and user-enums.ts files
-import {
-  BookingType,
-  BookingStatus,
-  FrequencyType,
-  CancellationReason,
-  RecurrenceFrequency,
-  BookingVolunteerStatus,
-  EventAttendeeUserType,
-} from '../enums/booking-enums';
-import { ServiceType, ProgramType } from '../enums/user-enums'; // Assuming these are in user-enums.ts now
+import { FrequencyType, RecurrenceFrequency, BookingStatus, BookingType, CancellationReason} from '../enums/booking-enums';
+import { BookingVolunteerStatus, EventAttendeeUserType } from '../enums/booking-enums';
 
 // ------------------------------------------------------------------------------------------------
 // INTERFACES
@@ -18,9 +9,9 @@ import { ServiceType, ProgramType } from '../enums/user-enums'; // Assuming thes
 // Base Booking Interface
 export interface IBooking extends Document {
   booking_id: number;
-  booking_type: BookingType;
-  status: BookingStatus;
-  frequency_type: FrequencyType;
+  booking_type: string;
+  status: string;
+  frequency_type: string;
   date: Date;
   start_time: string;
   appointment_time: string;
@@ -29,18 +20,18 @@ export interface IBooking extends Document {
   notes?: string;
   num_volunteers_needed: number;
   client_confirmation: boolean;
-  cancellation_reason?: CancellationReason | null;
+  cancellation_reason?: string | null;
   cancellation_notes?: string | null;
   is_parent_booking: boolean;
   parent_booking_id?: number | null;
   end_date?: Date | null;
-  recurrence_frequency?: RecurrenceFrequency | null;
+  recurrence_frequency?: string | null;
   recurrence_days?: number[] | null;
 }
 
 // Service/Program Booking Interface
 export interface IServiceProgramBooking extends IBooking {
-  service_type: ServiceType | ProgramType | string; // Using string for now to encompass all service/program types from schema
+  service_type: string; // Using string for now to encompass all service/program types from schema
   pickup_address_description: string;
   pickup_address_street: string;
   pickup_address_city: string;
@@ -108,7 +99,7 @@ export interface IBookingClientRelation extends Document {
 export interface IBookingVolunteerRelation extends Document {
   booking_id: number;
   volunteer_id: number;
-  status: BookingVolunteerStatus;
+  status: string;
 }
 
 // Event Attendee Interface
@@ -116,7 +107,7 @@ export interface IEventAttendee extends Document {
   event_booking_id: number;
   user_id?: number | null; // Corresponds to user_id in User.ts if internal
   external_name?: string | null;
-  user_type: EventAttendeeUserType;
+  user_type: string;
 }
 
 // Volunteer Absence Interface
@@ -171,8 +162,6 @@ const ServiceProgramBookingSchema = new Schema<IServiceProgramBooking>({
   service_type: {
     type: String,
     enum: [
-      ...Object.values(ServiceType),
-      ...Object.values(ProgramType),
       "Drives Medical", "Drives Miscellaneous", "Drives Shopping", "Drives Recreation",
       "Destination Walks", "Document Assistance", "Gardening", "Minor Home Repair",
       "Packing and Sorting", "Reassurance Phone Calls", "Social Phone Call",
