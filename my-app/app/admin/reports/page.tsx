@@ -72,6 +72,27 @@ export default function ReportsPage() {
   const [selectedBirthdayMonth, setSelectedBirthdayMonth] = useState("");
   const [birthdayPeople, setBirthdayPeople] = useState([]);
 
+  const [services, setServices] = useState([]);
+
+  const [selectedService, setSelectedService] = useState("");
+const [activeServices, setActiveServices] = useState([]);
+
+
+
+
+useEffect(() => {
+  fetch('/api/enums')
+    .then((res) => res.json())
+    .then((data) => {
+      setServices(data.services || []);
+    })
+    .catch((err) => {
+      console.error('Error fetching services:', err);
+      setServices([]);
+    });
+}, []);
+
+
 
   const handleTabClick = (label) => {
     setActiveTab(label);
@@ -116,6 +137,23 @@ export default function ReportsPage() {
     .catch((err) => {
       console.error("Error fetching birthdays:", err);
       setBirthdayPeople([]);
+    });
+};
+
+// Fetch new volunteers based on filters
+const fetchActiveServices = () => {
+  if (!selectedService) {
+    alert("Please select a service");
+    return;
+  }
+  fetch(`/api/reports?type=active_services&service=${selectedService}`)
+    .then((res) => res.json())
+    .then((data) => {
+      setActiveServices(data.message || []);
+    })
+    .catch((err) => {
+      console.error("Error fetching active services:", err);
+      setActiveServices([]);
     });
 };
 
@@ -294,10 +332,52 @@ export default function ReportsPage() {
 
 {/* Content Box for ACTIVE SERVICES */}
 
-{!activeTab && (
-  <div className="flex flex-col items-center justify-center h-96 text-gray-500">
-    <Search className="w-10 h-10 mb-4" />
-    <p className="text-lg">Click on a report type you would like to view</p>
+{activeSubTab === "ACTIVE SERVICES" && (
+  <div className="border border-gray-300 rounded-md p-4 space-y-4">
+    {/* Filters */}
+    <div className="flex gap-4 w-full">
+      {/* Services Dropdown */}
+      <Select onValueChange={setSelectedService} value={selectedService}>
+        <SelectTrigger className="w-full border border-gray-300 rounded-md px-3 py-2">
+          <SelectValue placeholder="Select service" />
+        </SelectTrigger>
+        <SelectContent>
+          {services.map((service) => (
+            <SelectItem key={service} value={service}>
+              {service}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {/* Sort Button */}
+      <Button
+        variant="outline"
+        className="flex-none border border-gray-300 text-gray-700 hover:bg-gray-100"
+        onClick={fetchActiveServices}
+      >
+        Sort
+      </Button>
+    </div>
+
+    {/* Table */}
+    {activeServices.length > 0 ? (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {activeServices.map((person, index) => (
+            <TableRow key={index}>
+              <TableCell>{person.name}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    ) : (
+      <p className="text-gray-500 text-sm">No results yet.</p>
+    )}
   </div>
 )}
 
