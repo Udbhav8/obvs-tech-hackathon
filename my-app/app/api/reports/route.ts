@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
 import UserModel from "../../../models/User"; // Your user Mongoose model
+import { fetchUserEnumsFromDatabase } from "../../../enums/user-enums"; // Update with actual path
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,6 +15,8 @@ export async function GET(request: NextRequest) {
         return await handleNewVolunteers(searchParams);
       case "birthdays":
         return await handleVolunteerBirthdays(searchParams);
+      case "enum":
+        return await handleEnumFetch(); // NEW
       default:
         return NextResponse.json(
           { message: "Invalid volunteer report type requested." },
@@ -29,7 +32,22 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// === Handler for New Volunteers by Month/Year ===
+// === NEW: Handler for User Enums ===
+
+async function handleEnumFetch() {
+  try {
+    const enums = await fetchUserEnumsFromDatabase();
+    return NextResponse.json({ enums }, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching enums:", error);
+    return NextResponse.json(
+      { message: "Failed to fetch enums." },
+      { status: 500 }
+    );
+  }
+}
+
+// === Existing handlers (unchanged) ===
 
 async function handleNewVolunteers(searchParams: URLSearchParams) {
   const month = searchParams.get("month");
@@ -64,11 +82,7 @@ async function handleNewVolunteers(searchParams: URLSearchParams) {
   }
 }
 
-// === Handler for Volunteer Birthdays by Month ===
-
 async function handleVolunteerBirthdays(searchParams: URLSearchParams) {
-    console.log("Search params:", searchParams.toString());
-    //console.log("Type param:", type);
   const month = searchParams.get("month");
 
   if (!month) {
