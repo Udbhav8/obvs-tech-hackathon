@@ -214,6 +214,46 @@ export default function ReportsPage() {
           )}
         </div>
       )}
+
+      {/* Content Box for BIRTHDAYS */}
+{activeSubTab === "BIRTHDAYS" && (
+  <div className="border border-gray-300 rounded-md p-4 space-y-4">
+    {/* Filters */}
+    <div className="flex gap-4 w-full">
+      {/* Month Dropdown */}
+      <Select onValueChange={setSelectedMonth} value={selectedMonth}>
+                <SelectTrigger className="w-full border border-gray-300 rounded-md px-3 py-2">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const month = (i + 1).toString().padStart(2, "0");
+                    return (
+                      <SelectItem key={month} value={month}>
+                        {month}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+      {/* Sort Button */}
+      <button className="flex-none border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100">
+        Sort
+      </button>
+    </div>
+
+    {/* Placeholder for birthdays table or content */}
+    <div className="text-gray-500 text-sm">Birthdays table will appear here...</div>
+  </div>
+)}
+
+{!activeTab && (
+  <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+    <Search className="w-10 h-10 mb-4" />
+    <p className="text-lg">Click on a report type you would like to view</p>
+  </div>
+)}
+
     </div>
   );
 }
