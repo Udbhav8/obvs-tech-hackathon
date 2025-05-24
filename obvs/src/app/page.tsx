@@ -1,149 +1,189 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Box,
-  Typography,
-  Button,
   Card,
   CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
-  Avatar,
-} from "@mui/material";
-import { Grid } from "@mui/material";
-import Image from "next/image";
-import Link from "next/link";
-import StorageIcon from "@mui/icons-material/Storage";
-import PaletteIcon from "@mui/icons-material/Palette";
-import LockIcon from "@mui/icons-material/Lock";
-import ApiIcon from "@mui/icons-material/Api";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { ReactElement } from "react";
+  CardTitle,
+} from "@/components/ui/card";
+import { Eye, EyeOff } from "lucide-react";
 
-interface Feature {
-  icon: ReactElement;
-  title: string;
-  desc: string;
-}
+export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-const features: Feature[] = [
-  {
-    icon: <StorageIcon color="primary" />,
-    title: "MongoDB Atlas Integration",
-    desc: "Connect instantly to MongoDB Atlas with Mongoose. Production-ready, scalable, and secure.",
-  },
-  {
-    icon: <PaletteIcon color="primary" />,
-    title: "Material UI Theming",
-    desc: "Modern, customizable UI with full dark/light mode support and easy branding.",
-  },
-  {
-    icon: <LockIcon color="primary" />,
-    title: "NextAuth.js Authentication",
-    desc: "Secure authentication with providers, sessions, and protected routes out of the box.",
-  },
-  {
-    icon: <ApiIcon color="primary" />,
-    title: "API Routes & Models",
-    desc: "Easily add new data models and RESTful API endpoints with our CLI generator.",
-  },
-  {
-    icon: <Brightness4Icon color="primary" />,
-    title: "Dark/Light Mode",
-    desc: "Switch themes instantly. All components and docs are theme-aware.",
-  },
-];
+  useEffect(() => {
+    const registered = searchParams.get("registered");
+    if (registered === "true") {
+      setSuccess("Registration successful! Please sign in.");
+    }
+    const authError = searchParams.get("error");
+    if (authError) {
+      // Map common NextAuth errors to more user-friendly messages
+      if (authError === "CredentialsSignin") {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError("An authentication error occurred. Please try again.");
+      }
+    }
+  }, [searchParams]);
 
-export default function HomePage(): JSX.Element {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    // Do not clear success message on new attempt, let it persist until next navigation
+
+    const result = await signIn("credentials", {
+      redirect: false, // Handle redirect manually to show errors on this page
+      email,
+      password,
+    });
+
+    if (result?.error) {
+      if (result.error === "CredentialsSignin") {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError(`Sign-in failed: ${result.error}`);
+      }
+      setLoading(false);
+    } else if (result?.ok) {
+      // Redirect to dashboard or intended page
+      // Check for a callbackUrl, otherwise default to /dashboard
+      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      router.push(callbackUrl);
+      // No need to setLoading(false) as we are navigating away
+    } else {
+      // Should not happen with redirect: false and proper error handling
+      setError("An unexpected error occurred during sign-in.");
+      setLoading(false);
+    }
+  };
+
   return (
-    <Box>
-      <Box
-        sx={{
-          minHeight: "80vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          gap: 4,
-        }}
-      >
-        <Image
-          src="/images/logo-circle-white-on-black.png"
-          alt="MongoNext Logo"
-          width={200}
-          height={200}
-          priority
-          style={{ borderRadius: "50%", background: "black" }}
-        />
-        <Typography variant="h2" component="h1" gutterBottom>
-          MongoNext
-        </Typography>
-        <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
-          The modern Next.js + MongoDB Atlas starter template with Material UI
-          and NextAuth.js and built-in features such as a RAG chatbot right out
-          of the box.
-        </Typography>
-        <Button
-          component={Link}
-          href="https://docs.mongonext.com"
-          variant="contained"
-          size="large"
-          sx={{ mt: 2 }}
-        >
-          Get Started
-        </Button>
-      </Box>
-      <Box sx={{ mt: 8, mb: 8, px: { xs: 1, sm: 2, md: 4 } }}>
-        <Box
-          sx={{
-            border: 1,
-            borderColor: "divider",
-            borderRadius: 4,
-            p: { xs: 2, sm: 4 },
-            bgcolor: "background.paper",
-          }}
-        >
-          <Grid container spacing={4} justifyContent="center">
-            {features.map((feature: Feature, idx: number) => (
-              <Grid item xs={12} sm={6} md={4} key={idx}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    p: 2,
-                  }}
-                  elevation={3}
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+          <CardDescription>
+            Sign in to continue to your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <div className="mb-4 p-3 bg-destructive/15 text-destructive rounded-md text-sm">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 p-3 bg-green-500/15 text-green-700 dark:text-green-400 rounded-md text-sm">
+              {success}
+            </div>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+                className="h-12"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="h-12 pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
                 >
-                  <CardHeader
-                    avatar={
-                      <Avatar
-                        sx={{
-                          bgcolor: "background.paper",
-                          color: "primary.main",
-                          width: 48,
-                          height: 48,
-                        }}
-                      >
-                        {feature.icon}
-                      </Avatar>
-                    }
-                    title={
-                      <Typography variant="h6">{feature.title}</Typography>
-                    }
-                    sx={{ textAlign: "center", pb: 0 }}
-                  />
-                  <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
-                    <Typography color="text.secondary">
-                      {feature.desc}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      </Box>
-    </Box>
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide" : "Show"} password
+                  </span>
+                </Button>
+              </div>
+            </div>
+            <Button type="submit" className="w-full h-12" disabled={loading}>
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Signing In...
+                </div>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="text-center block">
+          <p className="text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/auth/register"
+              className="text-primary hover:underline font-medium"
+            >
+              Sign up
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
