@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "enums:populate": "tsx enums/enums-populate-script.ts",
+    "enums:clear": "tsx enums/enums-populate-script.ts --clear",
+    "enums:verify": "tsx enums/enums-populate-script.ts --verify"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -54,11 +57,13 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
+    "dotenv": "^16.4.5",
     "eslint": "^9",
     "eslint-config-next": "15.1.8",
     "postcss": "^8",
     "prettier": "^3.5.3",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.7.0",
     "typescript": "^5"
   }
 }

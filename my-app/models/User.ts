@@ -6,156 +6,15 @@ export enum UserRole {
   CLIENT = "Client",
   DONOR = "Donor",
   VOLUNTEER = "Volunteer",
-  STAFF = "Staff",
-  BOARD = "Board",
-  BAH = "BAH",
-  EVENT_ATTENDEE = "Event Attendee",
-  OTHER = "Other",
-  ADMIN = "admin", // Keep existing admin role
-  USER = "user", // Keep existing user role
-}
-
-export enum StaffRole {
   VOLUNTEER_COORDINATOR = "Volunteer Coordinator",
-  ADMIN = "Admin",
-}
-
-export enum ReferredBy {
-  TWO_ONE_ONE = "211",
-  ADVERTISING = "Advertising",
-  FAMILY_FRIEND = "Family/Friend",
-  SUPPORT_SERVICE = "Support Service",
-  WEB_SEARCH = "Web Search",
-  OTHER = "Other",
-  UNKNOWN = "Unknown",
-}
-
-export enum Gender {
-  MALE = "Male",
-  FEMALE = "Female",
-  NON_BINARY = "Non-binary",
-  OTHER = "Other",
-}
-
-export enum Language {
-  ENGLISH = "English",
-  FRENCH = "French",
-  ARABIC = "Arabic",
-  BENGALI = "Bengali",
-  BULGARIAN = "Bulgarian",
-  CANTONESE = "Cantonese",
-  CROATIAN = "Croatian",
-  CZECH = "Czech",
-  DUTCH = "Dutch",
-  GERMAN = "German",
-  GREEK = "Greek",
-  HEBREW = "Hebrew",
-  HINDI = "Hindi",
-  IRANIAN = "Iranian",
-  ITALIAN = "Italian",
-  JAPANESE = "Japanese",
-  KOREAN = "Korean",
-  MANDARIN = "Mandarin",
-  PND = "PND",
-  PUNJABI = "Punjabi",
-  RUSSIAN = "Russian",
-  SAMOAN = "Samoan",
-  SPANISH = "Spanish",
-  SWEDISH = "Swedish",
-  TAGALOG = "Tagalog",
-  UKRAINIAN = "Ukrainian",
-  UNKNOWN = "Unknown",
-  URDU = "Urdu",
-}
-
-export enum Ethnicity {
-  ABORIGINAL = "Aboriginal/First Nations/Metis",
-  ARAB = "Arab",
-  BLACK = "Black",
-  CHINESE = "Chinese",
-  FILIPINO = "Filipino",
-  JAPANESE = "Japanese",
-  KOREAN = "Korean",
-  LATIN_AMERICAN = "Latin American",
-  OTHER = "Other",
-  PND = "PND",
-  SOUTH_ASIA = "South Asia",
-  SOUTHEAST_ASIA = "Southeast Asia",
-  UNKNOWN = "Unknown",
-  WEST_ASIA = "West Asia",
-  WHITE = "White",
-}
-
-export enum Status {
-  ACTIVE = "Active",
-  AWAY = "Away",
-  INACTIVE = "Inactive",
-  NEW = "New",
-  PENDING = "Pending",
-}
-
-export enum BookingStatus {
-  ASSIGNED = "Assigned",
-  CANCELLED = "Cancelled",
-  COMPLETED = "Completed",
-  DELETED = "Deleted",
-  NOT_ASSIGNED = "Not Assigned",
-}
-
-export enum ServiceType {
-  DESTINATION_WALK = "Destination Walk",
-  DOCUMENT_ASSISTANCE = "Document Assistance",
-  GARDENING = "Gardening",
-  MEDICAL_DRIVE = "Medical Drive",
-  MINOR_HOME_REPAIR = "Minor Home Repair",
-  MISCELLANEOUS_DRIVE = "Miscellaneous Drive",
-  MISCELLANEOUS_SERVICE = "Miscellaneous Service",
-  PACKING_AND_SORTING = "Packing and Sorting",
-  REASSURANCE_PHONE_CALL = "Reassurance Phone Call",
-  RECREATION_DRIVE = "Recreation Drive",
-  SHOPPING_DRIVE = "Shopping Drive",
-  SOCIAL_PHONE_CALL = "Social Phone Call",
-  TECHNOLOGY_SUPPORT = "Technology Support",
-  VISITING = "Visiting",
-  VISITING_WITH_DRIVE = "Visiting with Drive",
-  WALKING = "Walking",
-  WALKING_WITH_DRIVE = "Walking with Drive",
-  WHEELCHAIR_PUSH = "Wheelchair Push",
-}
-
-export enum ProgramType {
-  AMBASSADOR = "Ambassador",
-  BETTER_AT_HOME = "Better at Home",
-  COMPANION_PETS = "Companion Pets",
-  CULTURAL_COMPANIONS = "Cultural Companions",
-  HOLIDAY_GIFT_EXCHANGE = "Holiday Gift Exchange",
-  INCOME_TAX = "Income Tax",
-  SILENT_DISCO = "Silent Disco",
-  SNOW_ANGELS = "Snow Angels",
-  WELCOME_TEAM = "Welcome Team",
-}
-
-export enum MobilityAid {
-  CANE = "Cane",
-  WALKING_POLES = "Walking Poles",
-  WALKER = "Walker",
-  WHEELCHAIR = "Wheelchair",
-}
-
-export enum VehicleType {
-  COUPE = "Coupe",
-  SEDAN = "Sedan",
-  CROSSOVER = "Crossover",
-  SUV = "SUV",
-  MINIVAN = "Minivan",
-  VAN = "Van",
-  TRUCK = "Truck",
-}
-
-export enum BookingFrequency {
-  ONE_TIME = "One-Time",
-  ONGOING = "Ongoing",
-  RECURRING = "Recurring",
+  STAFF = "Staff",
+  ADMIN = "Admin", // Added based on JSON schema structure within Staff
+  SUPER_ADMIN = "Super Admin", // Added based on JSON schema structure within Staff
+  BOARD = "Board",
+  SPP = "SPP", // Social Prescribing Participant - Added based on JSON schema
+  EVENT_ATTENDEE = "Event Attendee",
+  OTHER = "Other", // Kept from provided TS enums
+  // USER = "user", // Removed as it's not listed as a specific role in the JSON schema
 }
 
 // Define the schema using Mongoose's automatic type inference
@@ -167,12 +26,16 @@ const userSchemaDefinition = {
       default: () => new mongoose.Types.ObjectId().toString(),
     },
     roles: [
-      { type: String, enum: Object.values(UserRole), default: [UserRole.USER] },
+      {
+        type: String,
+        enum: Object.values(UserRole),
+        default: [UserRole.CLIENT],
+      },
     ],
-    staff_roles: [{ type: String, enum: Object.values(StaffRole) }],
+    staff_roles: [String],
     enews_subscription: { type: Boolean, default: false },
     letter_mail_subscription: { type: Boolean, default: false },
-    referred_by: { type: String, enum: Object.values(ReferredBy) },
+    referred_by: { type: String },
   },
 
   // Personal Information
@@ -191,15 +54,15 @@ const userSchemaDefinition = {
       country: String,
       postal_code: String,
     },
-    gender: { type: String, enum: Object.values(Gender) },
+    gender: { type: String },
     interests: [String],
     skills: [String],
     languages: {
-      primary_language: { type: String, enum: Object.values(Language) },
-      other_languages: [{ type: String, enum: Object.values(Language) }],
+      primary_language: { type: String },
+      other_languages: [String],
       notes: String,
     },
-    ethnicity: [{ type: String, enum: Object.values(Ethnicity) }],
+    ethnicity: [String],
     spouse_partner: {
       id: String,
       name: String,
@@ -251,17 +114,17 @@ const userSchemaDefinition = {
 
   // Client Information
   client_information: {
-    current_status: { type: String, enum: Object.values(Status) },
+    current_status: { type: String },
     client_start_date: Date,
     internal_flags: [String],
     booking_flags: [String],
     volunteer_exceptions: [String],
     family_involvement: String,
-    mobility_aids: [{ type: String, enum: Object.values(MobilityAid) }],
-    vehicle_requirements: [{ type: String, enum: Object.values(VehicleType) }],
+    mobility_aids: [String],
+    vehicle_requirements: [String],
     client_services: [
       {
-        service_type: { type: String, enum: Object.values(ServiceType) },
+        service_type: { type: String },
         service_id: {
           type: String,
           default: () => new mongoose.Types.ObjectId().toString(),
@@ -274,7 +137,7 @@ const userSchemaDefinition = {
     ],
     client_programs: [
       {
-        program_type: { type: String, enum: Object.values(ProgramType) },
+        program_type: { type: String },
         program_id: {
           type: String,
           default: () => new mongoose.Types.ObjectId().toString(),
@@ -296,7 +159,7 @@ const userSchemaDefinition = {
 
   // Volunteer Information
   volunteer_information: {
-    current_status: { type: String, enum: Object.values(Status) },
+    current_status: { type: String },
     volunteer_intake_date: Date,
     volunteer_orientation_date: Date,
     volunteer_start_date: Date,
@@ -309,7 +172,7 @@ const userSchemaDefinition = {
     client_exceptions: [String],
     volunteer_services: [
       {
-        service_type: { type: String, enum: Object.values(ServiceType) },
+        service_type: { type: String },
         service_id: {
           type: String,
           default: () => new mongoose.Types.ObjectId().toString(),
@@ -322,7 +185,7 @@ const userSchemaDefinition = {
     ],
     volunteer_programs: [
       {
-        program_type: { type: String, enum: Object.values(ProgramType) },
+        program_type: { type: String },
         program_id: {
           type: String,
           default: () => new mongoose.Types.ObjectId().toString(),
@@ -358,9 +221,9 @@ const userSchemaDefinition = {
         vehicle_make: String,
         vehicle_model: String,
         vehicle_year: String,
-        vehicle_type: { type: String, enum: Object.values(VehicleType) },
+        vehicle_type: { type: String },
         number_of_passengers: String,
-        accommodations: [{ type: String, enum: Object.values(MobilityAid) }],
+        accommodations: [String],
       },
     },
     security_clearance: {
@@ -393,7 +256,7 @@ const userSchemaDefinition = {
 
   // Donor Information
   donor_information: {
-    current_status: { type: String, enum: [Status.ACTIVE, Status.INACTIVE] },
+    current_status: { type: String },
     active_engagement: Boolean,
     monthly_donor: Boolean,
     monthly_amount: String,
@@ -419,7 +282,7 @@ const userSchemaDefinition = {
 
   // Authentication fields (keep existing for compatibility)
   password: { type: String, required: true },
-  role: { type: String, enum: ["user", "admin"], default: "user" }, // Legacy role field
+  role: { type: String, default: "user" }, // Legacy role field
 
   // Legacy fields for backward compatibility
   name: { type: String },
@@ -483,7 +346,6 @@ UserSchema.methods.getPrimaryEmail = function (): string {
 
 // Create indexes
 UserSchema.index({ "personal_information.email": 1 });
-
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
 
 export default User;
