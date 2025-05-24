@@ -2,6 +2,7 @@ import mongoose, { Document, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 
 // Enums for various fields
+// Represents the high-level roles a user can have.
 export enum UserRole {
   CLIENT = "Client",
   DONOR = "Donor",
