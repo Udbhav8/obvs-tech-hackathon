@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 
 // Enums for various fields
@@ -344,8 +344,243 @@ UserSchema.methods.getPrimaryEmail = function (): string {
   return this.personal_information?.email || this.email || "";
 };
 
+// TypeScript interface for User document
+interface IUser extends Document {
+  // General Information
+  general_information?: {
+    user_id?: string;
+    roles?: string[];
+    staff_roles?: string[];
+    enews_subscription?: boolean;
+    letter_mail_subscription?: boolean;
+    referred_by?: string;
+  };
+
+  // Personal Information
+  personal_information: {
+    first_name: string;
+    preferred_name?: string;
+    last_name: string;
+    email: string;
+    cell_phone?: string;
+    home_phone?: string;
+    date_of_birth?: Date;
+    home_address?: {
+      street_address?: string;
+      city?: string;
+      province?: string;
+      country?: string;
+      postal_code?: string;
+    };
+    gender?: string;
+    interests?: string[];
+    skills?: string[];
+    languages?: {
+      primary_language?: string;
+      other_languages?: string[];
+      notes?: string;
+    };
+    ethnicity?: string[];
+    spouse_partner?: {
+      id?: string;
+      name?: string;
+    };
+    emergency_contacts?: Array<{
+      emergency_contact_id?: string;
+      name?: string;
+      relationship?: string;
+      home_phone?: string;
+      cell_phone?: string;
+      work_phone?: string;
+      email?: string;
+      notes?: string;
+    }>;
+  };
+
+  // Health Information
+  health_information?: {
+    allergies?: string[];
+    dnr?: boolean;
+    dnr_notes?: string;
+    smoker?: boolean;
+    health_conditions?: Array<{
+      health_condition_id?: string;
+      health_condition_type?: string;
+      notes?: string;
+    }>;
+    accessibility_needs?: Array<{
+      accessibility_need_id?: string;
+      accessibility_need_type?: string;
+      notes?: string;
+    }>;
+  };
+
+  // Client Information
+  client_information?: {
+    current_status?: string;
+    client_start_date?: Date;
+    internal_flags?: string[];
+    booking_flags?: string[];
+    volunteer_exceptions?: string[];
+    family_involvement?: string;
+    mobility_aids?: string[];
+    vehicle_requirements?: string[];
+    client_services?: Array<{
+      service_type?: string;
+      service_id?: string;
+      is_active?: boolean;
+      start_date?: Date;
+      end_date?: Date;
+      notes?: string;
+    }>;
+    client_programs?: Array<{
+      program_type?: string;
+      program_id?: string;
+      is_active?: boolean;
+      start_date?: Date;
+      end_date?: Date;
+      notes?: string;
+    }>;
+    client_notes?: Array<{
+      date?: Date;
+      author?: string;
+      note?: string;
+    }>;
+  };
+
+  // Volunteer Information
+  volunteer_information?: {
+    current_status?: string;
+    volunteer_intake_date?: Date;
+    volunteer_orientation_date?: Date;
+    volunteer_start_date?: Date;
+    volunteer_end_date?: Date;
+    volunteer_experience?: string;
+    work_experience?: string;
+    education?: string;
+    internal_flags?: string[];
+    booking_flags?: string[];
+    client_exceptions?: string[];
+    volunteer_services?: Array<{
+      service_type?: string;
+      service_id?: string;
+      is_active?: boolean;
+      start_date?: Date;
+      end_date?: Date;
+      notes?: string;
+    }>;
+    volunteer_programs?: Array<{
+      program_type?: string;
+      program_id?: string;
+      is_active?: boolean;
+      start_date?: Date;
+      end_date?: Date;
+      notes?: string;
+    }>;
+    volunteer_availability?: {
+      Monday?: { start_time?: string; end_time?: string };
+      Tuesday?: { start_time?: string; end_time?: string };
+      Wednesday?: { start_time?: string; end_time?: string };
+      Thursday?: { start_time?: string; end_time?: string };
+      Friday?: { start_time?: string; end_time?: string };
+      Saturday?: { start_time?: string; end_time?: string };
+      Sunday?: { start_time?: string; end_time?: string };
+    };
+    volunteer_driving_information?: {
+      accessible_parking_permit?: {
+        parking_permit?: boolean;
+        parking_permit_number?: string;
+        parking_permit_expiry_date?: Date;
+      };
+      drivers_license_number?: string;
+      drivers_abstract?: {
+        completion_date?: Date;
+        expiration_date?: Date;
+        notes?: string;
+      };
+      vehicle_information?: {
+        vehicle_make?: string;
+        vehicle_model?: string;
+        vehicle_year?: string;
+        vehicle_type?: string;
+        number_of_passengers?: string;
+        accommodations?: string[];
+      };
+    };
+    security_clearance?: {
+      completion_date?: Date;
+      expiration_date?: Date;
+      notes?: string;
+    };
+    references?: Array<{
+      first_name?: string;
+      last_name?: string;
+      relationship?: string;
+      email?: string;
+      cell_phone?: string;
+      home_phone?: string;
+      work_phone?: string;
+      notes?: string;
+      reference_check_completed_date?: Date;
+      reference_check_completed_by?: string;
+    }>;
+    volunteer_notes?: Array<{
+      date?: Date;
+      author?: string;
+      note?: string;
+    }>;
+  };
+
+  // Donor Information
+  donor_information?: {
+    current_status?: string;
+    active_engagement?: boolean;
+    monthly_donor?: boolean;
+    monthly_amount?: string;
+    donations?: Array<{
+      donation_date?: Date;
+      processed_date?: Date;
+      donation_type?: string[];
+      donation_amount?: string;
+      donation_value_advantage?: string;
+      donation_eligible_amount?: string;
+      donation_receipt?: boolean;
+    }>;
+    donor_notes?: Array<{
+      date?: Date;
+      author?: string;
+      note?: string;
+    }>;
+  };
+
+  // Authentication fields
+  password: string;
+  role?: string;
+
+  // Legacy fields
+  name?: string;
+  favorites?: mongoose.Types.ObjectId[];
+  watchlist?: mongoose.Types.ObjectId[];
+  preferences?: {
+    genres?: string[];
+    notifications?: {
+      email?: boolean;
+      push?: boolean;
+    };
+  };
+
+  // Methods
+  matchPassword(enteredPassword: string): Promise<boolean>;
+  isAdmin(): boolean;
+  getDisplayName(): string;
+  getPrimaryEmail(): string;
+}
+
 // Create indexes
 UserSchema.index({ "personal_information.email": 1 });
-const User = mongoose.model("User", UserSchema);
+
+// Export the model using the pattern from the GitHub issue to prevent "Cannot overwrite model once compiled" error
+const User = (mongoose.models.User ||
+  mongoose.model("User", UserSchema)) as Model<IUser>;
 
 export default User;

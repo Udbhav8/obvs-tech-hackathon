@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 
 export interface IEnumValue {
   key: string;
@@ -6,13 +6,26 @@ export interface IEnumValue {
   isActive: boolean;
 }
 
-export interface IEnum {
+export interface IEnum extends Document {
   name: string;
   description?: string;
   values: IEnumValue[];
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+
+  // Instance methods
+  addOrUpdateValue(
+    key: string,
+    value: string,
+    isActive?: boolean
+  ): Promise<IEnum>;
+}
+
+// Interface for static methods
+export interface IEnumModel extends Model<IEnum> {
+  getEnumValues(enumName: string): Promise<string[]>;
+  getEnumMap(enumName: string): Promise<Record<string, string>>;
 }
 
 const EnumValueSchema = new mongoose.Schema<IEnumValue>({
@@ -101,15 +114,15 @@ EnumSchema.methods.addOrUpdateValue = function (
   return this.save();
 };
 
-const Enum = mongoose.models.Enum || mongoose.model<IEnum>("Enum", EnumSchema);
-
-// Create unique index to ensure key uniqueness within each enum
+// Create indexes before model creation
 EnumSchema.index({ name: 1, "values.key": 1 }, { unique: true, sparse: true });
-
-// Create unique index to ensure value uniqueness within each enum
 EnumSchema.index(
   { name: 1, "values.value": 1 },
   { unique: true, sparse: true }
 );
+
+// Export the model using the pattern to prevent "Cannot overwrite model once compiled" error
+const Enum = (mongoose.models.Enum ||
+  mongoose.model<IEnum>("Enum", EnumSchema)) as IEnumModel;
 
 export default Enum;
