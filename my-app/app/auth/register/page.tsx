@@ -91,8 +91,12 @@ export default function RegisterPage() {
         // Redirect to home page after successful registration and auto-login
         router.push("/");
       }
-    } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
