@@ -6,7 +6,6 @@
 import { UserRole } from "@/models/User";
 import Enum from "../models/Enum";
 
-
 // Possible ways a user was referred to the organization.
 enum ReferredBy {
   TWO_ONE_ONE = "211",
@@ -296,7 +295,7 @@ export type EnumName = keyof typeof USER_ENUM_REGISTRY;
 
 // Type for the return value of fetchUserEnumsFromDatabase
 export type UserEnums = {
-  [K in EnumName]: Record<string, string>;
+  [K in EnumName]: string[];
 };
 
 // Function to fetch all user enums from the database
@@ -307,17 +306,16 @@ export async function fetchUserEnumsFromDatabase(): Promise<UserEnums> {
   for (const enumName of enumNames) {
     try {
       const enumMap = await Enum.getEnumMap(enumName);
-      result[enumName] = enumMap;
+      result[enumName] = Object.values(enumMap);
     } catch (error) {
       console.warn(`Failed to fetch enum ${enumName} from database:`, error);
       // Fallback to local enum definition
-      result[enumName] = USER_ENUM_REGISTRY[enumName] as Record<string, string>;
+      result[enumName] = Object.values(USER_ENUM_REGISTRY[enumName]);
     }
   }
 
   return result;
 }
-
 
 // Export the registry for the populate script
 export { USER_ENUM_REGISTRY };
