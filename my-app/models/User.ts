@@ -483,8 +483,6 @@ UserSchema.methods.getPrimaryEmail = function (): string {
 
 // Create indexes
 UserSchema.index({ "personal_information.email": 1 });
-UserSchema.index({ email: 1 });
-UserSchema.index({ "general_information.roles": 1 });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 

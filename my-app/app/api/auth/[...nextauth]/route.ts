@@ -8,7 +8,6 @@ interface ExtendedUser {
   id: string;
   email: string;
   name: string;
-  role: string;
   roles: string[];
 }
 
@@ -35,10 +34,7 @@ export const authOptions: NextAuthOptions = {
         try {
           // Try to find user by personal_information.email first, then fallback to legacy email field
           const user = await User.findOne({
-            $or: [
-              { "personal_information.email": credentials.email },
-              { email: credentials.email },
-            ],
+            $and: [{ "personal_information.email": credentials.email }],
           }).select("+password");
 
           if (!user) {
@@ -53,27 +49,22 @@ export const authOptions: NextAuthOptions = {
           if (!isMatch) {
             throw new Error("INVALID_CREDENTIALS");
           }
+          console.log(UserRole.ADMIN, "HELLOOO")
+          console.log(user.general_information?.roles, "HELLOOO")
 
-          if (user.role !== 'admin') {
+          if (!user.general_information?.roles?.includes(UserRole.ADMIN)) {
             throw new Error("ADMIN_REQUIRED");
           }
 
           // Get user details from the new schema structure
-          const displayName = user.getDisplayName();
-          const primaryEmail = user.getPrimaryEmail();
+          const displayName = user.personal_information?.first_name;
+          const primaryEmail = user.personal_information?.email;
           const userRoles = user.general_information?.roles || [UserRole.USER];
-
-          // Determine primary role for legacy compatibility
-          let primaryRole = "user";
-          if (user.role === "admin" || userRoles.includes(UserRole.ADMIN)) {
-            primaryRole = "admin";
-          }
 
           return {
             id: user._id.toString(),
-            email: primaryEmail,
-            name: displayName,
-            role: primaryRole,
+            email: primaryEmail ?? "",
+            name: displayName ?? "",
             roles: userRoles,
           };
         } catch (error) {
@@ -99,7 +90,6 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         const extendedUser = user as ExtendedUser;
         token.id = extendedUser.id;
-        token.role = extendedUser.role;
         token.roles = extendedUser.roles;
       }
       return token;
@@ -107,7 +97,6 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         (session.user as ExtendedUser).id = token.id as string;
-        (session.user as ExtendedUser).role = token.role as string;
         (session.user as ExtendedUser).roles = token.roles as string[];
       }
       return session;
