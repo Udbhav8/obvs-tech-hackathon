@@ -153,16 +153,18 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Admin Dashboard</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <a href='/admin' className="text-sm text-muted-foreground" >
-                Modern admin interface built with shadcn/ui components and
-                real-time updates.
-              </a>
-            </CardContent>
+          <Card className="cursor-pointer transition-all hover:shadow-lg hover:scale-105">
+            <Link href="/admin" className="block">
+              <CardHeader>
+                <CardTitle className="text-lg">Admin Dashboard</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Modern admin interface built with shadcn/ui components and
+                  real-time updates.
+                </p>
+              </CardContent>
+            </Link>
           </Card>
         </div>
       </main>
