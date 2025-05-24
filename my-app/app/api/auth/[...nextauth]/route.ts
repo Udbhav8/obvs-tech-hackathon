@@ -1,8 +1,16 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectDB from "../../../../lib/mongodb";
-import User from "../../../../models/User";
+import User, { UserRole } from "../../../../models/User";
 import bcrypt from "bcryptjs";
+
+interface ExtendedUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  roles: string[];
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<ExtendedUser | null> {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter an email and password");
         }
@@ -25,9 +33,13 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const user = await User.findOne({ email: credentials.email }).select(
-            "+password"
-          );
+          // Try to find user by personal_information.email first, then fallback to legacy email field
+          const user = await User.findOne({
+            $or: [
+              { "personal_information.email": credentials.email },
+              { email: credentials.email },
+            ],
+          }).select("+password");
 
           if (!user) {
             throw new Error("INVALID_CREDENTIALS");
@@ -46,11 +58,23 @@ export const authOptions: NextAuthOptions = {
             throw new Error("ADMIN_REQUIRED");
           }
 
+          // Get user details from the new schema structure
+          const displayName = user.getDisplayName();
+          const primaryEmail = user.getPrimaryEmail();
+          const userRoles = user.general_information?.roles || [UserRole.USER];
+
+          // Determine primary role for legacy compatibility
+          let primaryRole = "user";
+          if (user.role === "admin" || userRoles.includes(UserRole.ADMIN)) {
+            primaryRole = "admin";
+          }
+
           return {
             id: user._id.toString(),
-            email: user.email,
-            name: user.name,
-            role: user.role,
+            email: primaryEmail,
+            name: displayName,
+            role: primaryRole,
+            roles: userRoles,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -73,15 +97,18 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = (user as any).role;
+        const extendedUser = user as ExtendedUser;
+        token.id = extendedUser.id;
+        token.role = extendedUser.role;
+        token.roles = extendedUser.roles;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
+        (session.user as ExtendedUser).id = token.id as string;
+        (session.user as ExtendedUser).role = token.role as string;
+        (session.user as ExtendedUser).roles = token.roles as string[];
       }
       return session;
     },
