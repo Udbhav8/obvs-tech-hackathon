@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!user) {
-            throw new Error("No user found with this email");
+            throw new Error("INVALID_CREDENTIALS");
           }
 
           const isMatch = await bcrypt.compare(
@@ -39,13 +39,13 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isMatch) {
-            throw new Error("Incorrect password");
+            throw new Error("INVALID_CREDENTIALS");
           }
 
           if (user.role !== 'admin') {
-            throw new Error('Access denied. Admin privileges required.');
+            throw new Error("ADMIN_REQUIRED");
           }
-          
+
           return {
             id: user._id.toString(),
             email: user.email,
@@ -54,7 +54,10 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error("Auth error:", error);
-          throw error;
+          if (error instanceof Error) {
+            throw error;
+          }
+          throw new Error("An unexpected error occurred");
         }
       },
     }),
