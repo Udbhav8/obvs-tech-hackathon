@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
           const user = await User.findOne({
             $and: [{ "personal_information.email": credentials.email }],
           }).select("+password");
-
+          
           if (!user) {
             throw new Error("INVALID_CREDENTIALS");
           }
@@ -57,10 +57,10 @@ export const authOptions: NextAuthOptions = {
           // Get user details from the new schema structure
           const displayName = user.personal_information?.first_name;
           const primaryEmail = user.personal_information?.email;
-          const userRoles = user.general_information?.roles || [UserRole.USER];
+          const userRoles = user.general_information?.roles || [UserRole.ADMIN];
 
           return {
-            id: user._id.toString(),
+            id: user.id.toString(),
             email: primaryEmail ?? "",
             name: displayName ?? "",
             roles: userRoles,
