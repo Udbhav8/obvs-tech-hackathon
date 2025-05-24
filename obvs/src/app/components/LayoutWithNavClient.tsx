@@ -20,7 +20,7 @@ export default function LayoutWithNavClient({
       {!isAdmin && (
         <Sidebar>{/* Sidebar content/items will likely go here */}</Sidebar>
       )}
-      <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <main className="flex-1 flex flex-col">
         {children}
       </main>
       {/* {!isAdmin && <Footer />} Footer might be integrated differently now */}

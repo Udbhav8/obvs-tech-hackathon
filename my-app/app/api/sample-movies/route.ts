@@ -4,7 +4,7 @@ import {
   createSampleMovie,
   updateSampleMovie,
   deleteSampleMovie,
-} from "../../../utils/sampleData";
+} from "../../../../obvs/src/utils/sampleData";
 
 export async function GET(request: NextRequest) {
   try {

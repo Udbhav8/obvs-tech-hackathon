@@ -1,9 +1,9 @@
-import { getMovieModel } from "../models/Movie";
-import { getCommentModel } from "../models/Comment";
-import { getTheaterModel } from "../models/Theater";
-import { IMovie } from "../models/Movie";
-import { IComment } from "../models/Comment";
-import { ITheater } from "../models/Theater";
+import { getMovieModel } from "../../../my-app/models/Movie";
+import { getCommentModel } from "../../../my-app/models/Comment";
+import { getTheaterModel } from "../../../my-app/models/Theater";
+import { IMovie } from "../../../my-app/models/Movie";
+import { IComment } from "../../../my-app/models/Comment";
+import { ITheater } from "../../../my-app/models/Theater";
 
 // Helper function to get models for sample_mflix database
 export const getSampleMflixModels = () => ({

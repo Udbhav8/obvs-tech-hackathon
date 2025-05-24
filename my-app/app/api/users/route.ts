@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(user);
     }
 
-    let query: any = {};
+    const query: any = {};
     if (category) {
       query.category = category;
     }
