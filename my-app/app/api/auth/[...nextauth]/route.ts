@@ -49,8 +49,6 @@ export const authOptions: NextAuthOptions = {
           if (!isMatch) {
             throw new Error("INVALID_CREDENTIALS");
           }
-          console.log(UserRole.ADMIN, "HELLOOO")
-          console.log(user.general_information?.roles, "HELLOOO")
 
           if (!user.general_information?.roles?.includes(UserRole.ADMIN)) {
             throw new Error("ADMIN_REQUIRED");

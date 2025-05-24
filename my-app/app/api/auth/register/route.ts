@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import connectDB from "../../../../lib/mongodb";
-import User, { UserRole } from "../../../../models/User";
+import User, {  UserRole } from "../../../../models/User";
 
 interface RegistrationData {
   name: string;
