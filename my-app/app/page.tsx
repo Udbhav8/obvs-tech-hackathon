@@ -65,16 +65,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen" style={{background: '#bd1d4c'}}>
-          <div className="items-center py-12">
-            <Image
-                src="/image/OBVS-transparent-logo.png"
-                alt="OBVS Transparent Logo"
-                width={200}
-                height={50}
-                className="mx-auto"
-              />
-          </div>
-          <div className="flex items-baseline justify-center ">
+      <div className="items-center py-12">
+        <Image
+            src="/image/OBVS-transparent-logo.png"
+            alt="OBVS Transparent Logo"
+            width={200}
+            height={50}
+            className="mx-auto"
+          />
+      </div>
+      <div className="flex items-baseline justify-center">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
@@ -183,79 +183,3 @@ export default function LoginPage() {
 
   );
 }
-
-// "use client";
-
-// import Image from "next/image";
-// import Link from "next/link";
-// import { useSession, signOut } from "next-auth/react";
-
-// interface ExtendedUser {
-//   id?: string;
-//   name?: string | null;
-//   email?: string | null;
-//   image?: string | null;
-//   role?: string;
-// }
-// import { Button } from "@/components/ui/button";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { LogOut, Settings, User, Shield } from "lucide-react";
-
-// export default function Home() {
-//   const { data: session, status } = useSession();
-
-//   if (status === "loading") {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center">
-//         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen p-8 pb-20 gap-16 sm:p-20">
-//       <main className="max-w-4xl mx-auto">
-//         <div className="text-center mb-12">
-//           <Image
-//             className="dark:invert mx-auto mb-8"
-//             src="/images/OBVS-colour-logo.png"
-//             alt="OBVS"
-//             width={180}
-//             height={38}
-//             priority
-//           />
-//           <h1 className="text-5xl mb-4 text-shadow-lg">Sign In to OBVS</h1>
-//           {/* <p className="text-xl text-muted-foreground">
-//             A modern admin dashboard with user and booking management
-//           </p> */}
-//         </div>
-//         <Card className="max-w-2xl mx-auto">
-//             <CardHeader>
-//               <CardTitle>Get Started</CardTitle>
-//               <CardDescription>
-//                 Sign in to access your account and manage your data
-//               </CardDescription>
-//             </CardHeader>
-//             <CardContent>
-//               <div className="flex gap-4 justify-center">
-//                 <Button asChild>
-//                   <Link href="/auth/login">Sign In</Link>
-//                 </Button>
-//                 {/* Do not allow sign up for now */}
-//                 <Button variant="outline" asChild>
-//                   <Link href="/auth/register">Sign Up</Link>
-//                 </Button>
-//               </div>
-//             </CardContent>
-//           </Card>
-//       </main>
-//     </div>
-//   );
-// }
