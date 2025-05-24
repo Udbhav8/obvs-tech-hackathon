@@ -1,9 +1,8 @@
 import { Inter } from "next/font/google";
 import { Metadata } from "next";
+import "../styles/globals.css";
 import AuthProvider from "./components/AuthProvider";
-import ThemeRegistry from "./components/ThemeRegistry";
 import ClientLayoutWrapper from "./components/ClientLayoutWrapper";
-import FloatingChatbot from "../components/FloatingChatbot";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,15 +18,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body
-        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-        className={inter.className}
-      >
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
         <AuthProvider>
-          <ThemeRegistry>
-            <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-            <FloatingChatbot />
-          </ThemeRegistry>
+          <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         </AuthProvider>
       </body>
     </html>

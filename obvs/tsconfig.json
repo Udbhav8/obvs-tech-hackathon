@@ -33,7 +33,8 @@
     ".next/types/**/*.ts",
     "next.config.mjs",
     "prettier.config.cjs",
-    "postcss.config.cjs"
+    "postcss.config.cjs",
+    "../my-app/lib/mongodb.ts"
   ],
   "exclude": ["node_modules"]
 }
