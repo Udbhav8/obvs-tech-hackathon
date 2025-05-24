@@ -1,7 +1,4 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { FrequencyType, RecurrenceFrequency, BookingStatus, BookingType, CancellationReason} from '../enums/booking-enums';
-import { BookingVolunteerStatus, EventAttendeeUserType } from '../enums/booking-enums';
-
 // ------------------------------------------------------------------------------------------------
 // INTERFACES
 // ------------------------------------------------------------------------------------------------
@@ -136,9 +133,9 @@ export interface IJobHistory extends Document {
 // Base Booking Schema
 const BookingSchema = new Schema<IBooking>({
   booking_id: { type: Number, required: true, unique: true }, // Assuming booking_id is unique
-  booking_type: { type: String, enum: Object.values(BookingType), required: true },
-  status: { type: String, enum: Object.values(BookingStatus), required: true },
-  frequency_type: { type: String, enum: Object.values(FrequencyType), required: true },
+  booking_type: { type: String, required: true },
+  status: { type: String, required: true },
+  frequency_type: { type: String, required: true },
   date: { type: Date, required: true },
   start_time: { type: String, required: true, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
   appointment_time: { type: String, required: true, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
@@ -147,12 +144,12 @@ const BookingSchema = new Schema<IBooking>({
   notes: { type: String, minlength: 0, maxlength: 2000 },
   num_volunteers_needed: { type: Number, required: true, min: 1, max: 4, default: 1 },
   client_confirmation: { type: Boolean, required: true },
-  cancellation_reason: { type: String, enum: [...Object.values(CancellationReason), null], default: null },
+  cancellation_reason: { type: String, default: null },
   cancellation_notes: { type: String, default: null },
   is_parent_booking: { type: Boolean, required: true },
   parent_booking_id: { type: Number, default: null },
   end_date: { type: Date, default: null },
-  recurrence_frequency: { type: String, enum: [...Object.values(RecurrenceFrequency), null], default: null },
+  recurrence_frequency: { type: String, default: null },
   recurrence_days: { type: [Number], default: null },
 }, { timestamps: true });
 
@@ -242,7 +239,7 @@ const BookingClientRelationSchema = new Schema<IBookingClientRelation>({
 const BookingVolunteerRelationSchema = new Schema<IBookingVolunteerRelation>({
   booking_id: { type: Number, required: true, ref: 'Booking' }, // Reference to Booking
   volunteer_id: { type: Number, required: true, ref: 'User' }, // Reference to User (Volunteer)
-  status: { type: String, enum: Object.values(BookingVolunteerStatus), required: true },
+  status: { type: String, required: true },
 }, { _id: false });
 
 // Event Attendee Schema
@@ -250,7 +247,7 @@ const EventAttendeeSchema = new Schema<IEventAttendee>({
   event_booking_id: { type: Number, required: true, ref: 'EventBooking' }, // Reference to EventBooking
   user_id: { type: Number, default: null, ref: 'User' }, // Reference to User, nullable for external
   external_name: { type: String, default: null },
-  user_type: { type: String, enum: Object.values(EventAttendeeUserType), required: true },
+  user_type: { type: String, required: true },
 });
 
 // Volunteer Absence Schema
