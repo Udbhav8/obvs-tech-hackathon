@@ -5,7 +5,7 @@ server/node_modules
 client/npm-debug.log*
 
 client/build
-
+.env
 # **/.env*
 !**/.env*.example
 

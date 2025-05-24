@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 
 import { loginUserWithEmail } from '../../store/actions/authActions';
-import { , GOOGLE_AUTH_LINK } from '../../constants';
+import {  GOOGLE_AUTH_LINK } from '../../constants';
 import { loginSchema } from './validation';
 import './styles.css';
 

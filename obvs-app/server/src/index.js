@@ -5,12 +5,24 @@ import https from 'https';
 import { readFileSync } from 'fs';
 import { resolve, join } from 'path';
 import passport from 'passport';
+import cors from 'cors';
 import all_routes from 'express-list-endpoints';
 
 import routes from './routes';
 import { seedDb } from './utils/seed';
 
 const app = express();
+
+// Configure CORS options
+const corsOptions = {
+  origin: 'http://localhost:3000', // Allow requests from the React frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // Allow cookies to be sent
+};
+
+// Enable CORS with options
+app.use(cors(corsOptions));
 
 // Bodyparser Middleware
 app.use(express.json());
@@ -37,13 +49,14 @@ mongoose
   .then(() => {
     console.log('MongoDB Connected...');
     seedDb();
+    console.log('Seeded');
   })
   .catch((err) => console.log(err));
 
 // Use Routes
 app.use('/', routes);
 app.use('/public/images', express.static(join(__dirname, '../public/images')));
-
+console.log(isProduction, 'isProduction');
 // Serve static assets if in production
 if (isProduction) {
   // Set static folder
@@ -52,21 +65,16 @@ if (isProduction) {
 
   // app.get('*', (req, res) => {
   //   // index is in /server/src so 2 folders up
-  //   res.sendFile(resolve(__dirname, '../..', 'client', 'build', 'index.html')); 
+  //   res.sendFile(resolve(__dirname, '../..', 'client', 'build', 'index.html'));
   // });
 
   const port = process.env.PORT || 80;
   app.listen(port, () => console.log(`Server started on port ${port}`));
 } else {
-  const port = process.env.PORT || 5000;
+  const port = process.env.PORT || 5001;
 
-  const httpsOptions = {
-    key: readFileSync(resolve(__dirname, '../security/cert.key')),
-    cert: readFileSync(resolve(__dirname, '../security/cert.pem')),
-  };
-
-  const server = https.createServer(httpsOptions, app).listen(port, () => {
-    console.log('https server running at ' + port);
+  app.listen(port, () => {
+    console.log('http server running at ' + port);
     // console.log(all_routes(app));
   });
 }
