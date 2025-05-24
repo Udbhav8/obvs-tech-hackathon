@@ -12,7 +12,7 @@ if (!process.env.MONGODB_URI) {
 
 import mongoose from "mongoose";
 import Enum, { IEnumValue } from "../models/Enum";
-import { ENUM_REGISTRY } from "./user-enums";
+import { USER_ENUM_REGISTRY } from "./user-enums";
 
 // Custom connection function that uses the environment variable at runtime
 async function connectToMongoDB(): Promise<typeof mongoose | null> {
@@ -89,9 +89,9 @@ async function populateEnum(
 
 async function populateAllEnums(): Promise<void> {
   console.log("🚀 Starting enum population process...");
-  console.log(`📊 Found ${Object.keys(ENUM_REGISTRY).length} enums to process`);
+  console.log(`📊 Found ${Object.keys(USER_ENUM_REGISTRY).length} enums to process`);
 
-  for (const [enumName, enumObject] of Object.entries(ENUM_REGISTRY)) {
+  for (const [enumName, enumObject] of Object.entries(USER_ENUM_REGISTRY)) {
     await populateEnum(enumName, enumObject as Record<string, string>);
   }
 

@@ -3,10 +3,12 @@
 // Centralized TypeScript Enum Definitions
 // These enums are intended to be populated and managed dynamically, potentially via a database like MongoDB.
 
+import { UserRole } from "@/models/User";
+import Enum from "../models/Enum";
 
 
 // Possible ways a user was referred to the organization.
-export enum ReferredBy {
+enum ReferredBy {
   TWO_ONE_ONE = "211",
   ADVERTISING = "Advertising",
   FAMILY_FRIEND = "Family/Friend",
@@ -17,7 +19,7 @@ export enum ReferredBy {
 }
 
 // Possible gender identities.
-export enum Gender {
+enum Gender {
   MALE = "Male",
   FEMALE = "Female",
   NON_BINARY = "Non-binary",
@@ -25,7 +27,7 @@ export enum Gender {
 }
 
 // A list of languages.
-export enum Language {
+enum Language {
   ENGLISH = "English",
   FRENCH = "French",
   ARABIC = "Arabic",
@@ -57,7 +59,7 @@ export enum Language {
 }
 
 // A list of ethnicities.
-export enum Ethnicity {
+enum Ethnicity {
   ABORIGINAL = "Aboriginal/First Nations/Metis",
   ARAB = "Arab",
   BLACK = "Black",
@@ -76,7 +78,7 @@ export enum Ethnicity {
 }
 
 // Represents the current status of a user in various contexts (Client, Volunteer, Donor, Funder).
-export enum Status {
+enum Status {
   ACTIVE = "Active",
   AWAY = "Away",
   INACTIVE = "Inactive",
@@ -86,7 +88,7 @@ export enum Status {
 }
 
 // Represents the status of a specific booking.
-export enum BookingStatus {
+enum BookingStatus {
   ASSIGNED = "Assigned",
   CANCELLED = "Cancelled",
   COMPLETED = "Completed",
@@ -95,7 +97,7 @@ export enum BookingStatus {
 }
 
 // Types of services provided to clients, often involving volunteers.
-export enum ServiceType {
+enum ServiceType {
   DESTINATION_WALK = "Destination Walk",
   DOCUMENT_ASSISTANCE = "Document Assistance",
   GARDENING = "Gardening",
@@ -117,7 +119,7 @@ export enum ServiceType {
 }
 
 // Types of programs offered.
-export enum ProgramType {
+enum ProgramType {
   AMBASSADOR = "Ambassador",
   BETTER_AT_HOME = "Better at Home",
   COMPANION_PETS = "Companion Pets",
@@ -130,7 +132,7 @@ export enum ProgramType {
 }
 
 // Types of mobility aids used by clients or that volunteers might need to accommodate.
-export enum MobilityAid {
+enum MobilityAid {
   CANE = "Cane",
   WALKING_POLES = "Walking Poles",
   WALKER = "Walker",
@@ -138,7 +140,7 @@ export enum MobilityAid {
 }
 
 // Types of vehicles volunteers might use for drives.
-export enum VehicleType {
+enum VehicleType {
   COUPE = "Coupe",
   SEDAN = "Sedan",
   CROSSOVER = "Crossover",
@@ -149,24 +151,24 @@ export enum VehicleType {
 }
 
 // Frequency of a booking.
-export enum BookingFrequency {
+enum BookingFrequency {
   ONE_TIME = "One-Time",
   ONGOING = "Ongoing",
   RECURRING = "Recurring",
 }
 
 // Types of living arrangements for clients.
-export enum LivingArrangementType {
+enum LivingArrangementType {
   LIVES_ALONE_APT_CONDO = "Lives Alone in Apartment/Condo",
   LIVES_ALONE_HOUSE = "Lives Alone in House",
   LIVES_COMMUNALLY_LOW_INCOME = "Lives Communally in Low-Income Housing Facility",
-  LIVES_COMMUNALLY_SENIORS = "Lives Communally in Seniors’ Retirement Facility",
+  LIVES_COMMUNALLY_SENIORS = "Lives Communally in Seniors' Retirement Facility",
   LIVES_WITH_ROOMMATE_PARTNER_HOUSE = "Lives with a Roommate/Partner in House",
   LIVES_WITH_ROOMMATE_PARTNER_APT_CONDO = "Lives with a Roommate/Partner in Apartment/Condo",
 }
 
 // Types of support services a client might be receiving from elsewhere.
-export enum ClientSupportServiceType {
+enum ClientSupportServiceType {
   BETTER_AT_HOME_HOUSEKEEPING = "Better at Home Housekeeping",
   ISLAND_HEALTH_SUPPORT = "Island Health Support",
   PRIVATE_CAREGIVING = "Private Caregiving",
@@ -175,14 +177,14 @@ export enum ClientSupportServiceType {
 }
 
 // Types of structured programs a client might attend.
-export enum StructuredProgramType {
+enum StructuredProgramType {
   ADULT_DAY_PROGRAM = "Adult Day Program",
   RECREATION_CENTRE = "Recreation Centre",
-  SENIORS_CENTRE = "Seniors’ Centre",
+  SENIORS_CENTRE = "Seniors' Centre",
 }
 
 // Categories used to classify bookings.
-export enum BookingTypeCategory {
+enum BookingTypeCategory {
   CLIENT_SERVICE = "Client Service",
   CLIENT_PROGRAM = "Client Program",
   CLIENT_SUPPORT_SERVICE = "Client Support Service",
@@ -190,7 +192,7 @@ export enum BookingTypeCategory {
 }
 
 // Types of support services volunteers might provide within the organization.
-export enum VolunteerSupportServiceType {
+enum VolunteerSupportServiceType {
   ACCOUNTING = "Accounting",
   BOARD = "Board", // Note: This value is also present in UserRole, context is important.
   MARCOMM = "MarComm",
@@ -201,7 +203,7 @@ export enum VolunteerSupportServiceType {
 }
 
 // Possible sources/types of donations for Funders.
-export enum FunderDonationType {
+enum FunderDonationType {
   CHEQUE = "Cheque",
   CASH = "Cash",
   CANADA_HELPS = "CanadaHelps",
@@ -209,13 +211,13 @@ export enum FunderDonationType {
 }
 
 // Types of events an attendee might be contacted for.
-export enum EventContactType {
+enum EventContactType {
   SILENT_DISCO = "Silent Disco",
   SYMPHONY = "Symphony",
 }
 
 // Possible types of health conditions.
-export enum HealthConditionType {
+enum HealthConditionType {
   ASTHMA = "Asthma",
   ARTHRITIS = "Arthritis",
   BACK_PROBLEMS = "Back Problems",
@@ -239,7 +241,7 @@ export enum HealthConditionType {
 }
 
 // Possible types of accessibility needs.
-export enum AccessibilityNeedType {
+enum AccessibilityNeedType {
   BLIND = "Blind",
   VISION_LOSS = "Vision Loss",
   DEAF = "Deaf",
@@ -252,7 +254,7 @@ export enum AccessibilityNeedType {
 }
 
 // Referred by options specific to the Better at Home program.
-export enum BahReferredBy {
+enum BahReferredBy {
   AD = "Ad",
   BAH_HOST_ORGANIZATION = "BaH Host Organization",
   COMMUNITY_HEALTH_WORKER_NURSE_HA = "Community Health Worker / Nurse (HA)",
@@ -263,25 +265,9 @@ export enum BahReferredBy {
   UNKNOWN = "Unknown",
 }
 
-// Utility type to convert enum to array of values (Provided in original TS)
-export type EnumValues<T> = T[keyof T][];
-
-// Helper function to get enum values as array (Provided in original TS)
-export function getEnumValues<T extends Record<string, string>>(
-  enumObject: T
-): string[] {
-  return Object.values(enumObject);
-}
-
-// Helper function to get enum keys as array (Provided in original TS)
-export function getEnumKeys<T extends Record<string, string>>(
-  enumObject: T
-): (keyof T)[] {
-  return Object.keys(enumObject) as (keyof T)[];
-}
-
-// Enum registry for easy iteration and management (Updated to include all new enums)
-export const ENUM_REGISTRY = {
+// Create enum registry for internal use
+const USER_ENUM_REGISTRY = {
+  UserRole,
   ReferredBy,
   Gender,
   Language,
@@ -305,4 +291,33 @@ export const ENUM_REGISTRY = {
   BahReferredBy,
 } as const;
 
-export type EnumName = keyof typeof ENUM_REGISTRY;
+// Type for enum names
+export type EnumName = keyof typeof USER_ENUM_REGISTRY;
+
+// Type for the return value of fetchUserEnumsFromDatabase
+export type UserEnums = {
+  [K in EnumName]: Record<string, string>;
+};
+
+// Function to fetch all user enums from the database
+export async function fetchUserEnumsFromDatabase(): Promise<UserEnums> {
+  const enumNames = Object.keys(USER_ENUM_REGISTRY) as EnumName[];
+  const result = {} as UserEnums;
+
+  for (const enumName of enumNames) {
+    try {
+      const enumMap = await Enum.getEnumMap(enumName);
+      result[enumName] = enumMap;
+    } catch (error) {
+      console.warn(`Failed to fetch enum ${enumName} from database:`, error);
+      // Fallback to local enum definition
+      result[enumName] = USER_ENUM_REGISTRY[enumName] as Record<string, string>;
+    }
+  }
+
+  return result;
+}
+
+
+// Export the registry for the populate script
+export { USER_ENUM_REGISTRY };
