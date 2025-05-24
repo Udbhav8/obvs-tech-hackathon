@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +28,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -54,16 +57,42 @@ export default function RegisterPage() {
     }
 
     try {
-      // Add your registration logic here
-      console.log("Registration attempt:", formData);
+      // Call the registration API
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const data = await response.json();
 
-      // For demo purposes, show success
-      alert("Registration successful! (This is a demo)");
-    } catch (err) {
-      setError("Registration failed. Please try again.");
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      // Registration successful, now automatically sign in the user
+      const signInResult = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        setError(
+          "Registration successful, but auto-login failed. Please login manually."
+        );
+      } else {
+        // Redirect to home page after successful registration and auto-login
+        router.push("/");
+      }
+    } catch (err: any) {
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,24 +23,37 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Simulate login logic
     try {
-      // Add your authentication logic here
-      console.log("Login attempt:", { email, password });
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // For demo purposes, show success
-      alert("Login successful! (This is a demo)");
+      if (result?.error) {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        // Check if user is admin and redirect accordingly
+        const session = await getSession();
+        if (session?.user) {
+          // Redirect to admin dashboard if user has admin role
+          const userRole = (session.user as any).role;
+          if (userRole === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/"); // Redirect to home page for regular users
+          }
+        }
+      }
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      setError("An error occurred during login. Please try again.");
     } finally {
       setLoading(false);
     }
