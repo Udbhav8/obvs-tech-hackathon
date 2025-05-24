@@ -9,7 +9,7 @@ export const getUsers = () => async (dispatch, getState) => {
   });
   try {
     const options = attachTokenToHeaders(getState);
-    const response = await axios.get('/api/users', options);
+    const response = await axios.get('http://localhost:5001/api/users', options);
 
     dispatch({
       type: GET_USERS_SUCCESS,

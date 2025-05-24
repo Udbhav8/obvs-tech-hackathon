@@ -80,7 +80,7 @@ JWT_SECRET_PROD=
 #site urls
 CLIENT_URL_DEV=https://localhost:3000
 CLIENT_URL_PROD=https://mern-boilerplate-demo.herokuapp.com
-SERVER_URL_DEV=https://localhost:5000
+SERVER_URL_DEV=https://localhost:5001
 SERVER_URL_PROD=https://mern-boilerplate-demo.herokuapp.com
 
 #img folder path
@@ -105,7 +105,7 @@ $ npm install
 
 #### Run the server
 
-You are good to go, server will be available on `https://localhost:5000`
+You are good to go, server will be available on `https://localhost:5001`
 
 ```
 $ npm run server

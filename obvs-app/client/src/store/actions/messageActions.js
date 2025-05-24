@@ -17,13 +17,14 @@ import {
   CLEAR_MESSAGE_ERROR,
 } from '../types';
 
+
 export const getMessages = () => async (dispatch, getState) => {
   dispatch({
     type: GET_MESSAGES_LOADING,
   });
   try {
     const options = attachTokenToHeaders(getState);
-    const response = await axios.get('/api/messages', options);
+    const response = await axios.get('http://localhost:5001/api/messages', options);
 
     dispatch({
       type: GET_MESSAGES_SUCCESS,
@@ -44,7 +45,7 @@ export const addMessage = (formData) => async (dispatch, getState) => {
   });
   try {
     const options = attachTokenToHeaders(getState);
-    const response = await axios.post('/api/messages', formData, options);
+    const response = await axios.post('http://localhost:5001/api/messages', formData, options);
 
     dispatch({
       type: ADD_MESSAGE_SUCCESS,
@@ -65,7 +66,7 @@ export const deleteMessage = (id) => async (dispatch, getState) => {
   });
   try {
     const options = attachTokenToHeaders(getState);
-    const response = await axios.delete(`/api/messages/${id}`, options);
+    const response = await axios.delete(`http://localhost:5001/api/messages/${id}`, options);
 
     dispatch({
       type: DELETE_MESSAGE_SUCCESS,
@@ -86,7 +87,7 @@ export const editMessage = (id, formData) => async (dispatch, getState) => {
   });
   try {
     const options = attachTokenToHeaders(getState);
-    const response = await axios.put(`/api/messages/${id}`, formData, options);
+    const response = await axios.put(`http://localhost:5001/api/messages/${id}`, formData, options);
 
     dispatch({
       type: EDIT_MESSAGE_SUCCESS,
