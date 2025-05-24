@@ -122,14 +122,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link href="/" className="flex items-center gap-2">
-                        <Home className="h-4 w-4" />
-                        View Site
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
