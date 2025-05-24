@@ -138,15 +138,15 @@ const FREQUENCY_OPTIONS = [
 ];
 
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<Reports[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Reports[]>([]);
   const [activeTab, setActiveTab] = useState("assigned");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
-  const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
+  const [editingBooking, setEditingBooking] = useState<Reports | null>(null);
+  const [bookingToDelete, setBookingToDelete] = useState<Reports | null>(null);
   const [formData, setFormData] = useState({
     clientName: "",
     clientEmail: "",
@@ -177,7 +177,7 @@ export default function BookingsPage() {
       // Simulated data - replace with actual API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const mockBookings: Booking[] = [
+      const mockBookings: Reports[] = [
         {
           id: "1",
           clientName: "John Doe",
@@ -299,7 +299,7 @@ export default function BookingsPage() {
         );
       } else {
         // Add new booking
-        setBookings([...bookings, bookingData as Booking]);
+        setBookings([...bookings, bookingData as Reports]);
       }
 
       setDialogOpen(false);
@@ -309,7 +309,7 @@ export default function BookingsPage() {
     }
   };
 
-  const handleEdit = (booking: Booking) => {
+  const handleEdit = (booking: Reports) => {
     setEditingBooking(booking);
     setFormData({
       clientName: booking.clientName,
@@ -358,12 +358,12 @@ export default function BookingsPage() {
     setEditingBooking(null);
   };
 
-  const openDeleteDialog = (booking: Booking) => {
+  const openDeleteDialog = (booking: Reports) => {
     setBookingToDelete(booking);
     setDeleteDialogOpen(true);
   };
 
-  const duplicateBooking = (booking: Booking) => {
+  const duplicateBooking = (booking: Reports) => {
     const duplicatedBooking = {
       ...booking,
       id: Date.now().toString(),
@@ -587,7 +587,7 @@ export default function BookingsPage() {
                   onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      status: value as Booking["status"],
+                      status: value as Reports["status"],
                     })
                   }
                 >
