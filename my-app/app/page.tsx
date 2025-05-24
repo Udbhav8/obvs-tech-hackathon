@@ -39,16 +39,16 @@ export default function Home() {
         <div className="text-center mb-12">
           <Image
             className="dark:invert mx-auto mb-8"
-            src="/next.svg"
-            alt="Next.js logo"
+            src="/images/OBVS-colour-logo.png"
+            alt="OBVS"
             width={180}
             height={38}
             priority
           />
-          <h1 className="text-4xl font-bold mb-4">Welcome to My App</h1>
-          <p className="text-xl text-muted-foreground">
+          <h1 className="text-5xl mb-4 text-shadow-lg">Sign In to OBVS</h1>
+          {/* <p className="text-xl text-muted-foreground">
             A modern admin dashboard with user and booking management
-          </p>
+          </p> */}
         </div>
 
         {session ? (
