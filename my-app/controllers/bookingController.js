@@ -1,4 +1,4 @@
-// controllers/bookingController.js
+
 import Booking from '../models/Booking';
 import ServiceProgramBooking from '../models/ServiceProgramBooking';
 import EventBooking from '../models/EventBooking';

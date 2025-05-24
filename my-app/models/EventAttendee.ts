@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const eventAttendeeSchema = new mongoose.Schema({
   event_booking_id: { type: mongoose.Schema.Types.ObjectId, ref: 'EventBooking', required: true },

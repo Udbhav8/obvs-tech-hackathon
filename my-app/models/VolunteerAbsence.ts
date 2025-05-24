@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const volunteerAbsenceSchema = new mongoose.Schema({
   volunteer_id: { type: mongoose.Schema.Types.ObjectId, required: true },
