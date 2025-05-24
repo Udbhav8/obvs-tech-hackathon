@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
 
   // Protect admin routes
   if (isAdminPage && !isAdmin) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/admin", req.url));
   }
 
   return NextResponse.next();
