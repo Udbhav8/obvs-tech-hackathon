@@ -38,7 +38,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password. Please try again.");
+        setError("Only admins can login");
       } else {
         // Check if user is admin and redirect accordingly
         const session = await getSession();
