@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,17 +18,20 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const result = await signIn("credentials", {
@@ -38,22 +41,23 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Only admins can login");
-      } else {
-        // Check if user is admin and redirect accordingly
-        const session = await getSession();
-        if (session?.user) {
-          // Redirect to admin dashboard if user has admin role
-          const userRole = (session.user as any).role;
-          if (userRole === "admin") {
-            router.push("/admin");
-          } else {
-            router.push("/"); // Redirect to home page for regular users
-          }
+        switch (result.error) {
+          case "INVALID_CREDENTIALS":
+            setError("Invalid email or password. Please try again.");
+            break;
+          case "ADMIN_REQUIRED":
+            setError("Access denied. Admin privileges required.");
+            break;
+          default:
+            setError("An error occurred during sign in. Please try again.");
         }
+      } else if (result?.ok) {
+        const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+        router.push(callbackUrl);
       }
-    } catch (err) {
-      setError("An error occurred during login. Please try again.");
+    } catch (error) {
+      console.error("Sign in error:", error);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
