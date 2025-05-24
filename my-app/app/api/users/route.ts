@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
-import User, { UserRole, Status } from "../../../models/User";
+import User, { UserRole } from "../../../models/User";
 import bcrypt from "bcryptjs";
+import { Status } from "@/enums/user-enums";
 
 interface UserQuery {
   $or?: Array<Record<string, unknown>>;

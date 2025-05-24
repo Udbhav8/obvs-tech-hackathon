@@ -3,22 +3,7 @@
 // Centralized TypeScript Enum Definitions
 // These enums are intended to be populated and managed dynamically, potentially via a database like MongoDB.
 
-// Represents the high-level roles a user can have.
-export enum UserRole {
-  CLIENT = "Client",
-  DONOR = "Donor",
-  VOLUNTEER = "Volunteer",
-  VOLUNTEER_COORDINATOR = "Volunteer Coordinator",
 
-  STAFF = "Staff",
-  ADMIN = "Admin", // Added based on JSON schema structure within Staff
-  SUPER_ADMIN = "Super Admin", // Added based on JSON schema structure within Staff
-  BOARD = "Board",
-  SPP = "SPP", // Social Prescribing Participant - Added based on JSON schema
-  EVENT_ATTENDEE = "Event Attendee",
-  OTHER = "Other", // Kept from provided TS enums
-  // USER = "user", // Removed as it's not listed as a specific role in the JSON schema
-}
 
 // Possible ways a user was referred to the organization.
 export enum ReferredBy {
@@ -297,7 +282,6 @@ export function getEnumKeys<T extends Record<string, string>>(
 
 // Enum registry for easy iteration and management (Updated to include all new enums)
 export const ENUM_REGISTRY = {
-  UserRole,
   ReferredBy,
   Gender,
   Language,
