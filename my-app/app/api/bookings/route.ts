@@ -215,7 +215,7 @@ async function createRecurringBookings(parentBooking: any, originalData: any) {
     const recurrenceDays = originalData.recurrence_days || [];
 
     const recurringBookings = [];
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
 
     // Move to next occurrence
     switch (recurrenceFreq) {
