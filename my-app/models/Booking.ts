@@ -274,58 +274,16 @@ const JobHistorySchema = new Schema<IJobHistory>({
 // MODELS
 // ------------------------------------------------------------------------------------------------
 
-// Helper function to safely define models
-function getOrCreateModel<T extends mongoose.Document>(name: string, schema: mongoose.Schema<T>): mongoose.Model<T> {
-  return mongoose.models[name] as mongoose.Model<T> || mongoose.model<T>(name, schema);
-}
-
-// Helper function to safely define discriminators
-function getOrDefineDiscriminator<T extends mongoose.Document, U extends mongoose.Document>(
-  baseModel: mongoose.Model<T>,
-  name: string,
-  schema: mongoose.Schema<U>
-): mongoose.Model<U> {
-  // Check if discriminator already exists by trying to access it
-  try {
-    // If the model already has this discriminator, return it
-    // Mongoose might throw an error here if trying to access a non-existent discriminator or re-declare
-    // A more robust check might involve checking `baseModel.discriminators` object keys
-    if (baseModel.discriminators && baseModel.discriminators[name]) {
-      return baseModel.discriminators[name] as mongoose.Model<U>;
-    }
-  } catch (e) { /* Discriminator doesn't exist or other error, proceed to define */ }
-  
-  // If the discriminator doesn't exist on the model, define it.
-  // This path is usually taken on the first compile.
-  // On subsequent hot reloads, if the baseModel is from cache and already had the discriminator,
-  // the above check should ideally return it.
-  // If baseModel is recompiled and is fresh, this is also fine.
-  // The primary OverwriteModelError is for the base model itself.
-  return baseModel.discriminator<U>(name, schema);
-}
-
-// Define Booking model and its discriminators
-export const Booking = getOrCreateModel<IBooking>('Booking', BookingSchema);
-
-// It's important that discriminators are applied to the *same instance* of the base model.
-// If `Booking` above is fetched from cache (mongoose.models.Booking), ensure discriminators are compatible.
-// Mongoose typically handles this if the base model is correctly cached and retrieved.
-export const ServiceProgramBooking = getOrDefineDiscriminator<IBooking, IServiceProgramBooking>(
-    Booking, // Use the (potentially cached) Booking model
-    'ServiceProgramBooking',
-    ServiceProgramBookingSchema
-);
-export const EventBooking = getOrDefineDiscriminator<IBooking, IEventBooking>(
-    Booking, // Use the (potentially cached) Booking model
-    'EventBooking',
-    EventBookingSchema
-);
+// Models for the different booking types
+export const Booking = mongoose.model<IBooking>('Booking', BookingSchema);
+export const ServiceProgramBooking = Booking.discriminator<IServiceProgramBooking>('ServiceProgramBooking', ServiceProgramBookingSchema);
+export const EventBooking = Booking.discriminator<IEventBooking>('EventBooking', EventBookingSchema);
 
 // Models for related entities
-export const ClientModel = getOrCreateModel<IClient>('Client', ClientSchema);
-export const VolunteerModel = getOrCreateModel<IVolunteer>('Volunteer', VolunteerSchema);
-export const BookingClientRelation = getOrCreateModel<IBookingClientRelation>('BookingClientRelation', BookingClientRelationSchema);
-export const BookingVolunteerRelation = getOrCreateModel<IBookingVolunteerRelation>('BookingVolunteerRelation', BookingVolunteerRelationSchema);
-export const EventAttendee = getOrCreateModel<IEventAttendee>('EventAttendee', EventAttendeeSchema);
-export const VolunteerAbsence = getOrCreateModel<IVolunteerAbsence>('VolunteerAbsence', VolunteerAbsenceSchema);
-export const JobHistory = getOrCreateModel<IJobHistory>('JobHistory', JobHistorySchema);
+export const ClientModel = mongoose.model<IClient>('Client', ClientSchema);
+export const VolunteerModel = mongoose.model<IVolunteer>('Volunteer', VolunteerSchema);
+export const BookingClientRelation = mongoose.model<IBookingClientRelation>('BookingClientRelation', BookingClientRelationSchema);
+export const BookingVolunteerRelation = mongoose.model<IBookingVolunteerRelation>('BookingVolunteerRelation', BookingVolunteerRelationSchema);
+export const EventAttendee = mongoose.model<IEventAttendee>('EventAttendee', EventAttendeeSchema);
+export const VolunteerAbsence = mongoose.model<IVolunteerAbsence>('VolunteerAbsence', VolunteerAbsenceSchema);
+export const JobHistory = mongoose.model<IJobHistory>('JobHistory', JobHistorySchema);
