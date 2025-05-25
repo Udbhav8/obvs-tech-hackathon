@@ -78,7 +78,7 @@ EnumSchema.statics.getEnumValues = async function (
 EnumSchema.statics.getEnumMap = async function (
   enumName: string
 ): Promise<Record<string, string>> {
-  const enumDoc = await this.findOne({ name: enumName, isActive: true });
+  const enumDoc = await this.findOne({ name: enumName });
   if (!enumDoc) {
     throw new Error(`Enum '${enumName}' not found`);
   }
