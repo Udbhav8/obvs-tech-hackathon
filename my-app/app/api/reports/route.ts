@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
 import UserModel from "../../../models/User"; // Your user Mongoose model
+import { fetchUserEnumsFromDatabase } from "../../../enums/user-enums"; // Update with actual path
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,6 +15,10 @@ export async function GET(request: NextRequest) {
         return await handleNewVolunteers(searchParams);
       case "birthdays":
         return await handleVolunteerBirthdays(searchParams);
+      case "enum":
+        return await handleEnumFetch(); 
+      case "active_services"
+        return await handleActiveServices(searchParams);
       default:
         return NextResponse.json(
           { message: "Invalid volunteer report type requested." },
@@ -29,7 +34,23 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// === Handler for New Volunteers by Month/Year ===
+// === NEW: Handler for User Enums ===
+
+async function handleEnumFetch() {
+  try {
+    const enums = await fetchUserEnumsFromDatabase();
+    //console.log("Fetched enums:", enums);
+    return NextResponse.json({ enums }, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching enums:", error);
+    return NextResponse.json(
+      { message: "Failed to fetch enums." },
+      { status: 500 }
+    );
+  }
+}
+
+// === Existing handlers (unchanged) ===
 
 async function handleNewVolunteers(searchParams: URLSearchParams) {
   const month = searchParams.get("month");
@@ -64,11 +85,7 @@ async function handleNewVolunteers(searchParams: URLSearchParams) {
   }
 }
 
-// === Handler for Volunteer Birthdays by Month ===
-
 async function handleVolunteerBirthdays(searchParams: URLSearchParams) {
-    console.log("Search params:", searchParams.toString());
-    //console.log("Type param:", type);
   const month = searchParams.get("month");
 
   if (!month) {
@@ -105,3 +122,37 @@ async function handleVolunteerBirthdays(searchParams: URLSearchParams) {
     );
   }
 }
+
+async function handleActiveServices(searchParams: URLSearchParams) {
+    const service = searchParams.get("service");
+  
+    if (!service) {
+      return NextResponse.json(
+        { message: "Service is required." },
+        { status: 400 }
+      );
+    }
+  
+    try {
+      const activeServices = await UserModel.find({
+        "general_information.roles": "Volunteer",
+        "volunteer_information.volunteer_services": {
+          $elemMatch: {
+            service_type: service,
+            active: true,
+          },
+        },
+      });
+  
+      console.log("Active service volunteers:", activeServices);
+  
+      return NextResponse.json({ message: activeServices }, { status: 200 });
+    } catch (error) {
+      console.error("Error fetching active services:", error);
+      return NextResponse.json(
+        { message: "Unable to fetch active services." },
+        { status: 400 }
+      );
+    }
+  }
+  
