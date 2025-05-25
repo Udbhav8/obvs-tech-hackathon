@@ -79,12 +79,13 @@ const [activeServices, setActiveServices] = useState([]);
 
 
 
-
+//Get service type enums
 useEffect(() => {
-  fetch('/api/enums')
+    fetch(`/api/reports?type=enum`)
     .then((res) => res.json())
     .then((data) => {
-      setServices(data.services || []);
+        const fetchedServices = data.enums?.ServiceType || [];
+        setServices(fetchedServices);
     })
     .catch((err) => {
       console.error('Error fetching services:', err);

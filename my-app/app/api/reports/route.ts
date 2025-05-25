@@ -16,7 +16,9 @@ export async function GET(request: NextRequest) {
       case "birthdays":
         return await handleVolunteerBirthdays(searchParams);
       case "enum":
-        return await handleEnumFetch(); // NEW
+        return await handleEnumFetch(); 
+      case "active_services"
+        return await handleActiveServices(searchParams);
       default:
         return NextResponse.json(
           { message: "Invalid volunteer report type requested." },
@@ -37,6 +39,7 @@ export async function GET(request: NextRequest) {
 async function handleEnumFetch() {
   try {
     const enums = await fetchUserEnumsFromDatabase();
+    //console.log("Fetched enums:", enums);
     return NextResponse.json({ enums }, { status: 200 });
   } catch (error) {
     console.error("Error fetching enums:", error);
@@ -119,3 +122,37 @@ async function handleVolunteerBirthdays(searchParams: URLSearchParams) {
     );
   }
 }
+
+async function handleActiveServices(searchParams: URLSearchParams) {
+    const service = searchParams.get("service");
+  
+    if (!service) {
+      return NextResponse.json(
+        { message: "Service is required." },
+        { status: 400 }
+      );
+    }
+  
+    try {
+      const activeServices = await UserModel.find({
+        "general_information.roles": "Volunteer",
+        "volunteer_information.volunteer_services": {
+          $elemMatch: {
+            service_type: service,
+            active: true,
+          },
+        },
+      });
+  
+      console.log("Active service volunteers:", activeServices);
+  
+      return NextResponse.json({ message: activeServices }, { status: 200 });
+    } catch (error) {
+      console.error("Error fetching active services:", error);
+      return NextResponse.json(
+        { message: "Unable to fetch active services." },
+        { status: 400 }
+      );
+    }
+  }
+  
