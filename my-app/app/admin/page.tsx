@@ -175,13 +175,13 @@ export default function AdminDashboard() {
           <ScrollArea className="h-72 rounded-md border">
             <div className="p-4">
               {/* <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4> */}
-              {tags.map((tag) => (
-                <>
-                  <div key={tag} className="text-m">
+              {tags.map((tag, index) => (
+                <React.Fragment key={index}>
+                  <div className="text-m">
                     {tag}
                   </div>
                   <Separator className="mt-2 mb-2"/>
-                </>
+                </React.Fragment>
               ))}
             </div>
           </ScrollArea>
