@@ -1,12 +1,5 @@
 #!/usr/bin/env tsx
 
-/**
- * Script to populate the database with enum values from TypeScript enums.
- * This ensures that the database has all the required enum values for the application.
- *
- * Usage: npm run enums:populate
- */
-
 // Load environment variables FIRST, before any other imports
 import { config } from "dotenv";
 config({ path: "./.env.local" });
@@ -20,8 +13,6 @@ if (!process.env.MONGODB_URI) {
 import mongoose from "mongoose";
 import Enum, { IEnumValue } from "../models/Enum";
 import { USER_ENUM_REGISTRY } from "./user-enums";
-import { BOOKING_ENUM_REGISTRY } from "./booking-enums";
-import { DONATIONS_ENUM_REGISTRY } from "./donations-enums";
 
 // Custom connection function that uses the environment variable at runtime
 async function connectToMongoDB(): Promise<typeof mongoose | null> {
@@ -98,31 +89,9 @@ async function populateEnum(
 
 async function populateAllEnums(): Promise<void> {
   console.log("🚀 Starting enum population process...");
+  console.log(`📊 Found ${Object.keys(USER_ENUM_REGISTRY).length} enums to process`);
 
-  const totalEnums =
-    Object.keys(USER_ENUM_REGISTRY).length +
-    Object.keys(BOOKING_ENUM_REGISTRY).length +
-    Object.keys(DONATIONS_ENUM_REGISTRY).length;
-
-  console.log(`📊 Found ${totalEnums} enums to process`);
-
-  // Populate user enums
-  console.log("\n👤 Processing User Enums...");
   for (const [enumName, enumObject] of Object.entries(USER_ENUM_REGISTRY)) {
-    await populateEnum(enumName, enumObject as Record<string, string>);
-  }
-
-  // Populate booking enums
-  console.log("\n📅 Processing Booking Enums...");
-  for (const [enumName, enumObject] of Object.entries(BOOKING_ENUM_REGISTRY)) {
-    await populateEnum(enumName, enumObject as Record<string, string>);
-  }
-
-  // Populate donations enums
-  console.log("\n💰 Processing Donations Enums...");
-  for (const [enumName, enumObject] of Object.entries(
-    DONATIONS_ENUM_REGISTRY
-  )) {
     await populateEnum(enumName, enumObject as Record<string, string>);
   }
 
@@ -153,7 +122,7 @@ async function clearAllEnums(): Promise<void> {
 
 async function main(): Promise<void> {
   try {
-    // Connect to MongoDB
+    // Use the existing connectDB function
     console.log("🔌 Connecting to MongoDB...");
     const connection = await connectToMongoDB();
 
@@ -202,13 +171,15 @@ if (require.main === module) {
 Usage Examples:
 
 1. Populate all enums:
-   npm run enums:populate
+   npm run populate-enums
+   or
+   ts-node enums/enums-populate-script.ts
 
 2. Clear existing enums and repopulate:
-   npm run enums:populate -- --clear
+   ts-node enums/enums-populate-script.ts --clear
 
 3. Verify existing enums without changes:
-   npm run enums:populate -- --verify
+   ts-node enums/enums-populate-script.ts --verify
 
 4. Available flags:
    --clear, -c  : Clear all existing enums before populating

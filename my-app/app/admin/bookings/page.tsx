@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -52,52 +51,30 @@ import {
   Search,
   Calendar,
   Clock,
+  MapPin,
   User,
   Phone,
   CheckCircle,
   XCircle,
   AlertCircle,
   Copy,
-  ExternalLink,
 } from "lucide-react";
-import { IBooking, IClient, IVolunteer } from "@/models/Booking";
-import { ServiceProgramType } from "@/enums/booking-enums";
 
-// Extended interface for UI purposes with populated relations
-interface BookingWithRelations extends Omit<IBooking, "date" | "_id"> {
-  booking_type: string;
-  service_type?: string;
-  date: string; // UI expects string format
-  // Include properties from IServiceProgramBooking for service bookings
-  pickup_address_description?: string;
-  pickup_address_street?: string;
-  pickup_address_city?: string;
-  destination_address_description?: string;
-  destination_address_street?: string;
-  destination_address_city?: string;
-  // Include properties from IEventBooking for event bookings
-  event_id?: number;
-  location_description?: string;
-  location_street?: string;
-  location_city?: string;
-  // Populated relations
-  clients?: Array<
-    IClient & {
-      cell_phone?: string;
-      home_phone?: string;
-    }
-  >;
-  volunteers?: Array<
-    IVolunteer & {
-      status: string;
-    }
-  >;
-  eventAttendees?: Array<{
-    event_booking_id: number;
-    user_id?: number;
-    external_name?: string;
-    user_type: string;
-  }>;
+interface Booking {
+  id: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string;
+  serviceType: string;
+  date: string;
+  time: string;
+  status: "assigned" | "not-assigned" | "cancelled" | "completed";
+  volunteer?: string;
+  volunteerPhone?: string;
+  pickupAddress: string;
+  destinationAddress?: string;
+  notes?: string;
+  frequency: "one-time" | "ongoing" | "continuous";
   createdAt: string;
 }
 
@@ -110,158 +87,180 @@ interface BookingStatus {
 
 const BOOKING_STATUSES: BookingStatus[] = [
   {
-    value: "Assigned",
+    value: "assigned",
     label: "Assigned",
     color: "bg-green-100 text-green-800",
     icon: CheckCircle,
   },
   {
-    value: "Not Assigned",
+    value: "not-assigned",
     label: "Not Assigned",
     color: "bg-yellow-100 text-yellow-800",
     icon: AlertCircle,
   },
   {
-    value: "Cancelled",
+    value: "cancelled",
     label: "Cancelled",
     color: "bg-red-100 text-red-800",
     icon: XCircle,
   },
   {
-    value: "Completed",
+    value: "completed",
     label: "Completed",
     color: "bg-blue-100 text-blue-800",
     icon: CheckCircle,
   },
 ];
 
-const SERVICE_TYPES = Object.values(ServiceProgramType);
-
-const FREQUENCY_OPTIONS = [
-  { value: "One-Time", label: "One-Time" },
-  { value: "Ongoing", label: "Ongoing" },
-  { value: "Continuous", label: "Continuous" },
+const SERVICE_TYPES = [
+  "Medical Drive",
+  "Shopping Drive",
+  "Recreation Drive",
+  "Miscellaneous Drive",
+  "Destination Walk",
+  "Document Assistance",
+  "Gardening",
+  "Minor Home Repair",
+  "Packing and Sorting",
+  "Reassurance Phone Call",
+  "Social Phone Call",
+  "Technology Support",
+  "Visiting",
+  "Walking",
+  "Wheelchair Push",
+  "Miscellaneous Service",
 ];
 
-const BOOKING_TYPES = [
-  { value: "Service", label: "Service" },
-  { value: "Program", label: "Program" },
-  { value: "Support Service", label: "Support Service" },
-  { value: "Event", label: "Event" },
+const FREQUENCY_OPTIONS = [
+  { value: "one-time", label: "One-Time" },
+  { value: "ongoing", label: "Ongoing" },
+  { value: "continuous", label: "Continuous" },
 ];
 
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState<BookingWithRelations[]>([]);
-  const [filteredBookings, setFilteredBookings] = useState<
-    BookingWithRelations[]
-  >([]);
-  const [activeTab, setActiveTab] = useState("Not Assigned");
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+  const [activeTab, setActiveTab] = useState("assigned");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingBooking, setEditingBooking] =
-    useState<BookingWithRelations | null>(null);
-  const [bookingToDelete, setBookingToDelete] =
-    useState<BookingWithRelations | null>(null);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 50,
-    total: 0,
-    pages: 0,
-  });
-
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
   const [formData, setFormData] = useState({
-    booking_type: "Service",
-    service_type: "",
-    date: new Date().toISOString().split("T")[0],
-    start_time: new Date().toLocaleTimeString("en-US", {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    appointment_time: new Date().toLocaleTimeString("en-US", {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    appointment_length: 1,
-    full_duration: 1,
-    status: "Not Assigned",
-    frequency_type: "One-Time",
-    num_volunteers_needed: 1,
-    pickup_address_description: "",
-    pickup_address_street: "",
-    pickup_address_city: "",
-    destination_address_description: "",
-    destination_address_street: "",
-    destination_address_city: "",
+    clientName: "",
+    clientEmail: "",
+    clientPhone: "",
+    serviceType: "",
+    date: "",
+    time: "",
+    status: "not-assigned" as const,
+    volunteer: "",
+    volunteerPhone: "",
+    pickupAddress: "",
+    destinationAddress: "",
     notes: "",
-    client_confirmation: false,
+    frequency: "one-time" as const,
   });
 
   useEffect(() => {
     fetchBookings();
-  }, [activeTab, pagination.page]);
+  }, []);
 
   useEffect(() => {
     filterBookings();
-  }, [bookings, searchTerm]);
+  }, [bookings, activeTab, searchTerm]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        status: activeTab,
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-      });
+      // Simulated data - replace with actual API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const response = await fetch(`/api/bookings?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setBookings(data.data);
-        setPagination(data.pagination);
-      } else {
-        console.error("Failed to fetch bookings:", data.error);
-        setBookings([]);
-      }
+      const mockBookings: Booking[] = [
+        {
+          id: "1",
+          clientName: "John Doe",
+          clientEmail: "john.doe@example.com",
+          clientPhone: "+1 (555) 123-4567",
+          serviceType: "Medical Drive",
+          date: "2024-12-20",
+          time: "10:00",
+          status: "assigned",
+          volunteer: "Jane Smith",
+          volunteerPhone: "+1 (555) 987-6543",
+          pickupAddress: "123 Main St, City, State",
+          destinationAddress: "456 Hospital Ave, City, State",
+          notes: "Needs wheelchair assistance",
+          frequency: "one-time",
+          createdAt: "2024-12-15T10:30:00Z",
+        },
+        {
+          id: "2",
+          clientName: "Mary Johnson",
+          clientEmail: "mary.johnson@example.com",
+          clientPhone: "+1 (555) 456-7890",
+          serviceType: "Shopping Drive",
+          date: "2024-12-22",
+          time: "14:00",
+          status: "not-assigned",
+          pickupAddress: "789 Oak St, City, State",
+          destinationAddress: "SuperMart, City, State",
+          notes: "Weekly grocery shopping",
+          frequency: "ongoing",
+          createdAt: "2024-12-16T09:15:00Z",
+        },
+        {
+          id: "3",
+          clientName: "Robert Wilson",
+          clientEmail: "robert.wilson@example.com",
+          serviceType: "Technology Support",
+          date: "2024-12-18",
+          time: "16:00",
+          status: "completed",
+          volunteer: "Mike Davis",
+          pickupAddress: "321 Pine Ave, City, State",
+          notes: "Help setting up tablet",
+          frequency: "one-time",
+          createdAt: "2024-12-10T14:20:00Z",
+        },
+        {
+          id: "4",
+          clientName: "Sarah Brown",
+          clientEmail: "sarah.brown@example.com",
+          clientPhone: "+1 (555) 321-0987",
+          serviceType: "Recreation Drive",
+          date: "2024-12-25",
+          time: "13:00",
+          status: "cancelled",
+          pickupAddress: "654 Elm St, City, State",
+          destinationAddress: "Community Center, City, State",
+          notes: "Holiday event cancelled",
+          frequency: "one-time",
+          createdAt: "2024-12-14T11:45:00Z",
+        },
+      ];
+      setBookings(mockBookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
-      setBookings([]);
     } finally {
       setLoading(false);
     }
   };
 
   const filterBookings = () => {
-    if (!searchTerm) {
-      setFilteredBookings(bookings);
-      return;
-    }
+    let filtered = bookings.filter((booking) => booking.status === activeTab);
 
-    const filtered = bookings.filter((booking) => {
-      const clientName = booking.clients?.[0]
-        ? `${booking.clients[0].preferred_name} ${booking.clients[0].last_name}`.toLowerCase()
-        : "";
-      const serviceType = (
-        booking.service_type ||
-        booking.booking_type ||
-        ""
-      ).toLowerCase();
-      const volunteerName = booking.volunteers?.[0]
-        ? `${booking.volunteers[0].preferred_name} ${booking.volunteers[0].last_name}`.toLowerCase()
-        : "";
-      const bookingId = booking.booking_id.toString();
-
-      return (
-        clientName.includes(searchTerm.toLowerCase()) ||
-        serviceType.includes(searchTerm.toLowerCase()) ||
-        volunteerName.includes(searchTerm.toLowerCase()) ||
-        bookingId.includes(searchTerm)
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (booking) =>
+          booking.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.serviceType
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          booking.volunteer?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-    });
+    }
 
     setFilteredBookings(filtered);
   };
@@ -285,147 +284,97 @@ export default function BookingsPage() {
     try {
       const bookingData = {
         ...formData,
-        created_by_user_id: 1, // Should come from auth context
+        id: editingBooking?.id || Date.now().toString(),
+        createdAt: editingBooking?.createdAt || new Date().toISOString(),
       };
 
-      let response;
       if (editingBooking) {
         // Update existing booking
-        response = await fetch(`/api/bookings/${editingBooking.booking_id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...bookingData, updated_by_user_id: 1 }),
-        });
+        setBookings(
+          bookings.map((booking) =>
+            booking.id === editingBooking.id
+              ? { ...booking, ...bookingData }
+              : booking
+          )
+        );
       } else {
-        // Create new booking
-        response = await fetch("/api/bookings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bookingData),
-        });
+        // Add new booking
+        setBookings([...bookings, bookingData as Booking]);
       }
 
-      const data = await response.json();
-      if (data.success) {
-        setDialogOpen(false);
-        resetForm();
-        fetchBookings();
-      } else {
-        console.error("Failed to save booking:", data.error);
-      }
+      setDialogOpen(false);
+      resetForm();
     } catch (error) {
       console.error("Error saving booking:", error);
     }
   };
 
-  const handleEdit = (booking: BookingWithRelations) => {
+  const handleEdit = (booking: Booking) => {
     setEditingBooking(booking);
     setFormData({
-      booking_type: booking.booking_type,
-      service_type: booking.service_type || "",
-      date: booking.date.split("T")[0],
-      start_time: booking.start_time,
-      appointment_time: booking.appointment_time,
-      appointment_length: booking.appointment_length,
-      full_duration: booking.full_duration,
+      clientName: booking.clientName,
+      clientEmail: booking.clientEmail,
+      clientPhone: booking.clientPhone || "",
+      serviceType: booking.serviceType,
+      date: booking.date,
+      time: booking.time,
       status: booking.status,
-      frequency_type: booking.frequency_type,
-      num_volunteers_needed: booking.num_volunteers_needed,
-      pickup_address_description: booking.pickup_address_description || "",
-      pickup_address_street: booking.pickup_address_street || "",
-      pickup_address_city: booking.pickup_address_city || "",
-      destination_address_description:
-        booking.destination_address_description || "",
-      destination_address_street: booking.destination_address_street || "",
-      destination_address_city: booking.destination_address_city || "",
+      volunteer: booking.volunteer || "",
+      volunteerPhone: booking.volunteerPhone || "",
+      pickupAddress: booking.pickupAddress,
+      destinationAddress: booking.destinationAddress || "",
       notes: booking.notes || "",
-      client_confirmation: booking.client_confirmation,
+      frequency: booking.frequency,
     });
     setDialogOpen(true);
   };
 
   const handleDelete = async () => {
     if (bookingToDelete) {
-      try {
-        const response = await fetch(
-          `/api/bookings/${bookingToDelete.booking_id}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        const data = await response.json();
-        if (data.success) {
-          fetchBookings();
-          setDeleteDialogOpen(false);
-          setBookingToDelete(null);
-        }
-      } catch (error) {
-        console.error("Error deleting booking:", error);
-      }
+      setBookings(
+        bookings.filter((booking) => booking.id !== bookingToDelete.id)
+      );
+      setDeleteDialogOpen(false);
+      setBookingToDelete(null);
     }
   };
 
   const resetForm = () => {
     setFormData({
-      booking_type: "Service",
-      service_type: "",
-      date: new Date().toISOString().split("T")[0],
-      start_time: new Date().toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      appointment_time: new Date().toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      appointment_length: 1,
-      full_duration: 1,
-      status: "Not Assigned",
-      frequency_type: "One-Time",
-      num_volunteers_needed: 1,
-      pickup_address_description: "",
-      pickup_address_street: "",
-      pickup_address_city: "",
-      destination_address_description: "",
-      destination_address_street: "",
-      destination_address_city: "",
+      clientName: "",
+      clientEmail: "",
+      clientPhone: "",
+      serviceType: "",
+      date: "",
+      time: "",
+      status: "not-assigned",
+      volunteer: "",
+      volunteerPhone: "",
+      pickupAddress: "",
+      destinationAddress: "",
       notes: "",
-      client_confirmation: false,
+      frequency: "one-time",
     });
     setEditingBooking(null);
   };
 
-  const openDeleteDialog = (booking: BookingWithRelations) => {
+  const openDeleteDialog = (booking: Booking) => {
     setBookingToDelete(booking);
     setDeleteDialogOpen(true);
   };
 
-  const duplicateBooking = async (booking: BookingWithRelations) => {
-    try {
-      const response = await fetch(
-        `/api/bookings/${booking.booking_id}/replicate`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            frequency: "One-Time",
-            date: new Date().toISOString().split("T")[0],
-            time: booking.appointment_time,
-            created_by_user_id: 1,
-          }),
-        }
-      );
-
-      const data = await response.json();
-      if (data.success) {
-        fetchBookings();
-      }
-    } catch (error) {
-      console.error("Error duplicating booking:", error);
-    }
+  const duplicateBooking = (booking: Booking) => {
+    const duplicatedBooking = {
+      ...booking,
+      id: Date.now().toString(),
+      date: "",
+      time: "",
+      status: "not-assigned" as const,
+      volunteer: "",
+      volunteerPhone: "",
+      createdAt: new Date().toISOString(),
+    };
+    setBookings([...bookings, duplicatedBooking]);
   };
 
   if (loading) {
@@ -472,31 +421,46 @@ export default function BookingsPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="booking_type">Booking Type</Label>
-                  <Select
-                    value={formData.booking_type}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, booking_type: value })
+                  <Label htmlFor="clientName">Client Name</Label>
+                  <Input
+                    id="clientName"
+                    value={formData.clientName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, clientName: e.target.value })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select booking type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BOOKING_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="service_type">Service Type</Label>
+                  <Label htmlFor="clientEmail">Client Email</Label>
+                  <Input
+                    id="clientEmail"
+                    type="email"
+                    value={formData.clientEmail}
+                    onChange={(e) =>
+                      setFormData({ ...formData, clientEmail: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="clientPhone">Client Phone</Label>
+                  <Input
+                    id="clientPhone"
+                    value={formData.clientPhone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, clientPhone: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="serviceType">Service Type</Label>
                   <Select
-                    value={formData.service_type}
+                    value={formData.serviceType}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, service_type: value })
+                      setFormData({ ...formData, serviceType: value })
                     }
                   >
                     <SelectTrigger>
@@ -512,7 +476,6 @@ export default function BookingsPage() {
                   </Select>
                 </div>
               </div>
-
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="date">Date</Label>
@@ -527,209 +490,28 @@ export default function BookingsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="start_time">Start Time</Label>
+                  <Label htmlFor="time">Time</Label>
                   <Input
-                    id="start_time"
+                    id="time"
                     type="time"
-                    value={formData.start_time}
+                    value={formData.time}
                     onChange={(e) =>
-                      setFormData({ ...formData, start_time: e.target.value })
+                      setFormData({ ...formData, time: e.target.value })
                     }
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="appointment_time">Appointment Time</Label>
-                  <Input
-                    id="appointment_time"
-                    type="time"
-                    value={formData.appointment_time}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        appointment_time: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="appointment_length">
-                    Appointment Length (hours)
-                  </Label>
-                  <Input
-                    id="appointment_length"
-                    type="number"
-                    step="0.5"
-                    min="0.5"
-                    max="8"
-                    value={formData.appointment_length}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        appointment_length: parseFloat(e.target.value),
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="full_duration">Full Duration (hours)</Label>
-                  <Input
-                    id="full_duration"
-                    type="number"
-                    step="0.5"
-                    min="0.5"
-                    max="8"
-                    value={formData.full_duration}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        full_duration: parseFloat(e.target.value),
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="num_volunteers_needed">
-                    Volunteers Needed
-                  </Label>
+                  <Label htmlFor="frequency">Frequency</Label>
                   <Select
-                    value={formData.num_volunteers_needed.toString()}
+                    value={formData.frequency}
                     onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        num_volunteers_needed: parseInt(value),
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pickup_address_description">
-                  Pickup Address Description
-                </Label>
-                <Input
-                  id="pickup_address_description"
-                  value={formData.pickup_address_description}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      pickup_address_description: e.target.value,
-                    })
-                  }
-                  placeholder="e.g., Home Address"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pickup_address_street">Pickup Street</Label>
-                  <Input
-                    id="pickup_address_street"
-                    value={formData.pickup_address_street}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        pickup_address_street: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pickup_address_city">Pickup City</Label>
-                  <Input
-                    id="pickup_address_city"
-                    value={formData.pickup_address_city}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        pickup_address_city: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="destination_address_description">
-                  Destination Address Description
-                </Label>
-                <Input
-                  id="destination_address_description"
-                  value={formData.destination_address_description}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      destination_address_description: e.target.value,
-                    })
-                  }
-                  placeholder="Optional"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="destination_address_street">
-                    Destination Street
-                  </Label>
-                  <Input
-                    id="destination_address_street"
-                    value={formData.destination_address_street}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        destination_address_street: e.target.value,
-                      })
-                    }
-                    placeholder="Optional"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="destination_address_city">
-                    Destination City
-                  </Label>
-                  <Input
-                    id="destination_address_city"
-                    value={formData.destination_address_city}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        destination_address_city: e.target.value,
-                      })
-                    }
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="frequency_type">Frequency</Label>
-                  <Select
-                    value={formData.frequency_type}
-                    onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        frequency_type: value as typeof formData.frequency_type,
+                        frequency: value as
+                          | "one-time"
+                          | "ongoing"
+                          | "continuous",
                       })
                     }
                   >
@@ -745,31 +527,82 @@ export default function BookingsPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pickupAddress">Pickup Address</Label>
+                <Input
+                  id="pickupAddress"
+                  value={formData.pickupAddress}
+                  onChange={(e) =>
+                    setFormData({ ...formData, pickupAddress: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="destinationAddress">Destination Address</Label>
+                <Input
+                  id="destinationAddress"
+                  value={formData.destinationAddress}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      destinationAddress: e.target.value,
+                    })
+                  }
+                  placeholder="Optional"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) =>
+                  <Label htmlFor="volunteer">Volunteer</Label>
+                  <Input
+                    id="volunteer"
+                    value={formData.volunteer}
+                    onChange={(e) =>
+                      setFormData({ ...formData, volunteer: e.target.value })
+                    }
+                    placeholder="Optional"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="volunteerPhone">Volunteer Phone</Label>
+                  <Input
+                    id="volunteerPhone"
+                    value={formData.volunteerPhone}
+                    onChange={(e) =>
                       setFormData({
                         ...formData,
-                        status: value as typeof formData.status,
+                        volunteerPhone: e.target.value,
                       })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BOOKING_STATUSES.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Optional"
+                  />
                 </div>
               </div>
-
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      status: value as Booking["status"],
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BOOKING_STATUSES.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Input
@@ -781,7 +614,6 @@ export default function BookingsPage() {
                   placeholder="Optional notes"
                 />
               </div>
-
               <DialogFooter>
                 <Button
                   type="button"
@@ -814,7 +646,7 @@ export default function BookingsPage() {
             <div className="flex items-center space-x-2">
               <Search className="h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search bookings by client, service, volunteer, or booking number..."
+                placeholder="Search bookings..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="max-w-sm"
@@ -836,7 +668,6 @@ export default function BookingsPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Booking #</TableHead>
                           <TableHead>Client</TableHead>
                           <TableHead>Service</TableHead>
                           <TableHead>Date & Time</TableHead>
@@ -849,7 +680,7 @@ export default function BookingsPage() {
                         {filteredBookings.length === 0 ? (
                           <TableRow>
                             <TableCell
-                              colSpan={7}
+                              colSpan={6}
                               className="text-center py-8 text-muted-foreground"
                             >
                               No bookings found with status: {status.label}
@@ -857,49 +688,34 @@ export default function BookingsPage() {
                           </TableRow>
                         ) : (
                           filteredBookings.map((booking) => (
-                            <TableRow key={booking.booking_id}>
-                              <TableCell>
-                                <Link
-                                  href={`/admin/bookings/${booking.booking_id}`}
-                                  className="font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                                >
-                                  #{booking.booking_id}
-                                  <ExternalLink className="h-3 w-3" />
-                                </Link>
-                              </TableCell>
+                            <TableRow key={booking.id}>
                               <TableCell>
                                 <div className="space-y-1">
-                                  {booking.clients?.[0] ? (
-                                    <>
-                                      <div className="flex items-center gap-1">
-                                        <User className="h-3 w-3" />
-                                        <span className="font-medium">
-                                          {booking.clients[0].preferred_name}{" "}
-                                          {booking.clients[0].last_name}
-                                        </span>
-                                      </div>
-                                      {booking.clients[0].cell_phone && (
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                          <Phone className="h-3 w-3" />
-                                          {booking.clients[0].cell_phone}
-                                        </div>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <span className="text-muted-foreground">
-                                      No client assigned
+                                  <div className="flex items-center gap-1">
+                                    <User className="h-3 w-3" />
+                                    <span className="font-medium">
+                                      {booking.clientName}
                                     </span>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {booking.clientEmail}
+                                  </div>
+                                  {booking.clientPhone && (
+                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                      <Phone className="h-3 w-3" />
+                                      {booking.clientPhone}
+                                    </div>
                                   )}
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="space-y-1">
                                   <div className="font-medium">
-                                    {booking.service_type ||
-                                      booking.booking_type}
+                                    {booking.serviceType}
                                   </div>
                                   <div className="text-sm text-muted-foreground">
-                                    {booking.frequency_type}
+                                    {booking.frequency.charAt(0).toUpperCase() +
+                                      booking.frequency.slice(1)}
                                   </div>
                                 </div>
                               </TableCell>
@@ -913,22 +729,20 @@ export default function BookingsPage() {
                                   </div>
                                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <Clock className="h-3 w-3" />
-                                    {booking.appointment_time}
+                                    {booking.time}
                                   </div>
                                 </div>
                               </TableCell>
                               <TableCell>
-                                {booking.volunteers &&
-                                booking.volunteers.length > 0 ? (
+                                {booking.volunteer ? (
                                   <div className="space-y-1">
                                     <div className="font-medium">
-                                      {booking.volunteers[0].preferred_name}{" "}
-                                      {booking.volunteers[0].last_name}
+                                      {booking.volunteer}
                                     </div>
-                                    {booking.volunteers[0].cell_phone && (
+                                    {booking.volunteerPhone && (
                                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                         <Phone className="h-3 w-3" />
-                                        {booking.volunteers[0].cell_phone}
+                                        {booking.volunteerPhone}
                                       </div>
                                     )}
                                   </div>
@@ -952,14 +766,6 @@ export default function BookingsPage() {
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem asChild>
-                                      <Link
-                                        href={`/admin/bookings/${booking.booking_id}`}
-                                      >
-                                        <ExternalLink className="mr-2 h-4 w-4" />
-                                        View Details
-                                      </Link>
-                                    </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() => handleEdit(booking)}
                                     >
@@ -988,52 +794,6 @@ export default function BookingsPage() {
                       </TableBody>
                     </Table>
                   </div>
-
-                  {/* Pagination */}
-                  {pagination.pages > 1 && (
-                    <div className="flex items-center justify-between space-x-2 py-4">
-                      <div className="text-sm text-muted-foreground">
-                        Showing {(pagination.page - 1) * pagination.limit + 1}{" "}
-                        to{" "}
-                        {Math.min(
-                          pagination.page * pagination.limit,
-                          pagination.total
-                        )}{" "}
-                        of {pagination.total} bookings
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setPagination((prev) => ({
-                              ...prev,
-                              page: prev.page - 1,
-                            }))
-                          }
-                          disabled={pagination.page <= 1}
-                        >
-                          Previous
-                        </Button>
-                        <div className="text-sm">
-                          Page {pagination.page} of {pagination.pages}
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setPagination((prev) => ({
-                              ...prev,
-                              page: prev.page + 1,
-                            }))
-                          }
-                          disabled={pagination.page >= pagination.pages}
-                        >
-                          Next
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </TabsContent>
               ))}
             </Tabs>
@@ -1047,8 +807,8 @@ export default function BookingsPage() {
           <DialogHeader>
             <DialogTitle>Delete Booking</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete booking #
-              {bookingToDelete?.booking_id}? This action cannot be undone.
+              Are you sure you want to delete the booking for{" "}
+              {bookingToDelete?.clientName}? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

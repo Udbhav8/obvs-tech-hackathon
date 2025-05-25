@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       {
         message: "User created successfully",
         user: {
-          id: user.id.toString(),
+          id: user._id.toString(),
           email: user.personal_information?.email ?? "",
           name: user.personal_information?.first_name ?? "",
           roles: user.general_information?.roles || [UserRole.ADMIN],

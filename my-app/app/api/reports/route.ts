@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
 import UserModel from "../../../models/User"; // Your user Mongoose model
-import { fetchUserEnumsFromDatabase } from "../../../enums/enum-utils"; // Update with actual path
+import { fetchUserEnumsFromDatabase } from "../../../enums/user-enums"; // Update with actual path
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
         return await handleVolunteerBirthdays(searchParams);
       case "enum":
         return await handleEnumFetch(); 
-      case "active_services":
+      case "active_services"
         return await handleActiveServices(searchParams);
       default:
         return NextResponse.json(
@@ -134,18 +134,17 @@ async function handleActiveServices(searchParams: URLSearchParams) {
     }
   
     try {
-        console.log("Active service :", service);
       const activeServices = await UserModel.find({
         "general_information.roles": "Volunteer",
         "volunteer_information.volunteer_services": {
           $elemMatch: {
             service_type: service,
-            is_active: true,
+            active: true,
           },
         },
       });
-
-      //console.log("Active service volunteers:", activeServices[0]["volunteer_information"].volunteer_services);
+  
+      console.log("Active service volunteers:", activeServices);
   
       return NextResponse.json({ message: activeServices }, { status: 200 });
     } catch (error) {
