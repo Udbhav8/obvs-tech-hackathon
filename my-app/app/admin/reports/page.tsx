@@ -441,6 +441,34 @@ export default function ReportsPage() {
         </div>
       )}
 
+        {activeSubTab === "CLIENT BOOKINGS" && (
+        <div className="border border-gray-300 rounded-md p-4 space-y-4">
+            {clientBookings.length > 0 ? (
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead>Client Name</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                </TableRow>
+                </TableHeader>
+                <TableBody>
+                {clientBookings.map((booking, index) => (
+                    <TableRow key={index}>
+                    <TableCell>{booking.clientName}</TableCell>
+                    <TableCell>{booking.service}</TableCell>
+                    <TableCell>{booking.date}</TableCell>
+                    <TableCell>{booking.status}</TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+            ) : (
+            <p className="text-gray-500 text-sm">No results yet.</p>
+            )}
+        </div>
+        )}
 
       {/* Content Box for SERVICE ATTENDANCE */}
       {activeSubTab === "SERVICE ATTENDANCE" && (
