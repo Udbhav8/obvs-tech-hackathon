@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
         return await handleVolunteerBirthdays(searchParams);
       case "enum":
         return await handleEnumFetch(); 
-      case "active_services"
+      case "active_services":
         return await handleActiveServices(searchParams);
       default:
         return NextResponse.json(
