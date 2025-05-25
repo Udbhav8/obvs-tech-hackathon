@@ -59,6 +59,8 @@ import {
   AlertCircle,
   Copy,
 } from "lucide-react";
+import { UserIcon, PartyPopperIcon } from 'lucide-react';
+
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState(null);
@@ -299,7 +301,12 @@ export default function ReportsPage() {
               <TableBody>
                 {newVolunteers.map((person, index) => (
                   <TableRow key={index}>
-                    <TableCell>{person.name}</TableCell>
+                    <TableCell>
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <UserIcon size={16} className="text-[#0891B2]" />
+            <span>{person.name}</span>
+          </div>
+        </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -344,23 +351,36 @@ export default function ReportsPage() {
 
           {/* Table */}
           {birthdayPeople.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {birthdayPeople.map((person, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{person.name}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-gray-500 text-sm">No results yet.</p>
-          )}
+  <Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+      <TableHead>Day</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {birthdayPeople.map((person, index) => (
+      <TableRow key={index}>
+        <TableCell>
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <UserIcon size={16} className="text-[#0891B2]" />
+            <span>{person.name}</span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <PartyPopperIcon size={16} className="text-[#0891B2]" />
+            <span>{person.birthday}</span>
+          </div>
+        </TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+) : (
+  <p className="text-gray-500 text-sm">No results yet.</p>
+)}
+
         </div>
       )}
 
