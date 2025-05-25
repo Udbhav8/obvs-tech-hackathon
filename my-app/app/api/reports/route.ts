@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
-import UserModel from "../../../models/User"; // Your user Mongoose model
-import { fetchUserEnumsFromDatabase } from "../../../enums/enum-utils"; // Update with actual path
+import UserModel from "../../../models/User"; 
+import {BookingClientRelation} from "../../../models/Booking"; 
+import { fetchUserEnumsFromDatabase } from "../../../enums/enum-utils"; 
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +20,8 @@ export async function GET(request: NextRequest) {
         return await handleEnumFetch(); 
       case "active_services":
         return await handleActiveServices(searchParams);
+      case "client_bookings":
+        return await handleClientBookings();
       default:
         return NextResponse.json(
           { message: "Invalid volunteer report type requested." },
@@ -152,6 +155,41 @@ async function handleActiveServices(searchParams: URLSearchParams) {
       console.error("Error fetching active services:", error);
       return NextResponse.json(
         { message: "Unable to fetch active services." },
+        { status: 400 }
+      );
+    }
+  }
+  
+  async function handleClientBookings() {
+    try {
+      // Fetch all bookings that have client associations
+      const bookings = await BookingClientRelation.find({
+        booking_clients: { $exists: true, $not: { $size: 0 } }
+      }).select("booking_clients");
+  
+      const clientBookings = [];
+  
+      for (const booking of bookings) {
+        for (const clientRel of booking.booking_clients) {
+          const client = await UserModel.findOne({
+            user_id: clientRel.client_id, // adjust if using _id instead
+            "general_information.roles": "Client",
+          }).select("general_information.full_name");
+  
+          if (client) {
+            clientBookings.push({
+              client_name: client.personal_information.first_name + " " + client.personal_information.last_name,
+              booking_id: booking._id,
+            });
+          }
+        }
+      }
+  
+      return NextResponse.json({ message: clientBookings }, { status: 200 });
+    } catch (error) {
+      console.error("Error fetching client bookings:", error);
+      return NextResponse.json(
+        { message: "Unable to return volunteers." },
         { status: 400 }
       );
     }
