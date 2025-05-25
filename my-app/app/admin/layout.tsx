@@ -36,7 +36,6 @@ import {
   DollarSign,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { GlobalSearchBar } from "@/components/global-search-bar";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -173,9 +172,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <SidebarRail />
         </Sidebar>
         <main className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4">
-            <GlobalSearchBar />
-          </div>
           <div className="flex-1 overflow-auto p-6">{children}</div>
         </main>
       </div>

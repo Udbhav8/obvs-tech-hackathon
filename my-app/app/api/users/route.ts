@@ -35,11 +35,9 @@ interface MongoError extends Error {
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     const category = searchParams.get("category");
-    const searchTerm = searchParams.get("search");
 
     if (id) {
       const user = await User.findById(id).select("-password");
@@ -54,29 +52,18 @@ export async function GET(request: NextRequest) {
     // Handle category filtering based on roles
     if (category) {
       const roleMap: Record<string, string[]> = {
-        clients: [UserRole.CLIENT],
+        clients: [UserRole.CLIENT, UserRole.BAH],
         volunteers: [UserRole.VOLUNTEER],
         donors: [UserRole.DONOR],
         staff: [UserRole.STAFF],
         board: [UserRole.BOARD],
+        "helping-hearts": [UserRole.BAH],
         "event-attendees": [UserRole.EVENT_ATTENDEE],
       };
 
       if (roleMap[category]) {
         query["general_information.roles"] = { $in: roleMap[category] };
       }
-    }
-
-    // Handle search term
-    if (searchTerm) {
-      const searchRegex = { $regex: searchTerm, $options: "i" };
-      query.$or = [
-        { "personal_information.first_name": searchRegex },
-        { "personal_information.last_name": searchRegex },
-        { "personal_information.email": searchRegex },
-        { name: searchRegex }, // Legacy field
-        { email: searchRegex }, // Legacy field
-      ];
     }
 
     const users = await User.find(query).select("-password").sort({
@@ -124,21 +111,22 @@ export async function POST(request: NextRequest) {
       (body.name ? body.name.split(" ").slice(1).join(" ") : "");
 
     // Set roles based on category or provided roles
-    let userRoles: string[] = body.roles || [UserRole.CLIENT]; // Initialize with default
-    if (body.category) { // If category is present, it might override the default or body.roles
+    let userRoles = body.roles || [UserRole.USER];
+    if (body.category) {
       const categoryRoleMap: Record<string, string> = {
         clients: UserRole.CLIENT,
         volunteers: UserRole.VOLUNTEER,
         donors: UserRole.DONOR,
         staff: UserRole.STAFF,
         board: UserRole.BOARD,
+        "helping-hearts": UserRole.BAH,
         "event-attendees": UserRole.EVENT_ATTENDEE,
       };
+
       if (categoryRoleMap[body.category]) {
-        userRoles = [categoryRoleMap[body.category]]; // Override with category-specific role
+        userRoles = [categoryRoleMap[body.category]];
       }
-    } // If body.roles was present, it's used, unless overridden by category.
-      // If neither body.roles nor a valid category was present, it remains [UserRole.CLIENT].
+    }
 
     // Create user with comprehensive schema
     const userData = {
@@ -146,11 +134,11 @@ export async function POST(request: NextRequest) {
       name: body.name || `${firstName} ${lastName}`.trim(),
       email: body.email || "",
       password: body.password || "",
-      role: userRoles[0], // userRoles is guaranteed to have at least one element
+      role: body.role || "user",
 
       // New schema structure
       general_information: {
-        roles: userRoles, // userRoles is guaranteed to be an array
+        roles: userRoles,
         enews_subscription: false,
         letter_mail_subscription: false,
       },
