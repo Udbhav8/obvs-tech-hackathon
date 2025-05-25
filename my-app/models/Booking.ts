@@ -276,8 +276,10 @@ const JobHistorySchema = new Schema<IJobHistory>({
 
 // Models for the different booking types
 const Booking = (mongoose.models.Booking || mongoose.model<IBooking>('Booking', BookingSchema)) as Model<IBooking>;
-const ServiceProgramBooking = Booking.discriminator<IServiceProgramBooking>('ServiceProgramBooking', ServiceProgramBookingSchema);
-const EventBooking = Booking.discriminator<IEventBooking>('EventBooking', EventBookingSchema);
+
+// Check if discriminator already exists
+const ServiceProgramBooking = mongoose.models.ServiceProgramBooking || Booking.discriminator<IServiceProgramBooking>('ServiceProgramBooking', ServiceProgramBookingSchema);
+const EventBooking = mongoose.models.EventBooking || Booking.discriminator<IEventBooking>('EventBooking', EventBookingSchema);
 
 // Models for related entities
 const ClientModel = (mongoose.models.Client || mongoose.model<IClient>('Client', ClientSchema)) as Model<IClient>;
