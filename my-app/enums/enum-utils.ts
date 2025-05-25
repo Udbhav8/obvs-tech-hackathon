@@ -4,6 +4,7 @@
 import Enum from "../models/Enum";
 import { BOOKING_ENUM_REGISTRY, BookingEnumName } from "./booking-enums";
 import { USER_ENUM_REGISTRY, EnumName as UserEnumName } from "./user-enums";
+import { DONATIONS_ENUM_REGISTRY, DonationsEnumName } from "./donations-enums";
 
 // Type for booking enum return values
 export type BookingEnums = {
@@ -13,6 +14,11 @@ export type BookingEnums = {
 // Type for user enum return values
 export type UserEnums = {
   [K in UserEnumName]: string[];
+};
+
+// Type for donations enum return values
+export type DonationsEnums = {
+  [K in DonationsEnumName]: string[];
 };
 
 // Function to fetch all booking enums from the database
@@ -58,6 +64,25 @@ export async function fetchUserEnumsFromDatabase(): Promise<UserEnums> {
   return result;
 }
 
+// Function to fetch all donations enums from the database
+export async function fetchDonationsEnumsFromDatabase(): Promise<DonationsEnums> {
+  const enumNames = Object.keys(DONATIONS_ENUM_REGISTRY) as DonationsEnumName[];
+  const result = {} as DonationsEnums;
+
+  for (const enumName of enumNames) {
+    try {
+      const enumMap = await Enum.getEnumMap(enumName);
+      result[enumName] = Object.values(enumMap);
+    } catch (error) {
+      console.warn(`Failed to fetch enum ${enumName} from database:`, error);
+      // Fallback to local enum definition
+      result[enumName] = Object.values(DONATIONS_ENUM_REGISTRY[enumName]);
+    }
+  }
+
+  return result;
+}
+
 // Function to fetch a specific enum from the database
 export async function fetchSingleEnum(enumName: string): Promise<string[]> {
   try {
@@ -74,6 +99,13 @@ export async function fetchSingleEnum(enumName: string): Promise<string[]> {
     // Try to find in user enums
     if (enumName in USER_ENUM_REGISTRY) {
       return Object.values(USER_ENUM_REGISTRY[enumName as UserEnumName]);
+    }
+
+    // Try to find in donations enums
+    if (enumName in DONATIONS_ENUM_REGISTRY) {
+      return Object.values(
+        DONATIONS_ENUM_REGISTRY[enumName as DonationsEnumName]
+      );
     }
 
     throw new Error(`Enum ${enumName} not found in any registry`);
@@ -100,6 +132,14 @@ export async function fetchEnumMap(
     // Try to find in user enums
     if (enumName in USER_ENUM_REGISTRY) {
       const enumObj = USER_ENUM_REGISTRY[enumName as UserEnumName];
+      return Object.fromEntries(
+        Object.entries(enumObj).map(([key, value]) => [key, value])
+      );
+    }
+
+    // Try to find in donations enums
+    if (enumName in DONATIONS_ENUM_REGISTRY) {
+      const enumObj = DONATIONS_ENUM_REGISTRY[enumName as DonationsEnumName];
       return Object.fromEntries(
         Object.entries(enumObj).map(([key, value]) => [key, value])
       );
