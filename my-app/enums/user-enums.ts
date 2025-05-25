@@ -77,7 +77,7 @@ enum Ethnicity {
 }
 
 // Represents the current status of a user in various contexts (Client, Volunteer, Donor, Funder).
-enum Status {
+export enum Status {
   ACTIVE = "Active",
   AWAY = "Away",
   INACTIVE = "Inactive",
