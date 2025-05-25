@@ -36,6 +36,9 @@ import {
   DollarSign,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
+import { GlobalSearchBar } from "@/components/global-search-bar";
+
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -111,10 +114,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <Sidebar>
           <SidebarHeader className="border-b border-sidebar-border">
             <div className="flex items-center gap-2 px-4 py-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <LayoutDashboard className="h-4 w-4" />
-              </div>
-              <span className="font-semibold">Admin Dashboard</span>
+              </div> */}
+              <Image
+                src="/image/OBVS-colour-logo.png"
+                alt="OBVS colour logo"
+                width={50}
+                height={50}
+              />
+              <span className="font-semibold">OBVS Dashboard</span>
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -172,6 +181,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <SidebarRail />
         </Sidebar>
         <main className="flex-1 flex flex-col overflow-hidden">
+          <div className="p-4">
+            <GlobalSearchBar />
+          </div>
           <div className="flex-1 overflow-auto p-6">{children}</div>
         </main>
       </div>

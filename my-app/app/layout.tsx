@@ -39,7 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        className={`${ibmPlexMono.variable} antialiased`}        
+        className={`${ibmPlexMono.variable} antialiased`}
       >
         <SessionProvider>{children}</SessionProvider>
       </body>

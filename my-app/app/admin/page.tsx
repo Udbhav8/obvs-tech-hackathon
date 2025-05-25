@@ -8,14 +8,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Users, Calendar, TrendingUp, Activity } from "lucide-react";
+import { Users, Coins, TrendingUp, Activity } from "lucide-react";
 
 interface DashboardStats {
   totalUsers: number;
   totalBookings: number;
   activeBookings: number;
   recentActivity: number;
+
+  totalDonations: number;
+  totalClients: number;
+  totalVolunteers: number;
 }
 
 export default function AdminDashboard() {
@@ -24,6 +30,9 @@ export default function AdminDashboard() {
     totalBookings: 0,
     activeBookings: 0,
     recentActivity: 0,
+    totalDonations: 0,
+    totalClients: 0,
+    totalVolunteers: 0.
   });
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +51,9 @@ export default function AdminDashboard() {
         totalBookings: 89,
         activeBookings: 23,
         recentActivity: 7,
+        totalDonations: 1234,
+        totalClients: 22,
+        totalVolunteers: 13,
       });
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
@@ -87,20 +99,12 @@ export default function AdminDashboard() {
   //End
   const dashboardCards = [
     {
-      title: "Total Users",
-      description: "All registered users",
-      value: stats.totalUsers,
-      icon: Users,
+      title: "Total Donations",
+      description: "All donations",
+      value: stats.totalDonations,
+      icon: Coins,
       color: "text-blue-500",
       bgColor: "bg-blue-50",
-    },
-    {
-      title: "Total Bookings",
-      description: "All time bookings",
-      value: stats.totalBookings,
-      icon: Calendar,
-      color: "text-green-500",
-      bgColor: "bg-green-50",
     },
     {
       title: "Active Bookings",
@@ -111,20 +115,36 @@ export default function AdminDashboard() {
       bgColor: "bg-orange-50",
     },
     {
-      title: "Recent Activity",
-      description: "Last 24 hours",
-      value: stats.recentActivity,
-      icon: Activity,
+      title: "Total Clients",
+      description: "All registered clients",
+      value: stats.totalClients,
+      icon: Users,
+      color: "text-green-500",
+      bgColor: "bg-green-50",
+    },
+    {
+      title: "Total Volunteers",
+      description: "All registered volunteers",
+      value: stats.totalVolunteers,
+      icon: Users,
       color: "text-purple-500",
       bgColor: "bg-purple-50",
     },
+    
   ];
+
+  const tags = Array.from({ length: 25 }).map(
+    //placeholder data
+    (_, i, a) => `Fake Annoucement Data ${a.length - i}: Lorem ipsum dolor sit amet, 
+    consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore 
+    magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. `
+  )
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">DASHBOARD</h1>
           <p className="text-muted-foreground">
             Welcome to the admin dashboard
           </p>
@@ -150,7 +170,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">DASHBOARD</h1>
         <p className="text-muted-foreground">
           Welcome to the admin dashboard. Here&apos;s an overview of your
           system.
@@ -180,7 +200,33 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 grid-cols-full">
+        <Card>
+          <CardHeader>
+          <CardTitle>Annoucements</CardTitle>
+          <CardDescription>Annoucements submitted to the team journal</CardDescription>
+          </CardHeader>
+          <CardContent>
+          <ScrollArea className="h-72 rounded-md border">
+            <div className="p-4">
+              {/* <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4> */}
+              {tags.map((tag) => (
+                <>
+                  <div key={tag} className="text-m">
+                    {tag}
+                  </div>
+                  <Separator className="mt-2 mb-2"/>
+                </>
+              ))}
+            </div>
+          </ScrollArea>
+          </CardContent>
+          
+        </Card>
+      </div>
+
+
+      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
