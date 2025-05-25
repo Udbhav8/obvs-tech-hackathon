@@ -105,6 +105,9 @@ async function connectSampleDB(): Promise<Connection | null> {
   return cached!.sampleConn;
 }
 
+// Alias for API route compatibility
+export const connectToDatabase = connectDB;
+
 // Export default for backward compatibility with auth
 export default connectDB;
 // Export named functions for sample database

@@ -140,13 +140,13 @@ const BookingSchema = new Schema<IBooking>({
   start_time: { type: String, required: true, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
   appointment_time: { type: String, required: true, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
   appointment_length: { type: Number, required: true },
-  full_duration: { type: Number, required: true },
+  full_duration: { type: Number, default: null },
   notes: { type: String, minlength: 0, maxlength: 2000 },
   num_volunteers_needed: { type: Number, required: true, min: 1, max: 4, default: 1 },
   client_confirmation: { type: Boolean, required: true },
   cancellation_reason: { type: String, default: null },
   cancellation_notes: { type: String, default: null },
-  is_parent_booking: { type: Boolean, required: true },
+  is_parent_booking: { type: Boolean, required: true, default: false },
   parent_booking_id: { type: Number, default: null },
   end_date: { type: Date, default: null },
   recurrence_frequency: { type: String, default: null },
@@ -171,9 +171,9 @@ const ServiceProgramBookingSchema = new Schema<IServiceProgramBooking>({
     ],
     required: true,
   },
-  pickup_address_description: { type: String, required: true },
-  pickup_address_street: { type: String, required: true },
-  pickup_address_city: { type: String, required: true },
+  pickup_address_description: { type: String, required: true, default:"" },
+  pickup_address_street: { type: String, required: true, default:"" },
+  pickup_address_city: { type: String, required: true,  default: "" },
   destination_address_description: { type: String, default: null },
   destination_address_street: { type: String, default: null },
   destination_address_city: { type: String, default: null },
@@ -187,52 +187,52 @@ const EventBookingSchema = new Schema<IEventBooking>({
   setup_time_end: { type: String, default: null, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
   takedown_time_start: { type: String, default: null, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
   takedown_time_end: { type: String, default: null, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
-  location_description: { type: String, required: true },
-  location_street: { type: String, required: true },
-  location_city: { type: String, required: true },
+  location_description: { type: String, required: true , default: "" },
+  location_street: { type: String, required: true, default: "" },
+  location_city: { type: String, required: true, default: "" },
 });
 
 // Client Schema (Simplified for booking context, links to User schema)
 const ClientSchema = new Schema<IClient>({
   client_id: { type: Number, required: true, unique: true }, // Links to user_id in User.ts
-  preferred_name: { type: String, required: true },
-  last_name: { type: String, required: true },
-  internal_flags: { type: [String], required: true },
-  booking_flags: { type: [String], required: true },
+  preferred_name: { type: String, required: true, default: "" },
+  last_name: { type: String, required: true, default: "" },
+  internal_flags: { type: [String], default: null },
+  booking_flags: { type: [String], default: null },
   allergies: { type: String },
   mobility_aids: { type: [String] },
   disability: { type: String },
-  dnr: { type: Boolean, required: true },
+  dnr: { type: Boolean, required: true , default: false},
   dnr_notes: { type: String },
   home_phone: { type: String, default: null },
   cell_phone: { type: String, default: null },
-  home_address_street: { type: String, required: true },
-  home_address_city: { type: String, required: true },
-  scent_sensitivity: { type: Boolean, required: true },
-  smoking: { type: Boolean, required: true },
+  home_address_street: { type: String, required: true, default: "" },
+  home_address_city: { type: String, required: true, default: "" },
+  scent_sensitivity: { type: Boolean, required: true  , default: false },
+  smoking: { type: Boolean, required: true, default: false },
   vehicle_requirements: { type: [String] },
 }, { _id: false }); // _id: false because client_id is the primary key
 
 // Volunteer Schema (Simplified for booking context, links to User schema)
 const VolunteerSchema = new Schema<IVolunteer>({
   volunteer_id: { type: Number, required: true, unique: true }, // Links to user_id in User.ts
-  preferred_name: { type: String, required: true },
-  last_name: { type: String, required: true },
-  flags: { type: [String], required: true },
+  preferred_name: { type: String, required: true, default: "" },
+  last_name: { type: String, required: true, default: "" },
+  flags: { type: [String], default: null },
   allergies: { type: String },
   home_phone: { type: String, default: null },
   cell_phone: { type: String, default: null },
   email: { type: String, required: true },
   car_type: { type: String, default: null },
-  scent_sensitivity: { type: Boolean, required: true },
-  smoking: { type: Boolean, required: true },
+  scent_sensitivity: { type: Boolean, required: true, default: false },
+  smoking: { type: Boolean, required: true, default: false },
 }, { _id: false }); // _id: false because volunteer_id is the primary key
 
 // Booking Client Relation Schema
 const BookingClientRelationSchema = new Schema<IBookingClientRelation>({
   booking_id: { type: Number, required: true, ref: 'Booking' }, // Reference to Booking
   client_id: { type: Number, required: true, ref: 'User' }, // Reference to User (Client)
-  is_primary: { type: Boolean, required: true },
+  is_primary: { type: Boolean, required: true, default: false },
 }, { _id: false });
 
 // Booking Volunteer Relation Schema
@@ -256,7 +256,7 @@ const VolunteerAbsenceSchema = new Schema<IVolunteerAbsence>({
   volunteer_id: { type: Number, required: true, ref: 'User' }, // Reference to User (Volunteer)
   start_date: { type: Date, required: true },
   end_date: { type: Date, required: true },
-  is_one_day: { type: Boolean, required: true },
+  is_one_day: { type: Boolean, required: true, default: false },
   reason: { type: String, default: null },
 }, { timestamps: true });
 
