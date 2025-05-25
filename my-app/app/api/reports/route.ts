@@ -4,6 +4,10 @@ import UserModel from "../../../models/User";
 import {BookingClientRelation} from "../../../models/Booking"; 
 import { fetchUserEnumsFromDatabase } from "../../../enums/enum-utils"; 
 
+// All routes are working here except client bookings which currently is not returning results, 
+// most likely is a problem with the way the dummy data in mongodb is
+
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
