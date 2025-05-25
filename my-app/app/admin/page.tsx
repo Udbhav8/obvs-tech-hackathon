@@ -62,6 +62,41 @@ export default function AdminDashboard() {
     }
   };
 
+  //Here
+  const jobs = [
+    {
+      id: "45615",
+      client: "not confirmed",
+      type: "Drives Medical",
+      recurring: "One Time",
+      date: "Wed, Apr 23, 2025 11:20am",
+      duration: "1",
+      status: "Not Assigned",
+    },
+    {
+      id: "45616",
+      client: "not confirmed",
+      type: "Drives Medical",
+      recurring: "One Time",
+      date: "Wed, Apr 23, 2025 11:20am",
+      duration: "1",
+      status: "Not Assigned",
+    },
+    {
+      id: "44256",
+      client: "not confirmed",
+      type: "Income Tax",
+      recurring: "One Time",
+      date: "Fri, Apr 25, 2025 10:00am",
+      duration: "2",
+      status: "Not Assigned",
+    },
+  ];
+  //End
+
+  //Here
+  
+  //End
   const dashboardCards = [
     {
       title: "Total Donations",
@@ -191,7 +226,7 @@ export default function AdminDashboard() {
       </div>
 
 
-      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      /* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
@@ -277,7 +312,59 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
-      </div> */}
+        <Card className="col-span-7">
+  <CardHeader>
+    <CardTitle>Upcoming Jobs Next 14 Days</CardTitle>
+    <CardDescription>Volunteer jobs scheduled within the next two weeks</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm text-left">
+        <thead className="bg-muted text-muted-foreground">
+          <tr>
+            <th className="px-4 py-2">Status</th>
+            <th className="px-4 py-2">View Job ID</th>
+            <th className="px-4 py-2">View Client</th>
+            <th className="px-4 py-2">Type</th>
+            <th className="px-4 py-2">Recurring</th>
+            <th className="px-4 py-2">Date</th>
+            <th className="px-4 py-2">Duration (hrs)</th>
+            <th className="px-4 py-2">Job History</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          <tr>
+            <td className="px-4 py-2">
+              <Badge variant="secondary">Assigned</Badge>
+            </td>
+            <td className="px-4 py-2 text-blue-600 hover:underline cursor-pointer">#2043</td>
+            <td className="px-4 py-2 text-blue-600 hover:underline cursor-pointer">John Doe</td>
+            <td className="px-4 py-2">Grocery Delivery</td>
+            <td className="px-4 py-2">No</td>
+            <td className="px-4 py-2">April 26, 10:00 AM</td>
+            <td className="px-4 py-2">1.5</td>
+            <td className="px-4 py-2 text-blue-600 hover:underline cursor-pointer">View</td>
+          </tr>
+          <tr>
+            <td className="px-4 py-2">
+              <Badge variant="secondary">Available</Badge>
+            </td>
+            <td className="px-4 py-2 text-blue-600 hover:underline cursor-pointer">#2051</td>
+            <td className="px-4 py-2 text-blue-600 hover:underline cursor-pointer">Jane Smith</td>
+            <td className="px-4 py-2">Medical Escort</td>
+            <td className="px-4 py-2">Yes</td>
+            <td className="px-4 py-2">April 27, 2:00 PM</td>
+            <td className="px-4 py-2">2</td>
+            <td className="px-4 py-2 text-blue-600 hover:underline cursor-pointer">View</td>
+          </tr>
+          {}
+        </tbody>
+      </table>
+    </div>
+  </CardContent>
+</Card>
+
+      </div>
     </div>
   );
 }
