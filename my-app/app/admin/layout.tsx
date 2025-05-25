@@ -34,9 +34,12 @@ import {
   Settings,
   FileText,
   DollarSign,
+  Search,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import SearchBar from "@/components/search/SearchBar";
+
 interface AdminLayoutProps {
   children: ReactNode;
 }
@@ -121,6 +124,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 height={50}
               />
               <span className="font-semibold">OBVS Dashboard</span>
+            </div>
+            <div className="px-4 pb-4">
+              <SearchBar />
             </div>
           </SidebarHeader>
           <SidebarContent>
