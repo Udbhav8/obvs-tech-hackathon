@@ -577,9 +577,6 @@ interface IUser extends Document {
   getPrimaryEmail(): string;
 }
 
-// Create indexes
-UserSchema.index({ "personal_information.email": 1 });
-
 // Export the model using the pattern from the GitHub issue to prevent "Cannot overwrite model once compiled" error
 const User = (mongoose.models.User ||
   mongoose.model("User", UserSchema)) as Model<IUser>;

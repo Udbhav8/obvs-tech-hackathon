@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Model } from 'mongoose';
 // ------------------------------------------------------------------------------------------------
 // INTERFACES
 // ------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ export interface IEventBooking extends IBooking {
 
 // Client Interface (simplified based on booking schema, full client details are in User.ts)
 export interface IClient extends Document {
-  client_id: number;
+  client_id: string;
   preferred_name: string;
   last_name: string;
   internal_flags: string[];
@@ -72,7 +72,7 @@ export interface IClient extends Document {
 
 // Volunteer Interface (simplified based on booking schema, full volunteer details are in User.ts)
 export interface IVolunteer extends Document {
-  volunteer_id: number;
+  volunteer_id: string;
   preferred_name: string;
   last_name: string;
   flags: string[];
@@ -88,21 +88,21 @@ export interface IVolunteer extends Document {
 // Booking Client Relation Interface
 export interface IBookingClientRelation extends Document {
   booking_id: number;
-  client_id: number;
+  client_id: string;
   is_primary: boolean;
 }
 
 // Booking Volunteer Relation Interface
 export interface IBookingVolunteerRelation extends Document {
   booking_id: number;
-  volunteer_id: number;
+  volunteer_id: string;
   status: string;
 }
 
 // Event Attendee Interface
 export interface IEventAttendee extends Document {
   event_booking_id: number;
-  user_id?: number | null; // Corresponds to user_id in User.ts if internal
+  user_id?: string | null; // Corresponds to user_id in User.ts if internal
   external_name?: string | null;
   user_type: string;
 }
@@ -110,7 +110,7 @@ export interface IEventAttendee extends Document {
 // Volunteer Absence Interface
 export interface IVolunteerAbsence extends Document {
   absence_id: number;
-  volunteer_id: number;
+  volunteer_id: string;
   start_date: Date;
   end_date: Date;
   is_one_day: boolean;
@@ -121,7 +121,7 @@ export interface IVolunteerAbsence extends Document {
 export interface IJobHistory extends Document {
   history_id: number;
   booking_id: number;
-  user_id: number; // Corresponds to user_id in User.ts
+  user_id: string; // Corresponds to user_id in User.ts
   action: string;
   timestamp: Date;
 }
@@ -171,9 +171,9 @@ const ServiceProgramBookingSchema = new Schema<IServiceProgramBooking>({
     ],
     required: true,
   },
-  pickup_address_description: { type: String, required: true, default:"" },
-  pickup_address_street: { type: String, required: true, default:"" },
-  pickup_address_city: { type: String, required: true,  default: "" },
+  pickup_address_description: { type: String, required: true, default: "" },
+  pickup_address_street: { type: String, required: true, default: "" },
+  pickup_address_city: { type: String, required: true, default: "" },
   destination_address_description: { type: String, default: null },
   destination_address_street: { type: String, default: null },
   destination_address_city: { type: String, default: null },
@@ -187,14 +187,14 @@ const EventBookingSchema = new Schema<IEventBooking>({
   setup_time_end: { type: String, default: null, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
   takedown_time_start: { type: String, default: null, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
   takedown_time_end: { type: String, default: null, pattern: /^([01]\d|2[0-3]):([0-5]\d)$/ },
-  location_description: { type: String, required: true , default: "" },
+  location_description: { type: String, required: true, default: "" },
   location_street: { type: String, required: true, default: "" },
   location_city: { type: String, required: true, default: "" },
 });
 
 // Client Schema (Simplified for booking context, links to User schema)
 const ClientSchema = new Schema<IClient>({
-  client_id: { type: Number, required: true, unique: true }, // Links to user_id in User.ts
+  client_id: { type: String, required: true, unique: true }, // Links to user_id in User.ts
   preferred_name: { type: String, required: true, default: "" },
   last_name: { type: String, required: true, default: "" },
   internal_flags: { type: [String], default: null },
@@ -202,20 +202,20 @@ const ClientSchema = new Schema<IClient>({
   allergies: { type: String },
   mobility_aids: { type: [String] },
   disability: { type: String },
-  dnr: { type: Boolean, required: true , default: false},
+  dnr: { type: Boolean, required: true, default: false },
   dnr_notes: { type: String },
   home_phone: { type: String, default: null },
   cell_phone: { type: String, default: null },
   home_address_street: { type: String, required: true, default: "" },
   home_address_city: { type: String, required: true, default: "" },
-  scent_sensitivity: { type: Boolean, required: true  , default: false },
+  scent_sensitivity: { type: Boolean, required: true, default: false },
   smoking: { type: Boolean, required: true, default: false },
   vehicle_requirements: { type: [String] },
 }, { _id: false }); // _id: false because client_id is the primary key
 
 // Volunteer Schema (Simplified for booking context, links to User schema)
 const VolunteerSchema = new Schema<IVolunteer>({
-  volunteer_id: { type: Number, required: true, unique: true }, // Links to user_id in User.ts
+  volunteer_id: { type: String, required: true, unique: true }, // Links to user_id in User.ts
   preferred_name: { type: String, required: true, default: "" },
   last_name: { type: String, required: true, default: "" },
   flags: { type: [String], default: null },
@@ -231,21 +231,21 @@ const VolunteerSchema = new Schema<IVolunteer>({
 // Booking Client Relation Schema
 const BookingClientRelationSchema = new Schema<IBookingClientRelation>({
   booking_id: { type: Number, required: true, ref: 'Booking' }, // Reference to Booking
-  client_id: { type: Number, required: true, ref: 'User' }, // Reference to User (Client)
+  client_id: { type: String, required: true, ref: 'User' }, // Reference to User (Client)
   is_primary: { type: Boolean, required: true, default: false },
 }, { _id: false });
 
 // Booking Volunteer Relation Schema
 const BookingVolunteerRelationSchema = new Schema<IBookingVolunteerRelation>({
   booking_id: { type: Number, required: true, ref: 'Booking' }, // Reference to Booking
-  volunteer_id: { type: Number, required: true, ref: 'User' }, // Reference to User (Volunteer)
+  volunteer_id: { type: String, required: true, ref: 'User' }, // Reference to User (Volunteer)
   status: { type: String, required: true },
 }, { _id: false });
 
 // Event Attendee Schema
 const EventAttendeeSchema = new Schema<IEventAttendee>({
   event_booking_id: { type: Number, required: true, ref: 'EventBooking' }, // Reference to EventBooking
-  user_id: { type: Number, default: null, ref: 'User' }, // Reference to User, nullable for external
+  user_id: { type: String, default: null, ref: 'User' }, // Reference to User, nullable for external
   external_name: { type: String, default: null },
   user_type: { type: String, required: true },
 });
@@ -253,7 +253,7 @@ const EventAttendeeSchema = new Schema<IEventAttendee>({
 // Volunteer Absence Schema
 const VolunteerAbsenceSchema = new Schema<IVolunteerAbsence>({
   absence_id: { type: Number, required: true, unique: true },
-  volunteer_id: { type: Number, required: true, ref: 'User' }, // Reference to User (Volunteer)
+  volunteer_id: { type: String, required: true, ref: 'User' }, // Reference to User (Volunteer)
   start_date: { type: Date, required: true },
   end_date: { type: Date, required: true },
   is_one_day: { type: Boolean, required: true, default: false },
@@ -264,7 +264,7 @@ const VolunteerAbsenceSchema = new Schema<IVolunteerAbsence>({
 const JobHistorySchema = new Schema<IJobHistory>({
   history_id: { type: Number, required: true, unique: true },
   booking_id: { type: Number, required: true, ref: 'Booking' }, // Reference to Booking
-  user_id: { type: Number, required: true, ref: 'User' }, // Reference to User
+  user_id: { type: String, required: true, ref: 'User' }, // Reference to User
   action: { type: String, required: true },
   timestamp: { type: Date, required: true },
 }, { timestamps: true });
@@ -275,15 +275,28 @@ const JobHistorySchema = new Schema<IJobHistory>({
 // ------------------------------------------------------------------------------------------------
 
 // Models for the different booking types
-export const Booking = mongoose.model<IBooking>('Booking', BookingSchema);
-export const ServiceProgramBooking = Booking.discriminator<IServiceProgramBooking>('ServiceProgramBooking', ServiceProgramBookingSchema);
-export const EventBooking = Booking.discriminator<IEventBooking>('EventBooking', EventBookingSchema);
+const Booking = (mongoose.models.Booking || mongoose.model<IBooking>('Booking', BookingSchema)) as Model<IBooking>;
+const ServiceProgramBooking = Booking.discriminator<IServiceProgramBooking>('ServiceProgramBooking', ServiceProgramBookingSchema);
+const EventBooking = Booking.discriminator<IEventBooking>('EventBooking', EventBookingSchema);
 
 // Models for related entities
-export const ClientModel = mongoose.model<IClient>('Client', ClientSchema);
-export const VolunteerModel = mongoose.model<IVolunteer>('Volunteer', VolunteerSchema);
-export const BookingClientRelation = mongoose.model<IBookingClientRelation>('BookingClientRelation', BookingClientRelationSchema);
-export const BookingVolunteerRelation = mongoose.model<IBookingVolunteerRelation>('BookingVolunteerRelation', BookingVolunteerRelationSchema);
-export const EventAttendee = mongoose.model<IEventAttendee>('EventAttendee', EventAttendeeSchema);
-export const VolunteerAbsence = mongoose.model<IVolunteerAbsence>('VolunteerAbsence', VolunteerAbsenceSchema);
-export const JobHistory = mongoose.model<IJobHistory>('JobHistory', JobHistorySchema);
+const ClientModel = (mongoose.models.Client || mongoose.model<IClient>('Client', ClientSchema)) as Model<IClient>;
+const VolunteerModel = (mongoose.models.Volunteer || mongoose.model<IVolunteer>('Volunteer', VolunteerSchema)) as Model<IVolunteer>;
+const BookingClientRelation = (mongoose.models.BookingClientRelation || mongoose.model<IBookingClientRelation>('BookingClientRelation', BookingClientRelationSchema)) as Model<IBookingClientRelation>;
+const BookingVolunteerRelation = (mongoose.models.BookingVolunteerRelation || mongoose.model<IBookingVolunteerRelation>('BookingVolunteerRelation', BookingVolunteerRelationSchema)) as Model<IBookingVolunteerRelation>;
+const EventAttendee = (mongoose.models.EventAttendee || mongoose.model<IEventAttendee>('EventAttendee', EventAttendeeSchema)) as Model<IEventAttendee>;
+const VolunteerAbsence = (mongoose.models.VolunteerAbsence || mongoose.model<IVolunteerAbsence>('VolunteerAbsence', VolunteerAbsenceSchema)) as Model<IVolunteerAbsence>;
+const JobHistory = (mongoose.models.JobHistory || mongoose.model<IJobHistory>('JobHistory', JobHistorySchema)) as Model<IJobHistory>;
+
+export {
+  Booking,
+  ServiceProgramBooking,
+  EventBooking,
+  ClientModel,
+  VolunteerModel,
+  BookingClientRelation,
+  BookingVolunteerRelation,
+  EventAttendee,
+  VolunteerAbsence,
+  JobHistory
+};
