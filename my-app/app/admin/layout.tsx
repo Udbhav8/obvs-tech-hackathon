@@ -34,6 +34,7 @@ import {
   Settings,
   FileText,
   DollarSign,
+  Search,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -46,6 +47,11 @@ const menuItems = [
     title: "Dashboard",
     url: "/admin",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Search",
+    url: "/admin/search",
+    icon: Search,
   },
   {
     title: "Users",

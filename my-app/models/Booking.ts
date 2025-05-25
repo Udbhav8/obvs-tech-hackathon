@@ -274,16 +274,18 @@ const JobHistorySchema = new Schema<IJobHistory>({
 // MODELS
 // ------------------------------------------------------------------------------------------------
 
-// Models for the different booking types
-export const Booking = mongoose.model<IBooking>('Booking', BookingSchema);
-export const ServiceProgramBooking = Booking.discriminator<IServiceProgramBooking>('ServiceProgramBooking', ServiceProgramBookingSchema);
-export const EventBooking = Booking.discriminator<IEventBooking>('EventBooking', EventBookingSchema);
+// Base Booking Model - check if already compiled
+export const Booking = mongoose.models.Booking || mongoose.model<IBooking>('Booking', BookingSchema);
 
-// Models for related entities
-export const ClientModel = mongoose.model<IClient>('Client', ClientSchema);
-export const VolunteerModel = mongoose.model<IVolunteer>('Volunteer', VolunteerSchema);
-export const BookingClientRelation = mongoose.model<IBookingClientRelation>('BookingClientRelation', BookingClientRelationSchema);
-export const BookingVolunteerRelation = mongoose.model<IBookingVolunteerRelation>('BookingVolunteerRelation', BookingVolunteerRelationSchema);
-export const EventAttendee = mongoose.model<IEventAttendee>('EventAttendee', EventAttendeeSchema);
-export const VolunteerAbsence = mongoose.model<IVolunteerAbsence>('VolunteerAbsence', VolunteerAbsenceSchema);
-export const JobHistory = mongoose.model<IJobHistory>('JobHistory', JobHistorySchema);
+// Discriminators - ensure base model is accessed correctly before calling discriminator
+export const ServiceProgramBooking = mongoose.models.ServiceProgramBooking || Booking.discriminator<IServiceProgramBooking>('ServiceProgramBooking', ServiceProgramBookingSchema);
+export const EventBooking = mongoose.models.EventBooking || Booking.discriminator<IEventBooking>('EventBooking', EventBookingSchema);
+
+// Models for related entities - apply similar pattern
+export const ClientModel = mongoose.models.Client || mongoose.model<IClient>('Client', ClientSchema);
+export const VolunteerModel = mongoose.models.Volunteer || mongoose.model<IVolunteer>('Volunteer', VolunteerSchema);
+export const BookingClientRelation = mongoose.models.BookingClientRelation || mongoose.model<IBookingClientRelation>('BookingClientRelation', BookingClientRelationSchema);
+export const BookingVolunteerRelation = mongoose.models.BookingVolunteerRelation || mongoose.model<IBookingVolunteerRelation>('BookingVolunteerRelation', BookingVolunteerRelationSchema);
+export const EventAttendee = mongoose.models.EventAttendee || mongoose.model<IEventAttendee>('EventAttendee', EventAttendeeSchema);
+export const VolunteerAbsence = mongoose.models.VolunteerAbsence || mongoose.model<IVolunteerAbsence>('VolunteerAbsence', VolunteerAbsenceSchema);
+export const JobHistory = mongoose.models.JobHistory || mongoose.model<IJobHistory>('JobHistory', JobHistorySchema);
