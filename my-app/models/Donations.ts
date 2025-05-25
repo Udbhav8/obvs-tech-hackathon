@@ -1,5 +1,8 @@
-import mongoose, { Document, Schema } from 'mongoose';
+// models/Donation.ts
+// This file defines the Mongoose schemas and models for Donations, Donor Profiles, and Receipts.
+// It is adapted from your provided Donations.ts to be used directly by the Next.js backend.
 
+import mongoose, { Document, Schema, Model } from 'mongoose';
 
 // ------------------------------------------------------------------------------------------------
 // INTERFACES
@@ -7,9 +10,9 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 // Interface for Donation
 export interface IDonation extends Document {
-  donation_id: number;
+  donation_id?: number; // Optional as Mongoose will handle _id, and we might generate this if needed
   donation_type: string;
-  donor_id: number; // Foreign key reference to User (donor role)
+  donor_id: mongoose.Types.ObjectId; // Foreign key reference to User/DonorProfile
   donation_amount: number;
   eligible_amount: number;
   value_advantage: number;
@@ -22,40 +25,34 @@ export interface IDonation extends Document {
   notes?: string | null;
   created_at: Date;
   updated_at: Date;
-  created_by: number; // Foreign key reference to User
-  updated_by: number; // Foreign key reference to User
+  created_by?: mongoose.Types.ObjectId; // Foreign key reference to User
+  updated_by?: mongoose.Types.ObjectId; // Foreign key reference to User
 }
 
 // Interface for Donor Profile (as described in schema, linked to User)
 export interface IDonorProfile extends Document {
-  donor_id: number; // Primary key identifier for the donor
-  donor_type: string; // Type of donor
-  first_name?: string | null; // First name of the donor, for individuals
-  last_name?: string | null; // Last name of the donor, for individuals
-  organization_name?: string | null; // Name of the organization, for organizations
-  email?: string | null; // Email address of the donor
-  phone?: string | null; // Phone number of the donor
-  address_street?: string | null; // Street address of the donor
-  address_city?: string | null; // City of the donor's address
-  address_province?: string | null; // Province/state of the donor's address
-  address_postal_code?: string | null; // Postal/zip code of the donor's address
-  tax_receipt_address: boolean; // Indicates if address can be used for tax receipts
-  is_anonymous: boolean; // Indicates if the donor wishes to remain anonymous
-  donation_history_summary?: { // Virtual field - calculated summary of donation history
-    total_donations: number;
-    donation_count: number;
-    first_donation_date?: Date | null;
-    last_donation_date?: Date | null;
-    average_donation: number;
-  };
-  created_at: Date; // Timestamp when the donor record was created
-  updated_at: Date; // Timestamp when the donor record was last updated
+  donor_id?: number; // Optional as Mongoose will handle _id
+  first_name?: string | null;
+  last_name?: string | null;
+  organization_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address_street?: string | null;
+  address_city?: string | null;
+  address_province?: string | null;
+  address_postal_code?: string | null;
+  tax_receipt_address: boolean;
+  is_anonymous: boolean;
+  donor_type: string; // Added as it was in your original interface but missing from schema properties
+  // donation_history_summary will be a virtual field or populated on retrieval
+  created_at: Date;
+  updated_at: Date;
 }
 
 // Interface for Receipt
 export interface IReceipt extends Document {
-  receipt_id: number;
-  donation_id: number; // Foreign key reference to Donation
+  receipt_id?: number; // Optional as Mongoose will handle _id
+  donation_id: mongoose.Types.ObjectId; // Foreign key reference to Donation
   receipt_number: string;
   issue_date: Date;
   sent_date?: Date | null;
@@ -71,12 +68,23 @@ export interface IReceipt extends Document {
 
 // Donation Schema
 const DonationSchema = new Schema<IDonation>({
-  donation_id: { type: Number, required: true, unique: true },
+  // donation_id is typically handled by Mongoose's default _id, but if a specific numeric ID is required,
+  // it would need a custom pre-save hook or a separate sequence collection.
+  // For now, we'll rely on Mongoose's _id for unique identification.
   donation_type: { type: String, required: true },
-  donor_id: { type: Number, required: true, ref: 'User' }, // Reference to User model (UserRole.DONOR)
+  donor_id: { type: Schema.Types.ObjectId, required: true, ref: 'DonorProfile' }, // Reference to DonorProfile model
   donation_amount: { type: Number, required: true },
-  eligible_amount: { type: Number, required: true, default: function(this: IDonation) { return this.donation_amount; } }, // Auto-populate
-  value_advantage: { type: Number, required: true, default: 0.00 }, // Auto-populate
+  eligible_amount: {
+    type: Number,
+    required: true,
+    // Auto-populate eligible_amount with donation_amount if not provided
+    default: function(this: IDonation) { return this.donation_amount; }
+  },
+  value_advantage: {
+    type: Number,
+    required: true,
+    default: 0.00 // Auto-populate to 0.00
+  },
   payment_type: { type: String, required: true },
   receipt_type: { type: String, required: true },
   receipt_sent_date: { type: Date, default: null }, // Nullable
@@ -84,14 +92,14 @@ const DonationSchema = new Schema<IDonation>({
   processed_date: { type: Date, required: true, default: Date.now }, // Auto-populate to today's date
   deposit_date: { type: Date, required: true, default: Date.now }, // Auto-populate to today's date
   notes: { type: String, default: null }, // Optional
-  created_by: { type: Number, required: true, ref: 'User' }, // User ID who created
-  updated_by: { type: Number, required: true, ref: 'User' }, // User ID who last updated
+  created_by: { type: Schema.Types.ObjectId, ref: 'User' }, // User ID who created (assuming a User model exists)
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }, // User ID who last updated
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }); // Use mongoose timestamps for these fields
 
-// Donor Profile Schema (for linking to User if separate collection is desired, otherwise integrate into User.ts)
+// Donor Profile Schema
 const DonorProfileSchema = new Schema<IDonorProfile>({
-  donor_id: { type: Number, required: true, unique: true, ref: 'User' }, // Links to user_id in User.ts
-  donor_type: { type: String, required: true },
+  // We'll use Mongoose's default _id for donor identification.
+  // The original `donor_id` field is removed as `_id` serves this purpose.
   first_name: { type: String, default: null },
   last_name: { type: String, default: null },
   organization_name: { type: String, default: null },
@@ -101,20 +109,16 @@ const DonorProfileSchema = new Schema<IDonorProfile>({
   address_city: { type: String, default: null },
   address_province: { type: String, default: null },
   address_postal_code: { type: String, default: null },
-  tax_receipt_address: { type: Boolean, required: true },
-  is_anonymous: { type: Boolean, required: true },
-  // donation_history_summary will be a virtual field or populated on retrieval
-  created_at: { type: Date, required: true, default: Date.now },
-  updated_at: { type: Date, required: true, default: Date.now },
-}, { _id: false, timestamps: false }); // _id: false as donor_id is the primary key, handle timestamps manually if User.ts doesn't.
-// Note: In a real application, Donor profile might be part of the User model itself or a separate collection with strong linking.
-// Given User.ts already has a donor_information field, integrating this IDonorProfile logic there would be more consistent.
-// For now, it's defined as per the separate "Donor" definition in the schema, but consider unifying.
+  tax_receipt_address: { type: Boolean, required: true, default: false },
+  is_anonymous: { type: Boolean, required: true, default: false },
+  donor_type: { type: String, required: true }, // Added as per interface
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
+
 
 // Receipt Schema
 const ReceiptSchema = new Schema<IReceipt>({
-  receipt_id: { type: Number, required: true, unique: true },
-  donation_id: { type: Number, required: true, ref: 'Donation' }, // Reference to Donation model
+  // receipt_id handled by Mongoose's _id
+  donation_id: { type: Schema.Types.ObjectId, required: true, ref: 'Donation' }, // Reference to Donation model
   receipt_number: { type: String, required: true, unique: true },
   issue_date: { type: Date, required: true, default: Date.now },
   sent_date: { type: Date, default: null },
@@ -128,6 +132,7 @@ const ReceiptSchema = new Schema<IReceipt>({
 // MODELS
 // ------------------------------------------------------------------------------------------------
 
-export const Donation = mongoose.model<IDonation>('Donation', DonationSchema);
-export const DonorProfile = mongoose.model<IDonorProfile>('DonorProfile', DonorProfileSchema); // Exported for completeness, consider integrating into User model
-export const Receipt = mongoose.model<IReceipt>('Receipt', ReceiptSchema);
+// Check if models already exist to prevent Mongoose OverwriteModelError in development
+export const Donation: Model<IDonation> = mongoose.models.Donation || mongoose.model<IDonation>('Donation', DonationSchema);
+export const DonorProfile: Model<IDonorProfile> = mongoose.models.DonorProfile || mongoose.model<IDonorProfile>('DonorProfile', DonorProfileSchema);
+export const Receipt: Model<IReceipt> = mongoose.models.Receipt || mongoose.model<IReceipt>('Receipt', ReceiptSchema);
