@@ -1,8 +1,6 @@
-// routes/emailRoutes.js
 const express = require('express');
 const router = express.Router();
-// const { sendEmail } = require('../services/emailService');
-const { sendEmail } = require('../testSend.js');
+const { sendEmailWrapper } = require('../testSend');
 
 router.post('/notifications/send', async (req, res) => {
   const { to, subject, html } = req.body;
@@ -12,7 +10,7 @@ router.post('/notifications/send', async (req, res) => {
   }
 
   try {
-    await sendEmail(to, subject, html);
+    await sendEmailWrapper(to, subject, html);
     res.json({ success: true, message: 'Email sent' });
   } catch (err) {
     console.error(err);

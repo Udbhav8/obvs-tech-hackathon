@@ -1,0 +1,138 @@
+Project Structure
+obvs-notification-system/
+├── node_modules/
+├── public/
+├── src/
+│   ├── components/
+│   │   └── NotificationModal.jsx
+│   ├── hooks/
+│   │   └── useNotification.js
+│   ├── services/
+│   │   └── NotificationService.js
+│   ├── data/
+│   │   └── mockData.js
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+├── .gitignore
+├── index.html
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+├── vite.config.js
+└── README.md
+Setup Instructions
+1. Create Project Directory
+bashmkdir obvs-notification-system
+cd obvs-notification-system
+2. Initialize Project
+Create all the configuration files provided above:
+
+package.json
+vite.config.js
+tailwind.config.js
+postcss.config.js
+index.html
+
+3. Create Source Structure
+bashmkdir -p src/components src/hooks src/services src/data
+4. Add Source Files
+Place the following files in their respective directories:
+
+src/data/mockData.js
+src/components/NotificationModal.jsx
+src/services/NotificationService.js
+src/hooks/useNotification.js
+src/App.jsx
+src/main.jsx
+src/index.css
+
+5. Install Dependencies
+bashnpm install
+6. Run the Development Server
+bashnpm start
+# or
+npm run dev
+The application will open automatically at http://localhost:3000
+Additional Files
+.gitignore
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+README.md
+markdown# OBVS Notification System
+
+A modular notification system for Oak Bay Volunteer Services internal management platform.
+
+## Features
+
+- Send notifications to single or multiple users
+- Pre-defined notification templates
+- Editable notification content
+- Clean, accessible UI following OBVS branding
+- Mock data for testing
+
+## Quick Start
+
+1. Install dependencies: `npm install`
+2. Run development server: `npm start`
+3. Open http://localhost:3000
+
+## Usage
+
+```javascript
+import useNotification from './hooks/useNotification';
+
+// In your component
+const { openNotificationModal } = useNotification();
+
+// Open notification modal
+openNotificationModal([1, 2, 3], 5); // userIds, notificationId
+API Integration
+To connect to real API endpoints, update the methods in src/services/NotificationService.js:
+
+Replace mock data with actual API calls
+Update the apiBaseUrl with your backend URL
+Implement proper authentication headers
+
+License
+MIT
+
+## Environment Variables (Optional)
+Create `.env` file for API configuration:
+VITE_API_BASE_URL=http://localhost:8080/api/v1
+
+## Available Scripts
+
+- `npm start` or `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
